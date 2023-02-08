@@ -1,0 +1,15 @@
+{
+    "name": "polytope-solutions.toolset.editor",
+    "references": [
+        "polytope-solutions.toolset.runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,16 @@
+{
+    "name": "com.polytope-solutions.toolset",
+    "version": "0.0.1",
+    "displayName": "Toolset",
+    "description": "This is a package with generally handy tools for Unity projects.",
+    "dependencies": {},
+    "keywords": [
+        "Unity",
+        "Tools"
+    ],
+    "author": {
+        "name": "Daniil Koshelyuk",
+        "email": "polytope.solutions@gmail.com",
+        "url": "https://www.polytope.solutions"
+    }
+}
