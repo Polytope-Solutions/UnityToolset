@@ -1,6 +1,6 @@
 {
     "name": "com.polytope-solutions.toolset",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "displayName": "Toolset",
     "description": "This is a package with generally handy tools for Unity projects.",
     "dependencies": {},
