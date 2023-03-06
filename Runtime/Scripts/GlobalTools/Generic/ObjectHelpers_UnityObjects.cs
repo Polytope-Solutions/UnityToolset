@@ -8,7 +8,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 			if (goItem == null) return;
 			for(int i = goItem.transform.childCount-1; i>=0; i--) {
                 if (Application.isPlaying)
-                    GameObject.Destroy(this.gUnitHolder.transform.GetChild(i).gameObject);
+                    GameObject.Destroy(goItem.transform.GetChild(i).gameObject);
                 else
                     GameObject.DestroyImmediate(goItem.transform.GetChild(i).gameObject);
 			}
