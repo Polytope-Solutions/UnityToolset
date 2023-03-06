@@ -12,13 +12,13 @@ namespace PolytopeSolutions.Toolset.GlobalTools.UI {
 		void OnEnable() {
 			this.logs = new List<string>();
 			UpdateText();
-			Application.logMessageReceivedThreaded += logMessageReceived;
+			Application.logMessageReceivedThreaded += LogMessageReceived;
 		}
 		void OnDisable(){
-			Application.logMessageReceivedThreaded -= logMessageReceived;
+			Application.logMessageReceivedThreaded -= LogMessageReceived;
 		}
         
-		void logMessageReceived(string logString, string stackTrace, LogType type) {
+		void LogMessageReceived(string logString, string stackTrace, LogType type) {
 			while (this.logs.Count > this.logCount)
 				this.logs.RemoveAt(0);
 			this.logs.Add(logString);
