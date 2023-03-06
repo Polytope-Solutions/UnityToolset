@@ -13,6 +13,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                     GameObject.DestroyImmediate(goItem.transform.GetChild(i).gameObject);
 			}
 		}
+		public static void SetActiveChildren(this GameObject goItem, bool targetState){
+			if (goItem == null) return;
+			for(int i = goItem.transform.childCount-1; i>=0; i--) {
+                goItem.transform.GetChild(i).gameObject.SetActive(targetState);
+			}
+		}
 		public static GameObject TryFind(this GameObject goItem, string name) {
             GameObject goFound = null;
             Transform tFound = goItem.transform.Find(name);
