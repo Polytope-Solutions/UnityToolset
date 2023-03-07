@@ -32,7 +32,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             return goFound;
         }
         public static T TryGetComponent<T>(this GameObject gItem) 
-            where T : MonoBehavior { 
+            where T : MonoBehaviour { 
             T tFound = gItem.GetComponent<T>();
             if (tFound == null) {
                 tFound = gItem.AddComponent<T>();
