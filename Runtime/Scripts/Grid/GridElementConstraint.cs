@@ -14,6 +14,7 @@ namespace PolytopeSolutions.Toolset.Grid {
     [System.Serializable]
     public class GridElementNeighborConstraint : GridElementConstraint { 
         public enum ConnectorDirection { 
+            None,
             Up,
             Down,
             Front,
@@ -47,8 +48,8 @@ namespace PolytopeSolutions.Toolset.Grid {
         ///////////////////////////////////////////////////////////////////////////////////
         public GridElementConstraint Modify(int modifierType, object modifiers) {
             GridElementConstraint newConstraint = null;
-            ConnectorDirection _direction;
-            ConnectorType _type;
+            ConnectorDirection _direction = ConnectorDirection.None;
+            ConnectorType _type = ConnectorType.None;
             switch (modifierType) {
                 case 0: // Rotation
                     Vector3 rotation = (Vector3)modifiers; 
