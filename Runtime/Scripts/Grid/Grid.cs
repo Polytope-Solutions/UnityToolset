@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System;
 
 namespace PolytopeSolutions.Toolset.Grid {
@@ -140,20 +141,6 @@ namespace PolytopeSolutions.Toolset.Grid {
         }
         public virtual void RemoveAt(int[] axisIndices) {
             this._elements.RemoveAt(Index(axisIndices));
-        }
-    }
-    public static partial class ObjectHelpers {
-        public static int[] ToIntArray(this Vector3Int vector) { 
-            return new int[] { vector.x, vector.y, vector.z };
-        }
-        public static int[] ToIntArray(this Vector2Int vector) { 
-            return new int[] { vector.x, vector.y };
-        }
-        public static Vector3Int ToVector3Int(this int[] array) {
-            if (array.Length == 3) {
-                return new Vector3Int(array[0], array[1], array[2]);
-            }
-            return Vector3Int.zero;
         }
     }
 }

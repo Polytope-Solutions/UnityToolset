@@ -8,6 +8,7 @@ using System;
 
 namespace PolytopeSolutions.Toolset.Grid {
     public interface GridElementConstraint {
+        public GridElementConstraint Modify(int modifierType, object modifiers);
         public bool IsSatisfied(List<GridElementConstraint> otherConstraints);
     }
     [System.Serializable]
@@ -43,6 +44,85 @@ namespace PolytopeSolutions.Toolset.Grid {
         }
         public ConnectorDirection direction;
         public ConnectorType type;
+        ///////////////////////////////////////////////////////////////////////////////////
+        public GridElementConstraint Modify(int modifierType, object modifiers) {
+            GridElementConstraint newConstraint = null;
+            ConnectorDirection _direction;
+            ConnectorType _type;
+            switch (modifierType) {
+                case 0: // Rotation
+                    Vector3 rotation = (Vector3)modifiers; 
+                    _type = this.type;
+                    if (rotation.y == 90) { 
+                        switch (this.direction) {
+                            case ConnectorDirection.Up:
+                                _direction = ConnectorDirection.Up;
+                                break;
+                            case ConnectorDirection.Down:
+                                _direction = ConnectorDirection.Down;
+                                break;
+                            case ConnectorDirection.Front:
+                                _direction = ConnectorDirection.Right;
+                                break;
+                            case ConnectorDirection.Back:
+                                _direction = ConnectorDirection.Left;
+                                break;
+                            case ConnectorDirection.Left:
+                                _direction = ConnectorDirection.Front;
+                                break;
+                            case ConnectorDirection.Right:
+                                _direction = ConnectorDirection.Back;
+                                break;
+                        }
+                    } else if (rotation.y == 180) { 
+                        switch (this.direction) {
+                            case ConnectorDirection.Up:
+                                _direction = ConnectorDirection.Up;
+                                break;
+                            case ConnectorDirection.Down:
+                                _direction = ConnectorDirection.Down;
+                                break;
+                            case ConnectorDirection.Front:
+                                _direction = ConnectorDirection.Back;
+                                break;
+                            case ConnectorDirection.Back:
+                                _direction = ConnectorDirection.Front;
+                                break;
+                            case ConnectorDirection.Left:
+                                _direction = ConnectorDirection.Right;
+                                break;
+                            case ConnectorDirection.Right:
+                                _direction = ConnectorDirection.Left;
+                                break;
+                        }
+                    } else if (rotation.y == 270) { 
+                        switch (this.direction) {
+                            case ConnectorDirection.Up:
+                                _direction = ConnectorDirection.Up;
+                                break;
+                            case ConnectorDirection.Down:
+                                _direction = ConnectorDirection.Down;
+                                break;
+                            case ConnectorDirection.Front:
+                                _direction = ConnectorDirection.Left;
+                                break;
+                            case ConnectorDirection.Back:
+                                _direction = ConnectorDirection.Right;
+                                break;
+                            case ConnectorDirection.Left:
+                                _direction = ConnectorDirection.Back;
+                                break;
+                            case ConnectorDirection.Right:
+                                _direction = ConnectorDirection.Front;
+                                break;
+                        }
+                    }
+                    newConstraint = (GridElementConstraint)new GridElementNeighborConstraint() { direction=_direction, type=_type };
+                    break;
+
+            }
+            return newConstraint;
+        }
         public bool IsSatisfied(List<GridElementConstraint> otherConstraints) {
             bool satisfied = false;
             foreach (GridElementConstraint constraint in otherConstraints) { 
