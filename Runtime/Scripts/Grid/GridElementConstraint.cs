@@ -117,6 +117,8 @@ namespace PolytopeSolutions.Toolset.Grid {
                                 _direction = ConnectorDirection.Front;
                                 break;
                         }
+                    } else if (rotation.y == 0 || rotation.y == 360) {
+                        _direction = this.direction;
                     }
                     newConstraint = (GridElementConstraint)new GridElementNeighborConstraint() { direction=_direction, type=_type };
                     break;
