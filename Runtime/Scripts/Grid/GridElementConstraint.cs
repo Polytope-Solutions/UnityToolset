@@ -130,8 +130,8 @@ namespace PolytopeSolutions.Toolset.Grid {
             bool satisfied = false;
             foreach (GridElementConstraint constraint in otherConstraints) { 
                 GridElementNeighborConstraint neighbor = (GridElementNeighborConstraint)constraint;
-                int currentDirection = (int)this.direction;
-                int neighborDirection = (int)neighbor.direction;
+                int currentDirection = (int)this.direction-1;
+                int neighborDirection = (int)neighbor.direction-1;
                 satisfied |= (((currentDirection % 2 == 0) && ((int)neighbor.direction % 2 == 1) && (neighborDirection - currentDirection == 1))
                     || ((currentDirection % 2 == 1) && ((int)neighbor.direction % 2 == 0) && (neighborDirection - currentDirection == -1))
                     && (this.type == neighbor.type));
