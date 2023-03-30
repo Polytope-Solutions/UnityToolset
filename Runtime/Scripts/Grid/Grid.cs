@@ -143,9 +143,9 @@ namespace PolytopeSolutions.Toolset.Grid {
         }
         public virtual bool ValidIndex(int[] axisIndices) { 
             if (this._dimensions == null || this._dimensions.Length == 0 || this._dimensions.Length != axisIndices.Length) return false;
-            bool isValid = false;
+            bool isValid = true;
             for (int d = 0; d < this._dimensions.Length; d++)
-                isValid |= ((this._dimensions[d] > axisIndices[d]) && (axisIndices[d] > 0));
+                isValid &= ((this._dimensions[d] > axisIndices[d]) && (axisIndices[d] > 0));
             return isValid;
         }
 
