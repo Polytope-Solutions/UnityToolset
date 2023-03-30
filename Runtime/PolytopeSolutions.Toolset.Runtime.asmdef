@@ -1,5 +1,5 @@
 {
-    "name": "polytope-solutions.toolset.runtime",
+    "name": "Polytope-Solutions.Toolset.Runtime",
     "references": [
         "Unity.TextMeshPro"
     ],

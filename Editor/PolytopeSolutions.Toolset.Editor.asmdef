@@ -1,9 +1,11 @@
 {
-    "name": "polytope-solutions.toolset.editor",
+    "name": "Polytope-Solutions.Toolset.Editor",
     "references": [
-        "polytope-solutions.toolset.runtime"
+        "Polytope-Solutions.Toolset.Runtime"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
