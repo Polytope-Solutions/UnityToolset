@@ -11,8 +11,31 @@ using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System;
 
 namespace PolytopeSolutions.Toolset.Grid {
-    public class GridElement {
-        public GridElement() {}
+    public abstract class GridElement {
+        protected bool unitChanged = false;
+        protected bool unitUpdated = false;
+        protected bool unitResolved = false;
+        public bool UnitChanged => this.unitChanged;
+        public bool UnitUpdated => this.unitUpdated;
+        public bool UnitResolved => this.unitResolved;
+        protected int[] gridPosition;
+
+        public GridElement() {
+            this.unitChanged = true;
+            this.unitUpdated = true;
+            this.unitResolved = false;
+        }
+        public GridElement(int[] _gridPosition) : this() { 
+            this.gridPosition = _gridPosition;
+        }
+        public virtual void Update(int[] _gridPosition) { 
+            this.gridPosition = _gridPosition;
+        }
+
+        public void MarkSetup() {
+            this.unitChanged = false;
+            this.unitUpdated = false;
+        }
     }
     public abstract class Grid<T> where T : GridElement, new() {
         protected List<T> _elements;
