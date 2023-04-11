@@ -8,47 +8,33 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
+using PolytopeSolutions.Toolset.Solvers;
 using System;
 
 namespace PolytopeSolutions.Toolset.Grid {
-    public abstract class GridElement {
-        protected bool unitChanged = false;
-        protected bool unitUpdated = false;
-        protected bool unitResolved = false;
-        public bool UnitChanged => this.unitChanged;
-        public bool UnitUpdated => this.unitUpdated;
-        public bool UnitResolved => this.unitResolved;
+    public abstract class GridElement : Element {
         protected int[] gridPosition;
 
-        public GridElement() {
-            this.unitChanged = true;
-            this.unitUpdated = true;
-            this.unitResolved = false;
-        }
+        public GridElement() : base() {}
         public GridElement(int[] _gridPosition) : this() { 
             this.gridPosition = _gridPosition;
         }
         public virtual void Update(int[] _gridPosition) { 
             this.gridPosition = _gridPosition;
         }
-
-        public void MarkSetup() {
-            this.unitChanged = false;
-            this.unitUpdated = false;
-        }
     }
-    public abstract class Grid<T> where T : GridElement, new() {
-        protected List<T> _elements;
-        protected int[] _dimensions;
-
-        public T this[int i] {
+    public abstract class Grid<T> : ElementList<T> where T : GridElement, new() {
+        public override int Count {
             get {
-                return this._elements[i];
-            }
-            set {
-                this._elements[i] = value;
+                if (this._dimensions == null || this._dimensions.Length == 0)
+                    return 0;
+                return Index(this.LastElementIndex)+1;
             }
         }
+        ///////////////////////////////////////////////////////////////////////////////////
+        protected int[] _dimensions;
+        public int[] dimensions => this._dimensions;
+
         public T this[int[] axisIndices] {
             get {
                 return this[Index(axisIndices)];
@@ -66,19 +52,8 @@ namespace PolytopeSolutions.Toolset.Grid {
                 return lastElementIndex;
             }
         }
-        public int Count {
-            get {
-                if (this._dimensions == null || this._dimensions.Length == 0)
-                    return 0;
-                return Index(this.LastElementIndex)+1;
-            }
-        }
-        public int[] dimensions => this._dimensions;
-        public List<T> elements => this._elements;
 
-        public Grid() {
-            this._elements = new List<T>();
-        }
+        public Grid() : base() { }
         public Grid(int[] dimensions) : this() {
             this._dimensions = dimensions;
 
@@ -150,17 +125,8 @@ namespace PolytopeSolutions.Toolset.Grid {
         }
 
         //////////////////////////////////////////////////////////////////////////////////
-        public virtual void Insert(int i, T element) {
-            while (this._elements.Count <= i)
-                this._elements.Add(new T());
-            this._elements[i] = element;
-        }
         public virtual void Insert(int[] axisIndices, T element) {
             Insert(Index(axisIndices), element);
-        }
-        public virtual void RemoveAt(int i) {
-            if (i < this.Count)
-                this._elements.RemoveAt(i);
         }
         public virtual void RemoveAt(int[] axisIndices) {
             this._elements.RemoveAt(Index(axisIndices));
