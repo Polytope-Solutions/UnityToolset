@@ -21,6 +21,11 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public onSolveEvent OnCleared;
         [ContextMenu("Solve")]
         public virtual void Solve() {}
+        protected virtual void PrepareSolve() {
+            this.flagSolutionChanged = false;
+            this.flagSolutionUpdated = false;
+            this.flagSolutionSuccess = false;
+        }
         protected void FinishSolve() {
             if (this.flagSolutionSuccess) { 
                 if (this.OnSolutionSucces != null)
