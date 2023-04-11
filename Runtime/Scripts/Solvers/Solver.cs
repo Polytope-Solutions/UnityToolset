@@ -15,7 +15,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         protected bool flagSolutionSuccess;
 
         public Transform tSolutionParentHolder;
-        private GameObject gSolutionHolder;
+        protected GameObject gSolutionHolder;
 
         protected virtual string solutionName {
             get {
@@ -65,7 +65,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             }
             this.randomizer = new System.Random(this.seed.GetHashCode());
         }
-        private void PrepareSolutionStructure() {
+        protected void PrepareSolutionStructure() {
             if (this.tSolutionParentHolder != null) { 
                 if (this.gSolutionHolder == null) {
                     this.gSolutionHolder = this.tSolutionParentHolder.gameObject.TryFind(this.solutionName);
