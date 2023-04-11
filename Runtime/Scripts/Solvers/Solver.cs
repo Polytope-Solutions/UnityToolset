@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 using System;
+using PolytopeSolutions.Toolset.GlobalTools.Generic;
 
 namespace PolytopeSolutions.Toolset.Solvers {
     public class Solver : MonoBehaviour {
@@ -11,6 +13,15 @@ namespace PolytopeSolutions.Toolset.Solvers {
         protected bool flagSolutionChanged;
         protected bool flagSolutionUpdated;
         protected bool flagSolutionSuccess;
+
+        public Transform tSolutionParentHolder;
+        private GameObject gSolutionHolder;
+
+        protected virtual string solutionName {
+            get {
+                return "SolutionHolder";
+            }
+        }
 
         public string seed;
         protected System.Random randomizer;
@@ -38,6 +49,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         }
         [ContextMenu("Clear")]
         public virtual void Clear() {
+            this.gSolutionHolder.DestroyChildren();
             FinishClear();
             if (this.flagAutoUpdateSolution)
                 Solve();
@@ -52,6 +64,16 @@ namespace PolytopeSolutions.Toolset.Solvers {
                 this.seed = DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss:fff");
             }
             this.randomizer = new System.Random(this.seed.GetHashCode());
+        }
+        private void PrepareSolutionStructure() {
+            if (this.tSolutionParentHolder != null) { 
+                if (this.gSolutionHolder == null) {
+                    this.gSolutionHolder = this.tSolutionParentHolder.gameObject.TryFind(this.solutionName);
+                }
+                //else {
+                //    this.gSolutionHolder.SetActiveChildren(false);
+                //}
+            }
         }
     }
 }
