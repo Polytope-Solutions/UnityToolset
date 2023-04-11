@@ -10,14 +10,37 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public bool flagAutoUpdateSeed;
         protected bool flagSolutionChanged;
         protected bool flagSolutionUpdated;
+        protected bool flagSolutionSuccess;
 
         public string seed;
         protected System.Random randomizer;
-        
+
+        public delegate void onSolveEvent();
+        public onSolveEvent OnSolutionSucces;
+        public onSolveEvent OnSolutionFail;
+        public onSolveEvent OnCleared;
         [ContextMenu("Solve")]
-        public virtual void Solve() { }
+        public virtual void Solve() {}
+        protected void FinishSolve() {
+            if (this.flagSolutionSuccess) { 
+                if (this.OnSolutionSucces != null)
+                    this.OnSolutionSucces.Invoke();
+            }
+            else { 
+                if (this.OnSolutionFail != null)
+                    this.OnSolutionFail.Invoke();
+            }
+        }
         [ContextMenu("Clear")]
-        public virtual void Clear() { }
+        public virtual void Clear() {
+            FinishClear();
+            if (this.flagAutoUpdateSolution)
+                Solve();
+        }
+        protected void FinishClear() {
+            if (this.OnCleared != null)
+                this.OnCleared.Invoke();
+        }
 
         protected void UpdateSeed() {
             if (this.flagAutoUpdateSeed) { 
