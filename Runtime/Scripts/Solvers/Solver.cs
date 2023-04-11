@@ -30,12 +30,15 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public onSolveEvent OnSolutionSucces;
         public onSolveEvent OnSolutionFail;
         public onSolveEvent OnCleared;
+
+        ///////////////////////////////////////////////////////////////////////////////////
         [ContextMenu("Solve")]
         public virtual void Solve() {}
         protected virtual void PrepareSolve() {
             this.flagSolutionChanged = false;
             this.flagSolutionUpdated = false;
             this.flagSolutionSuccess = false;
+            UpdateSeed();
         }
         protected void FinishSolve() {
             if (this.flagSolutionSuccess) { 
@@ -47,6 +50,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
                     this.OnSolutionFail.Invoke();
             }
         }
+        ///////////////////////////////////////////////////////////////////////////////////
         [ContextMenu("Clear")]
         public virtual void Clear() {
             this.gSolutionHolder.DestroyChildren();
@@ -59,12 +63,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
                 this.OnCleared.Invoke();
         }
 
-        protected void UpdateSeed() {
-            if (this.flagAutoUpdateSeed) { 
-                this.seed = DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss:fff");
-            }
-            this.randomizer = new System.Random(this.seed.GetHashCode());
-        }
+        ///////////////////////////////////////////////////////////////////////////////////
         protected void PrepareSolutionStructure() {
             if (this.tSolutionParentHolder != null) { 
                 if (this.gSolutionHolder == null) {
@@ -74,6 +73,13 @@ namespace PolytopeSolutions.Toolset.Solvers {
                 //    this.gSolutionHolder.SetActiveChildren(false);
                 //}
             }
+        }
+        ///////////////////////////////////////////////////////////////////////////////////
+        protected void UpdateSeed() {
+            if (this.flagAutoUpdateSeed) { 
+                this.seed = DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss:fff");
+            }
+            this.randomizer = new System.Random(this.seed.GetHashCode());
         }
     }
 }
