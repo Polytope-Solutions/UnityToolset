@@ -7,7 +7,7 @@ using PolytopeSolutions.Toolset.GlobalTools.Types;
 namespace PolytopeSolutions.Toolset.Events {
     public class EventManager : TManager<EventManager> {
         public delegate void onEventInvoked();
-        private Dictionary<string, onEventInvoked> events;
+        private Dictionary<string, onEventInvoked> events = new Dictionary<string, onEventInvoked>();
 
         public void InvokeEvent(string eventName) { 
             if (this.events.ContainsKey(eventName))
