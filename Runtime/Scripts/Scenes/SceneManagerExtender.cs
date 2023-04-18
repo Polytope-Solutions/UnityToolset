@@ -13,17 +13,18 @@ namespace PolytopeSolutions.Toolset.Scenes {
         private float progress;
         public float Progress => this.progress;
 
-        public void LoadScene(string sceneName) {
+        public void LoadScene(string sceneName, bool skipLoadingScene) {
             Scene scene = SceneManager.GetActiveScene();
             if (scene.name != sceneName)
-                this.currentLoadingProcess = StartCoroutine(LoadSceneCoroutine(sceneName));
+                this.currentLoadingProcess = StartCoroutine(LoadSceneCoroutine(sceneName, skipLoadingScene));
         }
-        private IEnumerator LoadSceneCoroutine(string sceneName) {
+        private IEnumerator LoadSceneCoroutine(string sceneName, bool skipLoadingScene) {
             this.progress = 0f;
-            if (!string.IsNullOrEmpty(this.loaderSceneName))
-                SceneManager.LoadScene(this.loaderSceneName);
-            yield return new WaitForSeconds(this.minWaitTime);
-
+            if (!skipLoadingScene) {
+                if (!string.IsNullOrEmpty(this.loaderSceneName))
+                    SceneManager.LoadScene(this.loaderSceneName);
+                yield return new WaitForSeconds(this.minWaitTime);
+            }
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
             //asyncOperation.allowSceneActivation = false;
 
@@ -34,6 +35,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
             }
             this.progress = 1f;
             this.currentLoadingProcess = null;
+            yield return null;
         }
     }
 }

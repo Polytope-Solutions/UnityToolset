@@ -7,6 +7,7 @@ using PolytopeSolutions.Toolset.GlobalTools.Types;
 namespace PolytopeSolutions.Toolset.Scenes {
     public class SceneLoader : MonoBehaviour {
         [SerializeField] private string sceneName;
+        [SerializeField] private bool skipLoadingScene = false;
         [SerializeField] private bool autoloadOnEnable = false;
 
         private void OnEnable() {
@@ -14,7 +15,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 LoadScene();
         }
         public void LoadScene() {
-            SceneManagerExtender.instance?.LoadScene(sceneName);
+            SceneManagerExtender.instance?.LoadScene(this.sceneName, this.skipLoadingScene);
         }
     }
 }
