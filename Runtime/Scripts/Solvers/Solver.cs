@@ -15,7 +15,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         protected bool flagSolutionSuccess;
 
         public bool flagSolutionAvailable => !this.flagSolutionSuccess;
-        public virtual bool flagPrepared {
+        protected virtual bool flagPrepared {
             get {
                 return true;
             }
