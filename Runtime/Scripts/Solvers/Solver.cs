@@ -14,6 +14,8 @@ namespace PolytopeSolutions.Toolset.Solvers {
         protected bool flagSolutionUpdated;
         protected bool flagSolutionSuccess;
 
+        public bool flagSolutionAvailable => !this.flagSolutionSuccess;
+
         public Transform tSolutionParentHolder;
         protected GameObject gSolutionHolder;
 
