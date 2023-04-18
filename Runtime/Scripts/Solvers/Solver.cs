@@ -15,6 +15,11 @@ namespace PolytopeSolutions.Toolset.Solvers {
         protected bool flagSolutionSuccess;
 
         public bool flagSolutionAvailable => !this.flagSolutionSuccess;
+        public virtual bool flagPrepared {
+            get {
+                return true;
+            }
+        }
 
         public Transform tSolutionParentHolder;
         protected GameObject gSolutionHolder;
@@ -57,7 +62,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public virtual void Clear() {
             this.gSolutionHolder.DestroyChildren();
             FinishClear();
-            if (this.flagAutoUpdateSolution)
+            if (this.flagPrepared && this.flagAutoUpdateSolution)
                 Solve();
         }
         protected void FinishClear() {
