@@ -9,7 +9,7 @@ namespace PolytopeSolutions.Toolset.Editor.Solvers {
     [CustomEditor(typeof(Solver), true)]
     [CanEditMultipleObjects]
     public class SolverEditor : UnityEditor.Editor {
-        private Solver targetObject;
+        protected Solver targetObject;
         void OnEnable() {
             this.targetObject = (Solver)serializedObject.targetObject;
         }
