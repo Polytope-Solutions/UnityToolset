@@ -22,7 +22,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         }
 
         public Transform tSolutionParentHolder;
-        protected GameObject gSolutionHolder;
+        [SerializeField][HideInInspector] protected GameObject gSolutionHolder;
 
         protected virtual string solutionName {
             get {
