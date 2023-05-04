@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 	public static partial class ObjectHelpers {
-		public static int NextWeightedIndex(this System.Random randomizer, float[] weights) {
+		public static int NextWeightedIndex(this System.Random randomizer, List<float> weights) {
 			float totalWeight = 0f;
-			weights.ToList().ForEach(weight => { totalWeight += weight; });
+			weights.ForEach(weight => { totalWeight += weight; });
 			float randomValue = ((float)randomizer.NextDouble()) * totalWeight;
 			float currentTotal = 0f;
 			int i = 0;
