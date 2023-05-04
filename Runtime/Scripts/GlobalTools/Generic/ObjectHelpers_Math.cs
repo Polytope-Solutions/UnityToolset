@@ -13,7 +13,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 			float randomValue = ((float)randomizer.NextDouble()) * totalWeight;
 			float currentTotal = 0f;
 			int i = 0;
-			for (i = 0; i < weights.Length-1; i++){
+			for (i = 0; i < weights.Count-1; i++){
 				currentTotal += weights[i];
 				if (currentTotal >= randomValue)
 					break;
