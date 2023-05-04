@@ -57,6 +57,9 @@ namespace PolytopeSolutions.Toolset.Solvers {
         }
 
         //////////////////////////////////////////////////////////////////////////////////
+        public virtual void Add(T element) {
+            this._elements.Add(element);
+        }
         public virtual void Insert(int i, T element) {
             while (this._elements.Count <= i)
                 this._elements.Add(new T());
