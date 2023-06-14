@@ -26,7 +26,9 @@ namespace PolytopeSolutions.Toolset.Solvers {
             get {
                 bool state = (this.parentSolvers == null);
                 if (!state)
-                    this.parentSolvers.ForEach(solver => state &= (solver != null || !solver.flagSolutionAvailable)));
+                    this.parentSolvers.ForEach(solver => 
+                        state &= (solver != null || !solver.flagSolutionAvailable)
+                    );
                 return state;
             }
         }
