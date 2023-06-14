@@ -4,6 +4,7 @@ using UnityEngine;
 
 using System;
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
+using System.Linq;
 
 namespace PolytopeSolutions.Toolset.Solvers {
     public class Solver : MonoBehaviour {
@@ -15,9 +16,18 @@ namespace PolytopeSolutions.Toolset.Solvers {
         protected bool flagSolutionSuccess;
 
         public bool flagSolutionAvailable => !this.flagSolutionSuccess;
-        protected virtual bool flagPrepared {
+
+        protected virtual List<Solver> parentSolvers {
             get {
-                return true;
+                return null;
+            }
+        }
+        protected bool flagPrepared {
+            get {
+                bool state = (this.parentSolvers == null);
+                if (!state)
+                    this.parentSolvers.ForEach(solver => state &= (solver != null || !solver.flagSolutionAvailable)));
+                return state;
             }
         }
 
@@ -60,7 +70,8 @@ namespace PolytopeSolutions.Toolset.Solvers {
         ///////////////////////////////////////////////////////////////////////////////////
         [ContextMenu("Clear")]
         public virtual void Clear() {
-            this.gSolutionHolder.DestroyChildren();
+            if (this.gSolutionHolder != null)
+                this.gSolutionHolder.DestroyChildren();
             FinishClear();
             if (this.flagPrepared && this.flagAutoUpdateSolution)
                 Solve();
@@ -73,7 +84,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         ///////////////////////////////////////////////////////////////////////////////////
         protected void PrepareSolutionStructure() {
             if (this.tSolutionParentHolder != null) { 
-                if (this.gSolutionHolder == null) {
+                if (this.gSolutionHolder == null && !string.IsNullOrEmpty(this.solutionName)) {
                     this.gSolutionHolder = this.tSolutionParentHolder.gameObject.TryFind(this.solutionName);
                 }
                 //else {
