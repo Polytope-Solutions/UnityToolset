@@ -76,7 +76,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
                 this.gSolutionHolder.DestroyChildren();
             FinishClear();
             if (this.flagPrepared && this.flagAutoUpdateSolution)
-                Solve();
+                Invoke("Solve", 0.05f);
         }
         protected void FinishClear() {
             if (this.OnCleared != null)
