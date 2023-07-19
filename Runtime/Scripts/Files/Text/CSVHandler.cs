@@ -4,7 +4,6 @@ using UnityEngine;
 
 using System;
 using System.Linq;
-using static PolytopeSolutions.Toolset.Files.CSVHandler;
 using System.Text.RegularExpressions;
 
 namespace PolytopeSolutions.Toolset.Files {
