@@ -60,6 +60,7 @@ namespace PolytopeSolutions.Toolset.Files {
                 if (saveUVs) {
                     channelCount = 0;
                     meshDataBuilder.AppendLine("# UVs.");
+                    bool foundAny = false;
                     int c = 0; { 
                     //for (int c = 0; c < 8; c++) {
                         List<Vector2> uvs = new List<Vector2>();
@@ -73,7 +74,9 @@ namespace PolytopeSolutions.Toolset.Files {
                                 uvs[j].x.ToString(numberPrecisionFormat), uvs[j].y.ToString(numberPrecisionFormat));
                             meshDataBuilder.AppendLine();
                         }
+                        foundAny |= (uvs.Count > 0);
                     }
+                    saveUVs &= foundAny;
                 }
                 // Save normals.
                 if (saveNormals) {
@@ -87,6 +90,7 @@ namespace PolytopeSolutions.Toolset.Files {
                             (normals[j].x).ToString(numberPrecisionFormat), (normals[j].y).ToString(numberPrecisionFormat), (normals[j].z).ToString(numberPrecisionFormat));
                         meshDataBuilder.AppendLine();
                     }
+                    saveNormals &= (normals.Count > 0);
                 }
                 // Save Triangles.
                 meshDataBuilder.AppendLine("# Faces.");
@@ -96,11 +100,24 @@ namespace PolytopeSolutions.Toolset.Files {
                     if (meshes[i].subMeshCount > 1)
                         meshDataBuilder.AppendLine("#\tSubmesh " + sm);
                     for (int j = 0; j < indices.Count; j+=3) {
-                        meshDataBuilder.AppendFormat("f {0}/{1}/{2} {3}/{4}/{5} {6}/{7}/{8}",// {1}/{1}/{1} {2}/{2}/{2}
-                            lastVertexCount + indices[j] + 1, lastUVCount + indices[j] + 1, lastNormalCount + indices[j] + 1,
-                            lastVertexCount + indices[j+2] + 1, lastUVCount + indices[j+2] + 1, lastNormalCount + indices[j+2] + 1,
-                            lastVertexCount + indices[j+1] + 1, lastUVCount + indices[j+1] + 1, lastNormalCount + indices[j+1] + 1
-                        );
+                        meshDataBuilder.Append("f");
+
+                        // Vertex 1
+                        meshDataBuilder.AppendFormat(" {0}", lastVertexCount + indices[j] + 1);
+                        if (saveUVs)            meshDataBuilder.AppendFormat("/{0}", lastUVCount + indices[j] + 1);
+                        else if (saveNormals)   meshDataBuilder.Append("/");
+                        if (saveNormals)        meshDataBuilder.AppendFormat("/{0}", lastNormalCount + indices[j] + 1);
+                        // Vertex 2
+                        meshDataBuilder.AppendFormat(" {0}", lastVertexCount + indices[j+2] + 1);
+                        if (saveUVs) meshDataBuilder.AppendFormat("/{0}", lastUVCount + indices[j+2] + 1);
+                        else if (saveNormals) meshDataBuilder.Append("/");
+                        if (saveNormals) meshDataBuilder.AppendFormat("/{0}", lastNormalCount + indices[j+2] + 1);
+                        // Vertex 3
+                        meshDataBuilder.AppendFormat(" {0}", lastVertexCount + indices[j+1] + 1);
+                        if (saveUVs) meshDataBuilder.AppendFormat("/{0}", lastUVCount + indices[j+1] + 1);
+                        else if (saveNormals) meshDataBuilder.Append("/");
+                        if (saveNormals) meshDataBuilder.AppendFormat("/{0}", lastNormalCount + indices[j+1] + 1);
+
                         meshDataBuilder.AppendLine();
                     }
                 }

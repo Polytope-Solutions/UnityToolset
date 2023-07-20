@@ -19,6 +19,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
 				currentOffset += item.vertices.Length;
 			}
 
+			if (vertices.Count >= 65536)
+				mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+
 			mesh.vertices = vertices.ToArray();
 			mesh.triangles = indices.ToArray();
 			mesh.RecalculateNormals();
