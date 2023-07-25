@@ -71,12 +71,15 @@ namespace PolytopeSolutions.Toolset.Solvers {
         }
         ///////////////////////////////////////////////////////////////////////////////////
         [ContextMenu("Clear")]
-        public virtual void Clear() {
+        public void Clear() {
+            SingleClear();
+            if (this.flagPrepared && this.flagAutoUpdateSolution)
+                Invoke("Solve", 0.05f);
+        }
+        public virtual void SingleClear() {
             if (this.gSolutionHolder != null)
                 this.gSolutionHolder.DestroyChildren();
             FinishClear();
-            if (this.flagPrepared && this.flagAutoUpdateSolution)
-                Invoke("Solve", 0.05f);
         }
         protected void FinishClear() {
             if (this.OnCleared != null)
