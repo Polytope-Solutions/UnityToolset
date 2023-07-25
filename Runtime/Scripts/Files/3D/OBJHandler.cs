@@ -11,7 +11,7 @@ namespace PolytopeSolutions.Toolset.Files {
         public static void Encode(string name, Transform[] transforms, Mesh[] meshes,
                 out string meshData, out string materialData, 
                 string[] names = null, Material[] materials = null,
-                bool saveUVs=true, bool saveNormals=true) { 
+                bool saveUVs=true, bool saveNormals=true, bool embedTextureDetails=false) { 
             StringBuilder meshDataBuilder = new StringBuilder(), materialDataBuilder = new StringBuilder();
             bool useNames = ((names != null) && (names.Length == meshes.Length)), 
                 useMaterials = ((materials != null) && (materials.Length == meshes.Length));
@@ -152,9 +152,17 @@ namespace PolytopeSolutions.Toolset.Files {
                     materialDataBuilder.AppendLine();
                     // - texture
                     if (materials[i].mainTexture != null) {
-                        materialDataBuilder.AppendFormat("\tmap_Kd {0}",
+                        materialDataBuilder.Append("\tmap_Kd ");
+                        if (embedTextureDetails) {
+                            materialDataBuilder.AppendFormat("-o {0} {1} {2} -s {3} {4} {5} ",
+                                materials[i].mainTextureOffset.x.ToString(numberPrecisionFormat), materials[i].mainTextureOffset.y.ToString(numberPrecisionFormat), (0.0).ToString(numberPrecisionFormat),
+                                materials[i].mainTextureScale.x.ToString(numberPrecisionFormat), materials[i].mainTextureScale.y.ToString(numberPrecisionFormat), (1.0).ToString(numberPrecisionFormat));
+
+                        }
+                        materialDataBuilder.AppendFormat("{0}",
                             materials[i].mainTexture.name + ".png");
-                        materialDataBuilder.AppendLine();
+
+                    materialDataBuilder.AppendLine();
                     }
                     //// - specular
                     //materialDataBuilder.AppendFormat("\tKs {0} {1} {2}",
