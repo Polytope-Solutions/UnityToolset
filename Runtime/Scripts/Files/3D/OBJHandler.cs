@@ -4,6 +4,7 @@ using UnityEngine;
 
 using System;
 using System.Text;
+using System.Globalization;
 using System.Linq;
 
 namespace PolytopeSolutions.Toolset.Files {
@@ -53,7 +54,7 @@ namespace PolytopeSolutions.Toolset.Files {
                 for (int j = 0; j < vertices.Count; j++, currentVertexCount++) {
                     vertices[j] = transforms[i].TransformPoint(vertices[j]);
                     meshDataBuilder.AppendFormat("v {0} {1} {2}", 
-                        (-vertices[j].x).ToString(numberPrecisionFormat), (vertices[j].y).ToString(numberPrecisionFormat), (vertices[j].z).ToString(numberPrecisionFormat));
+                        (-vertices[j].x).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), (vertices[j].y).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), (vertices[j].z).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                     meshDataBuilder.AppendLine();
                 }
                 // Save UVs.
@@ -71,7 +72,7 @@ namespace PolytopeSolutions.Toolset.Files {
                         }
                         for (int j = 0; j < uvs.Count; j++, currentUVCount++) {
                             meshDataBuilder.AppendFormat("vt {0} {1}",
-                                uvs[j].x.ToString(numberPrecisionFormat), uvs[j].y.ToString(numberPrecisionFormat));
+                                uvs[j].x.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), uvs[j].y.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                             meshDataBuilder.AppendLine();
                         }
                         foundAny |= (uvs.Count > 0);
@@ -87,7 +88,7 @@ namespace PolytopeSolutions.Toolset.Files {
                     for (int j = 0; j < normals.Count; j++, currentNormalCount++) {
                         normals[j] = transforms[i].TransformDirection(normals[j]);
                         meshDataBuilder.AppendFormat("vn {0} {1} {2}",
-                            (normals[j].x).ToString(numberPrecisionFormat), (normals[j].y).ToString(numberPrecisionFormat), (normals[j].z).ToString(numberPrecisionFormat));
+                            (normals[j].x).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), (normals[j].y).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), (normals[j].z).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                         meshDataBuilder.AppendLine();
                     }
                     saveNormals &= (normals.Count > 0);
@@ -140,23 +141,23 @@ namespace PolytopeSolutions.Toolset.Files {
                     materialDataBuilder.AppendLine();
                     //// - ambient
                     //materialDataBuilder.AppendFormat("\tKa {0} {1} {2}",
-                    //    materials[i].color.r.ToString(numberPrecisionFormat), materials[i].color.g.ToString(numberPrecisionFormat), materials[i].color.b.ToString(numberPrecisionFormat));
+                    //    materials[i].color.r.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), materials[i].color.g.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), materials[i].color.b.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                     //materialDataBuilder.AppendLine();
                     // - diffuse
                     materialDataBuilder.AppendFormat("\tKd {0} {1} {2}",
-                        materials[i].color.r.ToString(numberPrecisionFormat), materials[i].color.g.ToString(numberPrecisionFormat), materials[i].color.b.ToString(numberPrecisionFormat));
+                        materials[i].color.r.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), materials[i].color.g.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), materials[i].color.b.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                     materialDataBuilder.AppendLine();
                     // - transparency
                     materialDataBuilder.AppendFormat("\td {0}",
-                        materials[i].color.a.ToString(numberPrecisionFormat));
+                        materials[i].color.a.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                     materialDataBuilder.AppendLine();
                     // - texture
                     if (materials[i].mainTexture != null) {
                         materialDataBuilder.Append("\tmap_Kd ");
                         if (embedTextureDetails) {
                             materialDataBuilder.AppendFormat("-o {0} {1} {2} -s {3} {4} {5} ",
-                                materials[i].mainTextureOffset.x.ToString(numberPrecisionFormat), materials[i].mainTextureOffset.y.ToString(numberPrecisionFormat), (0.0).ToString(numberPrecisionFormat),
-                                materials[i].mainTextureScale.x.ToString(numberPrecisionFormat), materials[i].mainTextureScale.y.ToString(numberPrecisionFormat), (1.0).ToString(numberPrecisionFormat));
+                                materials[i].mainTextureOffset.x.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), materials[i].mainTextureOffset.y.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), (0.0).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat),
+                                materials[i].mainTextureScale.x.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), materials[i].mainTextureScale.y.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), (1.0).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
 
                         }
                         materialDataBuilder.AppendFormat("{0}",
@@ -166,14 +167,14 @@ namespace PolytopeSolutions.Toolset.Files {
                     }
                     //// - specular
                     //materialDataBuilder.AppendFormat("\tKs {0} {1} {2}",
-                    //    materials[i].color.r.ToString(numberPrecisionFormat), materials[i].color.g.ToString(numberPrecisionFormat), materials[i].color.b.ToString(numberPrecisionFormat));
+                    //    materials[i].color.r.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), materials[i].color.g.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), materials[i].color.b.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                     //materialDataBuilder.AppendLine();
                     //// - specular exponent
-                    //materialDataBuilder.AppendFormat("\tNs {0}", 0f.ToString(numberPrecisionFormat));
+                    //materialDataBuilder.AppendFormat("\tNs {0}", 0f.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                     //materialDataBuilder.AppendLine();
                     //// - transmission filter
                     //materialDataBuilder.AppendFormat("\tTf {0} {1} {2}",
-                    //    Color.black.r.ToString(numberPrecisionFormat), Color.black.g.ToString(numberPrecisionFormat), Color.black.b.ToString(numberPrecisionFormat));
+                    //    Color.black.r.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), Color.black.g.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), Color.black.b.ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                     //materialDataBuilder.AppendLine();
 
                 }
