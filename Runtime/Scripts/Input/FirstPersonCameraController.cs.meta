@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: f1965404bbd681047ae69f431ad55bd4
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - cameraRotateLeftRight: {fileID: 5312077240112780319, guid: 3cef4d8fe5139b649899565ea3d48c71, type: 3}
+  - cameraRotateUpDown: {fileID: -3485924710505844917, guid: 3cef4d8fe5139b649899565ea3d48c71, type: 3}
+  - cameraMoveLeftRight: {fileID: 4272807508112728405, guid: 3cef4d8fe5139b649899565ea3d48c71, type: 3}
+  - cameraMoveUpDown: {fileID: 6896417761555522010, guid: 3cef4d8fe5139b649899565ea3d48c71, type: 3}
+  - cameraMoveForwardBackward: {fileID: -4382317112248179621, guid: 3cef4d8fe5139b649899565ea3d48c71, type: 3}
+  - viewerCamera: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
