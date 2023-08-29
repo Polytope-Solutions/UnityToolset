@@ -13,8 +13,8 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] private InputActionReference cameraMoveUpDown;
         [SerializeField] private InputActionReference cameraMoveForwardBackward;
 
-		[SerializeField] private float rotateSpeed = 1f;
-		[SerializeField] private float moveSpeed = 1f;
+		[SerializeField] private float rotateSpeed = 25f;
+		[SerializeField] private float moveSpeed = 2f;
 
 		[SerializeField] private Camera viewerCamera;
 		private new Rigidbody rigidbody;
@@ -105,7 +105,7 @@ namespace PolytopeSolutions.Toolset.Input {
 				this.rotateUpDownValue * Time.fixedDeltaTime
 			);
 			Vector3 direction =
-                Vector3.left * this.moveLeftRightValue +
+                - this.viewerCamera.transform.right * this.moveLeftRightValue +
                 Vector3.up * this.moveUpDownValue +
                 this.viewerCamera.transform.forward * this.moveForwardBackwardValue;
 			this.rigidbody.MovePosition(
