@@ -24,17 +24,21 @@ namespace PolytopeSolutions.Toolset.Grid {
         }
     }
     public abstract class Grid<T> : ElementList<T> where T : GridElement, new() {
-        public override int Count {
-            get {
-                if (this._dimensions == null || this._dimensions.Length == 0)
-                    return 0;
-                return Index(this.LastElementIndex)+1;
-            }
-        }
-        ///////////////////////////////////////////////////////////////////////////////////
         protected int[] _dimensions;
         public int[] dimensions => this._dimensions;
 
+        public Grid() : base() { }
+        public Grid(int[] dimensions) : this() {
+            this._dimensions = dimensions;
+
+            int count = dimensions[0];
+            for (int d = 1; d < dimensions.Length; d++)
+                count *= dimensions[d];
+            for (int i = 0; i < count; i++)
+                this._elements.Add(null);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////
         public T this[int[] axisIndices] {
             get {
                 return this[Index(axisIndices)];
@@ -52,17 +56,19 @@ namespace PolytopeSolutions.Toolset.Grid {
                 return lastElementIndex;
             }
         }
-
-        public Grid() : base() { }
-        public Grid(int[] dimensions) : this() {
-            this._dimensions = dimensions;
-
-            int count = dimensions[0];
-            for (int d = 1; d < dimensions.Length; d++)
-                count *= dimensions[d];
-            for (int i = 0; i < count; i++)
-                this._elements.Add(null);
+        public override int Count {
+            get {
+                if (this._dimensions == null || this._dimensions.Length == 0)
+                    return 0;
+                return Index(this.LastElementIndex)+1;
+            }
         }
+        public override void Clear() {
+            this._dimensions = new int[0];
+            base.Clear();
+        }
+        ///////////////////////////////////////////////////////////////////////////////////
+
         public virtual void Update(int[] dimensions) {
             bool changed = (dimensions.Length != this._dimensions?.Length);
             if (!changed) { 

@@ -12,32 +12,24 @@ using System;
 
 namespace PolytopeSolutions.Toolset.Solvers {
     public abstract class Element {
-        protected bool unitChanged = false;
-        protected bool unitUpdated = false;
-        protected bool unitResolved = false;
-        public bool UnitChanged => this.unitChanged;
-        public bool UnitUpdated => this.unitUpdated;
-        public bool UnitResolved => this.unitResolved;
+        protected int state;
 
         public Element() {
-            this.unitChanged = true;
-            this.unitUpdated = true;
-            this.unitResolved = false;
+            this.state = 0;
         }
-        
-        public void MarkSetup() {
-            this.unitChanged = false;
-            this.unitUpdated = false;
-        }
-        public void MarkResolved() {
-            this.unitResolved = true;
-        }
+
+        public abstract void UpdateState(int newState);
     }
     
     public abstract class ElementList<T> where T : Element, new() {
         protected List<T> _elements;
         public List<T> elements => this._elements;
+        
 
+        public ElementList() {
+            this._elements = new List<T>();
+        }
+        //////////////////////////////////////////////////////////////////////////////////
         public T this[int i] {
             get {
                 return this._elements[i];
@@ -51,9 +43,9 @@ namespace PolytopeSolutions.Toolset.Solvers {
                 return this._elements.Count;
             }
         }
-
-        public ElementList() {
-            this._elements = new List<T>();
+        public virtual void Clear() {
+            if (this._elements != null)
+                this._elements.Clear();
         }
 
         //////////////////////////////////////////////////////////////////////////////////
