@@ -58,7 +58,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             this._elements[i] = element;
         }
         public virtual void RemoveAt(int i) {
-            if (i < this.Count)
+            if (i < this._elements.Count)
                 this._elements.RemoveAt(i);
         }
     }
