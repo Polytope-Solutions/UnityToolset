@@ -84,8 +84,8 @@ namespace PolytopeSolutions.Toolset.Grid {
                     Insert(LastElementIndex, new T());
                 }
                 else if (oldCount > newCount) {
-                    for (int i = newCount+1; i < oldCount; i++) { 
-                        RemoveAt(i); 
+                    while (this._elements.Count > newCount) { 
+                        RemoveAt(this._elements.Count-1); 
                     }
                 }
             }
