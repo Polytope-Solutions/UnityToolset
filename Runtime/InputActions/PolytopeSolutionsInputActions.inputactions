@@ -2,7 +2,7 @@
     "name": "PolytopeSolutionsInputActions",
     "maps": [
         {
-            "name": "FirstPersonControl",
+            "name": "CameraControl",
             "id": "a925a72e-4088-4821-8b35-ef3cebcd29a2",
             "actions": [
                 {
