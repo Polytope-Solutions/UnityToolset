@@ -56,22 +56,22 @@ namespace PolytopeSolutions.Toolset.Input {
                 Mathf.Pow(frustumWidth / 2, 2)
             );
 
-            this.cameraRotateLeftRight.action.Enable();
-            this.cameraRotateUpDown.action.Enable();
-            this.cameraMoveLeftRight.action.Enable();
-            this.cameraMoveForwardBackward.action.Enable();
-            this.cameraMoveZoomInOut.action.Enable();
-
-            this.cameraRotateLeftRight.action.started += RotateLeftRightStarted;
-            this.cameraRotateUpDown.action.started += RotateUpDownStarted;
-            this.cameraMoveLeftRight.action.started += MoveLeftRightStarted;
-            this.cameraMoveForwardBackward.action.started += MoveForwardBackwardStarted;
-            this.cameraMoveZoomInOut.action.started += MoveZoomInOutStarted;
+            this.cameraRotateLeftRight.action.performed += RotateLeftRightPerformed;
+            this.cameraRotateUpDown.action.performed += RotateUpDownPerformed;
+            this.cameraMoveLeftRight.action.performed += MoveLeftRightPerformed;
+            this.cameraMoveForwardBackward.action.performed += MoveForwardBackwardPerformed;
+            this.cameraMoveZoomInOut.action.performed += MoveZoomInOutPerformed;
             this.cameraRotateLeftRight.action.canceled += RotateLeftRightEnded;
             this.cameraRotateUpDown.action.canceled += RotateUpDownEnded;
             this.cameraMoveLeftRight.action.canceled += MoveLeftRightEnded;
             this.cameraMoveForwardBackward.action.canceled += MoveForwardBackwardEnded;
             this.cameraMoveZoomInOut.action.canceled += MoveZoomInOutEnded;
+
+            this.cameraRotateLeftRight.action.Enable();
+            this.cameraRotateUpDown.action.Enable();
+            this.cameraMoveLeftRight.action.Enable();
+            this.cameraMoveForwardBackward.action.Enable();
+            this.cameraMoveZoomInOut.action.Enable();
         }
         private void OnDisable() { 
             this.cameraRotateLeftRight.action.Disable();
@@ -80,11 +80,11 @@ namespace PolytopeSolutions.Toolset.Input {
             this.cameraMoveForwardBackward.action.Disable();
             this.cameraMoveZoomInOut.action.Disable();
 
-            this.cameraRotateLeftRight.action.started -= RotateLeftRightStarted;
-            this.cameraRotateUpDown.action.started -= RotateUpDownStarted;
-            this.cameraMoveLeftRight.action.started -= MoveLeftRightStarted;
-            this.cameraMoveForwardBackward.action.started -= MoveForwardBackwardStarted;
-            this.cameraMoveZoomInOut.action.started -= MoveZoomInOutStarted;
+            this.cameraRotateLeftRight.action.performed -= RotateLeftRightPerformed;
+            this.cameraRotateUpDown.action.performed -= RotateUpDownPerformed;
+            this.cameraMoveLeftRight.action.performed -= MoveLeftRightPerformed;
+            this.cameraMoveForwardBackward.action.performed -= MoveForwardBackwardPerformed;
+            this.cameraMoveZoomInOut.action.performed -= MoveZoomInOutPerformed;
             this.cameraRotateLeftRight.action.canceled -= RotateLeftRightEnded;
             this.cameraRotateUpDown.action.canceled -= RotateUpDownEnded;
             this.cameraMoveLeftRight.action.canceled -= MoveLeftRightEnded;
@@ -140,32 +140,32 @@ namespace PolytopeSolutions.Toolset.Input {
             this.tCamera.LookAt(this.tTarget);
         }
         ///////////////////////////////////////////////////////////////////////
-        private void MoveLeftRightStarted(InputAction.CallbackContext context) {
+        private void MoveLeftRightPerformed(InputAction.CallbackContext context) {
             this.moveLeftRightValue = context.ReadValue<float>() * this.moveSpeed;
         }
         private void MoveLeftRightEnded(InputAction.CallbackContext context) {
             this.moveLeftRightValue = 0f;
         }
-        private void MoveForwardBackwardStarted(InputAction.CallbackContext context) {
+        private void MoveForwardBackwardPerformed(InputAction.CallbackContext context) {
             this.moveForwardBackwardValue = context.ReadValue<float>() * this.moveSpeed;
         }
         private void MoveForwardBackwardEnded(InputAction.CallbackContext context){
             this.moveForwardBackwardValue = 0f;
         }
-        private void MoveZoomInOutStarted(InputAction.CallbackContext context) {
+        private void MoveZoomInOutPerformed(InputAction.CallbackContext context) {
             this.moveZoomInOutValue = context.ReadValue<float>() * this.moveSpeed;
         }
         private void MoveZoomInOutEnded(InputAction.CallbackContext context) {
             this.moveZoomInOutValue = 0f;
         }
-        private void RotateLeftRightStarted(InputAction.CallbackContext context)
+        private void RotateLeftRightPerformed(InputAction.CallbackContext context)
         {
             this.rotateLeftRightValue = context.ReadValue<float>() * this.rotateSpeed;
         }
         private void RotateLeftRightEnded(InputAction.CallbackContext context) {
             this.rotateLeftRightValue = 0f;
         }
-        private void RotateUpDownStarted(InputAction.CallbackContext context) {
+        private void RotateUpDownPerformed(InputAction.CallbackContext context) {
             this.rotateUpDownValue = context.ReadValue<float>() * this.rotateSpeed;
         }
         private void RotateUpDownEnded(InputAction.CallbackContext context) {
