@@ -33,6 +33,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         public static Vector3 ToYZ(this Vector2 vector, float extraValue = 0) => new Vector3(extraValue, vector.x, vector.y);
         public static Vector3 ToZY(this Vector2 vector, float extraValue = 0) => new Vector3(extraValue, vector.y, vector.x);
 
+        public static Vector4 ToVector4(this Quaternion quternion) =>
+            new Vector4(quternion.x, quternion.y, quternion.z, quternion.w);
+
         // Generates a square regular grid mesh with the specified resolution and size.
         // By default in XY plane, centered at origin, but has Matrix parameter if needs to be modified.
         public static Mesh RegularSquareGridMesh(int resolution, float size,
