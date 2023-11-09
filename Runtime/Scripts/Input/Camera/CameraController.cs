@@ -6,7 +6,7 @@ using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.Input {
 	[RequireComponent(typeof(Rigidbody))]
-    public abstract class CameraController : MonoBehaviour {
+    public abstract class CameraController : InputReceiver {
         // NB! Call ObjectSetup from OnEnable() in derived classes
 
         [Header("General")]

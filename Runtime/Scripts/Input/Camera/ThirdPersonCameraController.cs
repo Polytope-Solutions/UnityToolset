@@ -32,12 +32,9 @@ namespace PolytopeSolutions.Toolset.Input {
 
         ///////////////////////////////////////////////////////////////////////
         #region UNITY_FUNCTIONS
-        private void OnEnable() {
+        protected override void OnEnable() {
             base.ObjectSetup();
-            SetupInputEvents();
-        }
-        private void OnDisable() { 
-            UnsetupInputEvents();
+            base.OnEnable();
         }
         private void FixedUpdate() {
             HandleInputValues();
@@ -51,7 +48,7 @@ namespace PolytopeSolutions.Toolset.Input {
         #endregion
         ///////////////////////////////////////////////////////////////////////
         #region INPUT_HANDLING
-        private void SetupInputEvents() {
+        protected override void EnableInputEvents() {
             this.cameraRotateLeftRight.action.performed += RotateLeftRightPerformed;
             this.cameraRotateUpDown.action.performed += RotateUpDownPerformed;
             this.cameraMoveLeftRight.action.performed += MoveLeftRightPerformed;
@@ -69,7 +66,7 @@ namespace PolytopeSolutions.Toolset.Input {
             this.cameraMoveForwardBackward.action.Enable();
             this.cameraMoveZoomInOut.action.Enable();
         }
-        private void UnsetupInputEvents() { 
+        protected override void DisableInputEvents() {
             this.cameraRotateLeftRight.action.Disable();
             this.cameraRotateUpDown.action.Disable();
             this.cameraMoveLeftRight.action.Disable();
@@ -86,6 +83,12 @@ namespace PolytopeSolutions.Toolset.Input {
             this.cameraMoveLeftRight.action.canceled -= MoveLeftRightEnded;
             this.cameraMoveForwardBackward.action.canceled -= MoveForwardBackwardEnded;
             this.cameraMoveZoomInOut.action.canceled -= MoveZoomInOutEnded;
+
+            this.rotateLeftRightValue = 0f;
+            this.rotateUpDownValue = 0f;
+            this.moveLeftRightValue = 0f;
+            this.moveForwardBackwardValue = 0f;
+            this.moveZoomInOutValue = 0f;
         }
         private void MoveLeftRightPerformed(InputAction.CallbackContext context) {
             this.moveLeftRightValue = context.ReadValue<float>() * this.moveSpeed;

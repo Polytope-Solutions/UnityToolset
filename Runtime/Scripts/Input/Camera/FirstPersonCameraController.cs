@@ -25,20 +25,18 @@ namespace PolytopeSolutions.Toolset.Input {
 
         ///////////////////////////////////////////////////////////////////////
         #region UNITY_FUNCTIONS
-        private void OnEnable() {
+        protected override void OnEnable() {
             base.ObjectSetup();
-			SetupInputEvents();
-		}
-		private void OnDisable() {
-			UnsetupInputEvents();
-		}
+            base.OnEnable();
+        }
 		private void FixedUpdate() {
 			HandleInputValues();
         }
         #endregion
         ///////////////////////////////////////////////////////////////////////
         #region INPUT_HANDLING
-        private void SetupInputEvents() {
+
+        protected override void EnableInputEvents() {
             this.cameraRotateLeftRight.action.Enable();
             this.cameraRotateUpDown.action.Enable();
             this.cameraMoveLeftRight.action.Enable();
@@ -56,15 +54,15 @@ namespace PolytopeSolutions.Toolset.Input {
             this.cameraMoveUpDown.action.canceled += MoveUpDownEnded;
             this.cameraMoveForwardBackward.action.canceled += MoveForwardBackwardEnded;
         }
-		private void UnsetupInputEvents() {
+        protected override void DisableInputEvents() {
             this.cameraRotateLeftRight.action.performed -= RotateLeftRightPerformed;
             this.cameraRotateUpDown.action.performed -= RotateUpDownPerformed;
-            this.cameraMoveLeftRight.action.performed += MoveLeftRightPerformed;
+            this.cameraMoveLeftRight.action.performed -= MoveLeftRightPerformed;
             this.cameraMoveUpDown.action.performed -= MoveUpDownPerformed;
             this.cameraMoveForwardBackward.action.performed -= MoveForwardBackwardPerformed;
             this.cameraRotateLeftRight.action.canceled -= RotateLeftRightEnded;
             this.cameraRotateUpDown.action.canceled -= RotateUpDownEnded;
-            this.cameraMoveLeftRight.action.canceled += MoveLeftRightEnded;
+            this.cameraMoveLeftRight.action.canceled -= MoveLeftRightEnded;
             this.cameraMoveUpDown.action.canceled -= MoveUpDownEnded;
             this.cameraMoveForwardBackward.action.canceled -= MoveForwardBackwardEnded;
 
@@ -72,7 +70,13 @@ namespace PolytopeSolutions.Toolset.Input {
             this.cameraRotateUpDown.action.Disable();
             this.cameraMoveUpDown.action.Disable();
             this.cameraMoveForwardBackward.action.Disable();
-        }
+
+			this.rotateLeftRightValue = 0f;
+            this.rotateUpDownValue = 0f;
+            this.moveLeftRightValue = 0f;
+            this.moveUpDownValue = 0f;
+            this.moveForwardBackwardValue = 0f;
+		}
         private void RotateLeftRightPerformed(InputAction.CallbackContext context) { 
 			this.rotateLeftRightValue = context.ReadValue<float>() * this.rotateSpeed;
 		}
