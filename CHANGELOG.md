@@ -2,6 +2,21 @@
 
 ---
 
+## 0.0.18
+
+2023-11-10
+
+-	Fix Third Person Camera Controller to not allow rig to zoom out pushing the target;
+-	Extend Scene Manager Extender:	-	Add OnSceneLoaded and OnSceneUnloaded events;
+	-	Make loading scene additive - for smooth transitioning;
+	-	Make unloading old scene asyncronous;
+-	Add Loading Scene camera Preset;
+-	Add Loading Screen script to smoothly animate it in and out;
+-	Smooth out loading bar transitions;
+-	Add preliminary Spawning system.
+
+---
+
 ## 0.0.17
 
 2023-11-09

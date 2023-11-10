@@ -134,13 +134,15 @@ namespace PolytopeSolutions.Toolset.Input {
                 this.tCamera.right,
                 this.rotateUpDownValue * Time.fixedDeltaTime
             );
-            Vector3 direction =
+            Vector3 directionHorizontal =
                 -this.tCamera.right * this.moveLeftRightValue +
-                this.tCamera.forward.XZ().ToXZ().normalized * this.moveForwardBackwardValue +
+                this.tCamera.forward.XZ().ToXZ().normalized * this.moveForwardBackwardValue;
+            Vector3 directionInRig =
                 this.tCamera.forward * this.moveZoomInOutValue;
             this.rigidbody.MovePosition(
-                transform.position + direction * Time.fixedDeltaTime
+                transform.position + directionHorizontal * Time.fixedDeltaTime
             );
+            this.tCamera.position += directionInRig * Time.fixedDeltaTime;
         }
         private void ConstrainCameraToTraget() {
             Vector3 lookDirection = this.tTarget.position - this.tCamera.position;
