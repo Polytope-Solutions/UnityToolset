@@ -2,6 +2,17 @@
 
 ---
 
+## 0.0.19
+
+2023-11-13
+
+-	Fix Scene loading for builds (didn't waot enough time to load scene before setting it active);
+-	Redo Geography converters: 		-	Switch to fractional tile indices encoding UVs directly;
+	-	Simplify and minimize cross calls;
+	-	Improve precision;
+
+---
+
 ## 0.0.18
 
 2023-11-10

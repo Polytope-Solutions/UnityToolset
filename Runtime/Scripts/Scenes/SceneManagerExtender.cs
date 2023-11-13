@@ -1,3 +1,8 @@
+#define DEBUG
+// #undef DEBUG
+// #define DEBUG2
+#undef DEBUG2
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -62,35 +67,64 @@ namespace PolytopeSolutions.Toolset.Scenes {
             skipLoadingScene &= !string.IsNullOrEmpty(this.loaderSceneName);
             DateTime startTime = DateTime.Now;
             this.progress = 0f;
-            string currentScene = this.activeSceneName;
+            string currentSceneName = this.activeSceneName;
+            #if DEBUG
+            Debug.Log("SceneManagerExtender: Loading scene: " + sceneName + " from: " + currentSceneName + ". Skipping loadscene: " + skipLoadingScene);
+            #endif
             if (!skipLoadingScene) {
                 // 1. Load the loading scene if it was specified.
                 // - If there is loading scene - load it additively.
                 AsyncOperation loaderSceneLoad = SceneManager.LoadSceneAsync(this.loaderSceneName, LoadSceneMode.Additive);
                 yield return AwaitSceneAsyncOperation(loaderSceneLoad, Vector2.zero);
+                #if DEBUG2
+                Debug.Log("SceneManagerExtender: Loader scene loaded");
+                #endif
                 // - Trigger SmoothTransition coroutine.
                 yield return SmoothTransition(true);
+                #if DEBUG2
+                Debug.Log("SceneManagerExtender: Loader smooth transitioning in complete");
+                #endif
                 // 2. Unload the old scene
                 // (NB! after loading scene as unloading can't happen without any scenes)
-                yield return UnloadOldScene(currentScene, skipLoadingScene);
+                yield return UnloadOldScene(currentSceneName, skipLoadingScene);
+                #if DEBUG2
+                Debug.Log("SceneManagerExtender: Old scene unloaded");
+                #endif
             }
             // 3. Load the new scene
             yield return LoadNewScene(sceneName, skipLoadingScene, startTime);
+            #if DEBUG2
+            Debug.Log("SceneManagerExtender: New scene loaded. Active Scene: " + this.activeSceneName);
+            #endif
 
             if (!skipLoadingScene) {
                 // 4. Unload the loader scene if it was loaded.
                 // - Trigger SmoothTransition coroutine.
                 yield return SmoothTransition(false);
+                #if DEBUG2
+                Debug.Log("SceneManagerExtender: Loader smooth transitioning out complete");
+                #endif
                 // - Unload the loading scene.
                 AsyncOperation loaderSceneUnload = SceneManager.UnloadSceneAsync(this.loaderSceneName);
                 yield return AwaitSceneAsyncOperation(loaderSceneUnload, Vector2.one);
+                #if DEBUG2
+                Debug.Log("SceneManagerExtender: Loader scene unloaded");
+                #endif
             } else {
                 // 5. Unload the old scene
                 // (NB! after as if loading scene is skipped unloading can't happen without any scenes)
-                yield return UnloadOldScene(currentScene, skipLoadingScene);
+                yield return UnloadOldScene(currentSceneName, skipLoadingScene);
+                #if DEBUG2
+                Debug.Log("SceneManagerExtender: Old scene unloaded");
+                #endif
             }
             // 6. Reset loading coroutine.
             this.currentLoadingProcess = null;
+            #if DEBUG
+            Debug.Log("SceneManagerExtender: Finished loading scene: " + sceneName 
+                + ". Active scenes: " + SceneManager.loadedSceneCount
+                + ". Active scene: " + this.activeSceneName);
+            #endif
         }
         private IEnumerator SmoothTransition(bool inTransition) { 
             this.smoothProgress = (inTransition) ? 0f : 1f;
@@ -135,7 +169,21 @@ namespace PolytopeSolutions.Toolset.Scenes {
             // - Scene is loaded - set it as active
             // (NB! has to happen after it is loaded, which won't happen till async queue is released)
             yield return null;
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
+            bool loaded = false;
+            Scene newScene;
+            do {
+                // Fix for build: Scene loading doesn't happen fast enough for the scene to be set as active.
+                // - wait and try to set the scene as active until it is set properly.
+                try{ 
+                    newScene = SceneManager.GetSceneByName(sceneName);
+                    loaded = SceneManager.SetActiveScene(newScene);
+                }
+                catch {
+                    loaded = false;
+                }
+                yield return null;
+            }
+            while (!loaded);
         }
         private IEnumerator UnloadOldScene(string oldScene, bool skipLoadingScene) {
             // - Trigger OnSceneUnloaded events

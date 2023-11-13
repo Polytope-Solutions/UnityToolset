@@ -20,6 +20,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 			}
 			return i;
 		}
-	
+
+		public static float FlipReference(this float value) {
+            return value + 1 - 2*value.Fraction();
+        }
+		public static float Fraction(this float value) {
+            return (float)((decimal)value % 1);
+        }
 	}
 }
