@@ -2,6 +2,20 @@
 
 ---
 
+## 0.0.20
+
+2023-11-15
+
+-	Introduce Concurrent Task Controller for threaded operations with limited amount of sub-tasks;
+-	Expand Scene Manager Extender: 	
+	-	Improve order of operations;
+	-	Simplify callbacks;
+	-	Introduce blocking coroutine for scene Setup;
+	-	Create explicit previous and next scene names accessors;
+-	Fix error in Geo converter: GameTile to Game;
+
+---
+
 ## 0.0.19
 
 2023-11-13

@@ -141,7 +141,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             return new Vector3(
                 (- baseGeoTile.x.Fraction() + gameTile.x) * zoomGameTileSize,
                 0,
-                (baseGeoTile.y.Fraction() - gameTile.y.FlipReference()) * zoomGameTileSize);
+                (baseGeoTile.y.Fraction() - 1 + gameTile.y) * zoomGameTileSize);
         }
         public static Vector2 GameTile2GameUV(this Vector2 gameTile) {
             Vector2 uv = new Vector2(gameTile.x.Fraction(),
