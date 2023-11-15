@@ -175,7 +175,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
             List<Scene> scenes = new List<Scene>();
             for (int i = 0; i < SceneManager.sceneCount; i++) {
                 Scene scene = SceneManager.GetSceneAt(i);
-                if (scene.isLoaded)
+                if (scene.isLoaded || scene.name == this.PreviousSceneName)
                     scenes.Add(scene);
             }
             return scenes;

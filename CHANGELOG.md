@@ -11,7 +11,8 @@
 	-	Improve order of operations;
 	-	Simplify callbacks;
 	-	Introduce blocking coroutine for scene Setup;
-	-	Create explicit previous and next scene names accessors;
+	-	Create manually controlled previous and next scene names accessors (to address uncertain order of Unity's operations);
+	-	More precise progress calculation based on amount of operations to perform;
 -	Fix error in Geo converter: GameTile to Game;
 
 ---
