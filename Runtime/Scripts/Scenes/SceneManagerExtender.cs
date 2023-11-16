@@ -1,7 +1,7 @@
 #define DEBUG
 // #undef DEBUG
-// #define DEBUG2
-#undef DEBUG2
+#define DEBUG2
+// #undef DEBUG2
 
 using System.Collections;
 using System.Collections.Generic;
@@ -79,6 +79,9 @@ namespace PolytopeSolutions.Toolset.Scenes {
         public void Awake() { 
             // through intance to ensuere it is assigned from the beginning.
             SceneManagerExtender.instance.CurrentSceneName = this.activeSceneName;
+            #if DEBUG
+            Debug.Log("SceneManagerExtender: Starting scene: " + this.CurrentSceneName);
+            #endif
         }
         public void LoadScene(string sceneName, bool skipLoadingScene) {
             if (this.activeSceneName != sceneName) {
@@ -87,6 +90,8 @@ namespace PolytopeSolutions.Toolset.Scenes {
             }
         }
         private IEnumerator LoadSceneCoroutine(string sceneName, bool skipLoadingScene) {
+            if (this.activeScene == null)
+                yield return ActivateScene(this.CurrentSceneName);
             this.PreviousSceneName = this.CurrentSceneName;
             this.CurrentSceneName = sceneName;
 
@@ -94,11 +99,11 @@ namespace PolytopeSolutions.Toolset.Scenes {
             DateTime startTime = DateTime.Now;
             this.progress = 0f;
             int currentOperationIndex = 0;
-            List<Scene> currentScenes = GetActiveScenes();
+            List<string> currentSceneNames = GetLoadedSceneNames();
             int extraOperations = (this.OnSceneSetup.ContainsKey(sceneName)) ?
                 this.OnSceneSetup[sceneName].Count : 0;
-            int operationCount = 2              // Load New
-                + currentScenes.Count() * 2     // Unload Current, Unload Current Assets
+            int operationCount = 2              // Load New, Unload Current Assets
+                + currentSceneNames.Count()     // Unload Current
                 + extraOperations               // Setup Operations if any
                 + ((skipLoadingScene) ? 0 : 2); // Load Loader, Unload Loader
             #if DEBUG
@@ -120,8 +125,8 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 Debug.Log("SceneManagerExtender: Loader smooth transitioning in complete");
                 #endif
                 // 2. Unload the old scenes
-                yield return UnloadOldScenes(currentScenes, currentOperationIndex, operationCount);
-                currentOperationIndex += currentScenes.Count() * 2;
+                yield return UnloadOldScenes(currentSceneNames, currentOperationIndex, operationCount);
+                currentOperationIndex += currentSceneNames.Count();
             }
             // 3. Load the new scene
             // - Launch new scene loading and pause it's activation until complete.
@@ -138,13 +143,18 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 Mathf.Max(0, this.minWaitTime - (float)(DateTime.Now - startTime).TotalSeconds - this.smoothTransitionTime * 2);
             yield return new WaitForSeconds(waitTime);
             // - Realease the scene loading async queue and Activate the scene.
-            yield return ActivateScene(newSceneLoad, sceneName);
+            newSceneLoad.allowSceneActivation = true;
+            yield return ActivateScene(sceneName);
             #if DEBUG2
             Debug.Log("SceneManagerExtender: New scene activated.");
             #endif
 
             if (!skipLoadingScene) {
                 // 4. Unload the loader scene if it was loaded.
+                // - In case of async unloading assets don't get released automatically. 
+                AsyncOperation assetUnload = Resources.UnloadUnusedAssets();
+                yield return AwaitSceneAsyncOperation(assetUnload, currentOperationIndex, operationCount);
+                currentOperationIndex++;
                 // - Trigger SmoothTransition coroutine.
                 yield return SmoothTransition(false, operationCount);
                 #if DEBUG2
@@ -160,8 +170,13 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 #endif
             } else {
                 // 5. Unload the old scenes
-                yield return UnloadOldScenes(currentScenes, currentOperationIndex, operationCount);
-                currentOperationIndex += currentScenes.Count() * 2;
+                yield return UnloadOldScenes(currentSceneNames, currentOperationIndex, operationCount);
+                currentOperationIndex += currentSceneNames.Count();
+
+                // In case of async unloading assets don't get released automatically. 
+                AsyncOperation assetUnload = Resources.UnloadUnusedAssets();
+                yield return AwaitSceneAsyncOperation(assetUnload, currentOperationIndex, operationCount);
+                currentOperationIndex++;
             }
             // 6. Reset loading coroutine.
             this.currentLoadingProcess = null;
@@ -171,14 +186,14 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 + ". Active scene: " + this.activeSceneName);
             #endif
         }
-        private List<Scene> GetActiveScenes() { 
-            List<Scene> scenes = new List<Scene>();
+        private List<string> GetLoadedSceneNames() { 
+            List<string> sceneNames = new List<string>();
             for (int i = 0; i < SceneManager.sceneCount; i++) {
                 Scene scene = SceneManager.GetSceneAt(i);
                 if (scene.isLoaded || scene.name == this.PreviousSceneName)
-                    scenes.Add(scene);
+                    sceneNames.Add(scene.name);
             }
-            return scenes;
+            return sceneNames;
         }
         private IEnumerator SmoothTransition(bool inTransition, int operationsCount) { 
             this.smoothProgress = (inTransition) ? 0f : 1f;
@@ -240,36 +255,32 @@ namespace PolytopeSolutions.Toolset.Scenes {
             if (this.OnBeforeSceneUnloaded.ContainsKey(oldSceneName))
                 this.OnBeforeSceneUnloaded[oldSceneName].Values.ToList().ForEach(item => item?.Invoke());
         }
-        private IEnumerator UnloadOldScenes(List<Scene> currentScenes, int currentOperationIndex, int operationCount) {
-            foreach (Scene oldScene in currentScenes) { 
+        private IEnumerator UnloadOldScenes(List<string> currentScenes, int currentOperationIndex, int operationCount) {
+            foreach (string oldSceneName in currentScenes) { 
                 // - Trigger OnBeforeSceneUnloaded events
-                BeforeSceneUnload(oldScene.name);
+                BeforeSceneUnload(oldSceneName);
                 // - Unload the old scene
                 // (NB! after loading loading scene as unloading can't happen without any scenes)
-                AsyncOperation oldSceneUnload = SceneManager.UnloadSceneAsync(oldScene.name);
-                oldSceneUnload.allowSceneActivation = false;
-                yield return UnloadOldScene(oldSceneUnload, oldScene.name, 
+                AsyncOperation oldSceneUnload = SceneManager.UnloadSceneAsync(oldSceneName);
+                yield return UnloadOldScene(oldSceneUnload, oldSceneName, 
                     currentOperationIndex, operationCount);
-                currentOperationIndex += 2;
+                currentOperationIndex++;
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Old scene ["+oldScene.name+"] unloaded");
+                Debug.Log("SceneManagerExtender: Old scene ["+ oldSceneName + "] unloaded");
                 #endif
             }
         }
         private IEnumerator UnloadOldScene(AsyncOperation oldSceneUnload, string oldSceneName, 
             int currentOperationIndex, int operationCount) {
+            oldSceneUnload.allowSceneActivation = false;
             // - Wait until the last scene fully unloads asynchronously.
             yield return AwaitSceneAsyncOperation(oldSceneUnload, currentOperationIndex, operationCount);
             currentOperationIndex++;
-            // In case of async unloading assets don't get released automatically. 
-            AsyncOperation unloadingAssets = Resources.UnloadUnusedAssets();
-            yield return AwaitSceneAsyncOperation(unloadingAssets, currentOperationIndex, operationCount);
             // - Realease the scene loading async queue.
             oldSceneUnload.allowSceneActivation = true;
             yield return null;
         }
-        private IEnumerator ActivateScene(AsyncOperation newSceneLoad, string sceneName) {
-            newSceneLoad.allowSceneActivation = true;
+        private IEnumerator ActivateScene(string sceneName) {
             bool loaded = false;
             Scene newScene;
             do {

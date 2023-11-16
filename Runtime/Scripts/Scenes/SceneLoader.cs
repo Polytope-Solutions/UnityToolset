@@ -8,10 +8,10 @@ namespace PolytopeSolutions.Toolset.Scenes {
     public class SceneLoader : MonoBehaviour {
         [SerializeField] private string sceneName;
         [SerializeField] private bool skipLoadingScene = false;
-        [SerializeField] private bool autoloadOnEnable = false;
+        [SerializeField] private bool autoloadOnStart = false;
 
-        private void OnEnable() {
-            if (this.autoloadOnEnable)
+        private void Start() {
+            if (this.autoloadOnStart)
                 LoadScene();
         }
         public void LoadScene() {

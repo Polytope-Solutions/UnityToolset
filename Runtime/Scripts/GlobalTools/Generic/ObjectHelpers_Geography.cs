@@ -63,12 +63,48 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             return geoCoordinate.Geo2GeoTile(zoomLevel)
                 .GeoTile2GameUV();
         }
-            
+
         // GeoTile converters
-        public static Vector2 GeoTile2Geo(this Vector2 geoTileIndex, int zoomLevel) {
-            double n = Math.PI - ((2.0d * Math.PI * (double)geoTileIndex.y) / (1 << zoomLevel));
+        public static Vector2 GeoTileParent(this Vector2 geoTile) {
+            return geoTile / 2f;
+        }
+        public static Vector2Int[] GeoTileChildren(this Vector2 geoTile) {
+            return new Vector2Int[] { 
+                geoTile.FloorToInt()*2 + Vector2Int.zero,
+                geoTile.FloorToInt()*2 + Vector2Int.right,
+                geoTile.FloorToInt()*2 + Vector2Int.up,
+                geoTile.FloorToInt()*2 + Vector2Int.one
+            };
+        }
+        public static Vector2Int[] GeoTileSiblings(this Vector2 geoTile) {
+            Vector2Int[] siblings = new Vector2Int[3];
+            Vector2 parent = geoTile.GeoTileParent();
+            if (parent.x.Fraction() >= 0.5f && parent.y.Fraction() >= 0.5f) { 
+                siblings[0] = geoTile.FloorToInt() - Vector2Int.right;
+                siblings[1] = geoTile.FloorToInt() - Vector2Int.up;
+                siblings[2] = geoTile.FloorToInt() - Vector2Int.right - Vector2Int.up;
+            }
+            else if (parent.x.Fraction() < 0.5f && parent.y.Fraction() >= 0.5f) {
+                siblings[0] = geoTile.FloorToInt() + Vector2Int.right;
+                siblings[1] = geoTile.FloorToInt() - Vector2Int.up;
+                siblings[2] = geoTile.FloorToInt() + Vector2Int.right - Vector2Int.up;
+            }
+            else if (parent.x.Fraction() < 0.5f && parent.y.Fraction() < 0.5f) {
+                siblings[0] = geoTile.FloorToInt() + Vector2Int.right;
+                siblings[1] = geoTile.FloorToInt() + Vector2Int.up;
+                siblings[2] = geoTile.FloorToInt() + Vector2Int.right + Vector2Int.up;
+            }
+            else {
+                siblings[0] = geoTile.FloorToInt() - Vector2Int.right;
+                siblings[1] = geoTile.FloorToInt() + Vector2Int.up;
+                siblings[2] = geoTile.FloorToInt() - Vector2Int.right + Vector2Int.up;
+            }
+            return siblings;
+        }
+        public static Vector2 GeoTile2Geo(this Vector2 geoTile, int zoomLevel) {
+            double n = Math.PI - ((2.0d * Math.PI * (double)geoTile.y) / (1 << zoomLevel));
             Vector2 geoCoordinate = new Vector2(
-                (float)(((double)geoTileIndex.x / (1 << zoomLevel) * 360.0d) - 180.0d),
+                (float)(((double)geoTile.x / (1 << zoomLevel) * 360.0d) - 180.0d),
                 (float)(180.0d / Math.PI * Math.Atan(Math.Sinh(n))));
 
             return geoCoordinate;
@@ -87,11 +123,20 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                 .FloorToInt();
             return new Vector2(
                 -baseGeoTileIndex.x + geoTile.x,
-                baseGeoTileIndex.y - geoTile.y + 1); // flip to Make fractional part refer to UV
+                baseGeoTileIndex.y - geoTile.y + 1);
         }
         public static Vector2 GeoTile2GameUV(this Vector2 geoTile) { 
             return new Vector2(geoTile.x.Fraction(),
                                1 - geoTile.y.Fraction());
+        }
+        public static Vector2 GeoTileIndex2Geo(this Vector2Int geoTileIndex, int zoomLevel) {
+            return (geoTileIndex + Vector2.one*0.5f).GeoTile2Geo(zoomLevel);
+        }
+        public static Vector3 GeoTileIndex2Game(this Vector2Int geoTileIndex, int zoomLevel, Vector2 baseGeoCoordinate, GameTileSize gameTileSize) {
+            return (geoTileIndex + Vector2.one*0.5f).GeoTile2Game(zoomLevel, baseGeoCoordinate, gameTileSize);
+        }
+        public static Vector2Int GeoTileIndex2GameTileIndex(this Vector2Int geoTileIndex, int zoomLevel, Vector2 baseGeoCoordinate) {
+            return (geoTileIndex + Vector2.one*0.5f).GeoTile2GameTile(zoomLevel, baseGeoCoordinate).FloorToInt();
         }
         
         // Game coordinate converters
@@ -150,6 +195,15 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             uv.x = (uv.x > 0) ? uv.x : 1 + uv.x;
             uv.y = (uv.y > 0) ? uv.y : 1 + uv.y;
             return uv;
+        }
+        public static Vector2 GameTileIndex2Geo(this Vector2Int gameTileIndex, int zoomLevel, Vector2 baseGeoCoordinate) {
+            return (gameTileIndex + Vector2.one*0.5f).GameTile2Geo(zoomLevel, baseGeoCoordinate);
+        }
+        public static Vector2Int GameTileIndex2GeoTileIndex(this Vector2Int gameTileIndex, int zoomLevel, Vector2 baseGeoCoordinate) {
+            return (gameTileIndex + Vector2.one*0.5f).GameTile2GeoTile(zoomLevel, baseGeoCoordinate).FloorToInt();
+        }
+        public static Vector3 GameTileIndex2Game(this Vector2Int gameTileIndex, int zoomLevel, Vector2 baseGeoCoordinate, GameTileSize gameTileSize) {
+            return (gameTileIndex + Vector2.one*0.5f).GameTile2Game(zoomLevel, baseGeoCoordinate, gameTileSize);
         }
     }
 }

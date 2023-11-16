@@ -2,6 +2,20 @@
 
 ---
 
+## 0.0.21
+
+2023-11-16
+
+-	Expand Geo Converters:
+	-	Add Parent, Children and Sibling indicies calculations;
+	-	Add separate Tile Index converters (as axis flip, 0 fraction resulted in wrong reference in other system);
+-	Debug Scene Manager:
+	-	Scene Loader changed to Start as OnEnable can happen before Scene Manager's Awake;
+	-	Wait for previous scene to activate if for some reason it didn't activate yet;
+	-	Unload assets once not with every unloaded scene;
+
+---
+
 ## 0.0.20
 
 2023-11-15
@@ -13,6 +27,8 @@
 	-	Introduce blocking coroutine for scene Setup;
 	-	Create manually controlled previous and next scene names accessors (to address uncertain order of Unity's operations);
 	-	More precise progress calculation based on amount of operations to perform;
+	-	Unload all loaded scenes not just the active one (in case switched before previous switching finished);
+	-	Unload assets when unloading a scene;
 -	Fix error in Geo converter: GameTile to Game;
 
 ---
