@@ -19,7 +19,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                 goItem.transform.GetChild(i).gameObject.SetActive(targetState);
 			}
 		}
-		public static GameObject TryFind(this GameObject goItem, string name) {
+		public static GameObject TryFindOrAddByName(this GameObject goItem, string name) {
             GameObject goFound = null;
             Transform tFound = goItem.transform.Find(name);
             if (tFound == null){
@@ -31,7 +31,15 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             }
             return goFound;
         }
-        public static T TryGetComponent<T>(this GameObject gItem) 
+		public static GameObject TryFindOrAddByName(string name) {
+            GameObject goFound = GameObject.Find(name);
+            if (goFound == null){
+                goFound = new GameObject();
+                goFound.name = name;
+            }
+            return goFound;
+        }
+        public static T TryGetOrAddComponent<T>(this GameObject gItem) 
             where T : MonoBehaviour { 
             T tFound = gItem.GetComponent<T>();
             if (tFound == null) {

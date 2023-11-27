@@ -2,6 +2,20 @@
 
 ---
 
+## 0.0.22
+
+2023-11-27
+
+-	Switch TManager to more consistent naming and add default Awake - to ensure instance is set as early as possible;
+-	Add discarding for Extended Touch when starting over UI;
+-	Remove unnecessary delegates;
+-	Split Mesh Generation tools into own static class MeshTools and merge with Aggregator;
+-	Add generic tool to set images in UI in ObjectHelpers_UI;
+-	Put more explicit names for Unity Helper functions in ObjectHelpers_UnityObjects;
+-	Add quit utility;
+
+---
+
 ## 0.0.21
 
 2023-11-16

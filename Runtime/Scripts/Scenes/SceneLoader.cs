@@ -15,7 +15,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 LoadScene();
         }
         public void LoadScene() {
-            SceneManagerExtender.instance?.LoadScene(this.sceneName, this.skipLoadingScene);
+            SceneManagerExtender.Instance?.LoadScene(this.sceneName, this.skipLoadingScene);
         }
     }
 }

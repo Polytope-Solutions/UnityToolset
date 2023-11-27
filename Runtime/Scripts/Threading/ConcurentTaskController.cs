@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 
 namespace PolytopeSolutions.Toolset.Threading {
     public class ConcurentTaskController<T>{
+        // TODO: Evaluate perforrmance on mobile devices.
+
         private string source;
         private Task concurentLoop;
 

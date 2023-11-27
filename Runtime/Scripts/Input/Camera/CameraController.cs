@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using System;
 using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.Input {
-	[RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(Rigidbody))]
     public abstract class CameraController : InputReceiver {
-        // NB! Call ObjectSetup from OnEnable() in derived classes
+        // NB! If overriding OnEnable call the base version in derived classes
 
         [Header("General")]
         [SerializeField] protected Transform tCamera;
@@ -18,9 +19,12 @@ namespace PolytopeSolutions.Toolset.Input {
         private float epsilon = 0.0001f;
         private Coroutine movementMonitor;
         private float farCornerDistanceCache;
-        public delegate void OnCameraViewChanged();
-        public OnCameraViewChanged onCameraViewChanged = null;
-        
+        public event Action onCameraViewChanged = null;
+
+        protected override void OnEnable() { 
+            base.OnEnable();
+            ObjectSetup();
+        }
         protected void ObjectSetup() {
             this.rigidbody = gameObject.GetComponent<Rigidbody>();
             this.cCamera = this.tCamera?.GetComponent<Camera>();

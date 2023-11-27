@@ -25,10 +25,6 @@ namespace PolytopeSolutions.Toolset.Input {
 
         ///////////////////////////////////////////////////////////////////////
         #region UNITY_FUNCTIONS
-        protected override void OnEnable() {
-            base.ObjectSetup();
-            base.OnEnable();
-        }
 		private void FixedUpdate() {
 			HandleInputValues();
         }
@@ -48,6 +44,7 @@ namespace PolytopeSolutions.Toolset.Input {
             this.cameraMoveLeftRight.action.performed += MoveLeftRightPerformed;
             this.cameraMoveUpDown.action.performed += MoveUpDownPerformed;
             this.cameraMoveForwardBackward.action.performed += MoveForwardBackwardPerformed;
+
             this.cameraRotateLeftRight.action.canceled += RotateLeftRightEnded;
             this.cameraRotateUpDown.action.canceled += RotateUpDownEnded;
             this.cameraMoveLeftRight.action.canceled += MoveLeftRightEnded;
@@ -55,21 +52,23 @@ namespace PolytopeSolutions.Toolset.Input {
             this.cameraMoveForwardBackward.action.canceled += MoveForwardBackwardEnded;
         }
         protected override void DisableInputEvents() {
+            this.cameraRotateLeftRight.action.Disable();
+            this.cameraRotateUpDown.action.Disable();
+            this.cameraMoveLeftRight.action.Disable();
+            this.cameraMoveUpDown.action.Disable();
+            this.cameraMoveForwardBackward.action.Disable();
+
             this.cameraRotateLeftRight.action.performed -= RotateLeftRightPerformed;
             this.cameraRotateUpDown.action.performed -= RotateUpDownPerformed;
             this.cameraMoveLeftRight.action.performed -= MoveLeftRightPerformed;
             this.cameraMoveUpDown.action.performed -= MoveUpDownPerformed;
             this.cameraMoveForwardBackward.action.performed -= MoveForwardBackwardPerformed;
+
             this.cameraRotateLeftRight.action.canceled -= RotateLeftRightEnded;
             this.cameraRotateUpDown.action.canceled -= RotateUpDownEnded;
             this.cameraMoveLeftRight.action.canceled -= MoveLeftRightEnded;
             this.cameraMoveUpDown.action.canceled -= MoveUpDownEnded;
             this.cameraMoveForwardBackward.action.canceled -= MoveForwardBackwardEnded;
-
-            this.cameraRotateLeftRight.action.Disable();
-            this.cameraRotateUpDown.action.Disable();
-            this.cameraMoveUpDown.action.Disable();
-            this.cameraMoveForwardBackward.action.Disable();
 
 			this.rotateLeftRightValue = 0f;
             this.rotateUpDownValue = 0f;
@@ -77,31 +76,36 @@ namespace PolytopeSolutions.Toolset.Input {
             this.moveUpDownValue = 0f;
             this.moveForwardBackwardValue = 0f;
 		}
-        private void RotateLeftRightPerformed(InputAction.CallbackContext context) { 
+        private void RotateLeftRightPerformed(InputAction.CallbackContext context) {
+            if (!this.IsInputEnabled) return;
 			this.rotateLeftRightValue = context.ReadValue<float>() * this.rotateSpeed;
 		}
 		private void RotateLeftRightEnded(InputAction.CallbackContext context) { 
 			this.rotateLeftRightValue = 0f;
 		}
 		private void RotateUpDownPerformed(InputAction.CallbackContext context) { 
+            if (!this.IsInputEnabled) return;
 			this.rotateUpDownValue = context.ReadValue<float>() * this.rotateSpeed;
 		}
 		private void RotateUpDownEnded(InputAction.CallbackContext context) { 
 			this.rotateUpDownValue = 0f;
 		}
 		private void MoveLeftRightPerformed(InputAction.CallbackContext context) { 
+            if (!this.IsInputEnabled) return;
 			this.moveLeftRightValue = context.ReadValue<float>() * this.moveSpeed;
 		}
 		private void MoveLeftRightEnded(InputAction.CallbackContext context) { 
 			this.moveLeftRightValue = 0f;
 		}
 		private void MoveUpDownPerformed(InputAction.CallbackContext context) { 
+            if (!this.IsInputEnabled) return;
 			this.moveUpDownValue = context.ReadValue<float>() * this.moveSpeed;
 		}
 		private void MoveUpDownEnded(InputAction.CallbackContext context) { 
 			this.moveUpDownValue = 0f;
 		}
 		private void MoveForwardBackwardPerformed(InputAction.CallbackContext context) {
+            if (!this.IsInputEnabled) return;
 			this.moveForwardBackwardValue = context.ReadValue<float>() * this.moveSpeed;
 		}
 		private void MoveForwardBackwardEnded(InputAction.CallbackContext context) {

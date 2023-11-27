@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.UI;
-using PolytopeSolutions.Toolset.GlobalTools.Generic;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.UI {
     public class ProgressBar : MonoBehaviour {

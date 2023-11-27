@@ -8,7 +8,7 @@ namespace PolytopeSolutions.Toolset.Events {
     public class EventInvoker : MonoBehaviour {
         [SerializeField] private string eventName;
         public void InvokeEvent() {
-            EventManager.instance?.InvokeEvent(eventName);
+            EventManager.Instance?.InvokeEvent(eventName);
         }
     }
 }

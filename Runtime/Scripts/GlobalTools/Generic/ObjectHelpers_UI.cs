@@ -32,5 +32,17 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             }
             #endif
 		}
+        public static void SetImage(this GameObject goItem, object image) {
+            { 
+                Image imageHolder = goItem.GetComponent<Image>();
+                if (imageHolder != null && image is Sprite)
+                    imageHolder.sprite = (Sprite)image;
+            }
+            {
+                RawImage imageHolder = goItem.GetComponent<RawImage>();
+                if (imageHolder != null && image is Texture)
+                    imageHolder.texture = (Texture)image;
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(CanvasGroup))]
     public class LoadingScreen : MonoBehaviour {
-        protected float progress => (float)SceneManagerExtender.instance?.SmoothProgress;
+        protected float progress => (float)SceneManagerExtender.Instance?.SmoothLoadingAnimateInProgress;
 
         private CanvasGroup canvasGroup;
 

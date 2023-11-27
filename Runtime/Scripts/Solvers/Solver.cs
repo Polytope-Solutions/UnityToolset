@@ -90,7 +90,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         protected void PrepareSolutionStructure() {
             if (this.tSolutionParentHolder != null) { 
                 if (this.gSolutionHolder == null && !string.IsNullOrEmpty(this.solutionName)) {
-                    this.gSolutionHolder = this.tSolutionParentHolder.gameObject.TryFind(this.solutionName);
+                    this.gSolutionHolder = this.tSolutionParentHolder.gameObject.TryFindOrAddByName(this.solutionName);
                 }
                 //else {
                 //    this.gSolutionHolder.SetActiveChildren(false);

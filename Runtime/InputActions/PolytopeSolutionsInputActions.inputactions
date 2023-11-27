@@ -328,6 +328,34 @@
                     "isPartOfComposite": true
                 }
             ]
+        },
+        {
+            "name": "Pointer",
+            "id": "39858e89-8899-4901-b377-5c9503e31d5d",
+            "actions": [
+                {
+                    "name": "PointerContact",
+                    "type": "Button",
+                    "id": "14f18cdf-d9ff-44aa-b95d-b9f36a59db84",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "16b23801-c7f5-4f11-be7c-a519abdb16de",
+                    "path": "<Pointer>/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PointerContact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

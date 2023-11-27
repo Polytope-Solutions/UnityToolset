@@ -77,8 +77,6 @@ namespace PolytopeSolutions.Toolset.Input {
         private bool _primaryFingerCurrentContact;
         private bool _secondaryFingerCurrentContact;
 
-        private Coroutine touchCoroutine;
-
         public static ExtendedTouch current { get; internal set; }
 
         public override void MakeCurrent() {
