@@ -2,6 +2,21 @@
 
 ---
 
+## 0.0.23
+
+2023-11-29
+
+-	Create UIToWorld Input Receiver and Handler abstract prototype - to allow to drag from UI into world;
+-	Allow for InputReceivers to be activated exlusively, by temporarily disabling the other receivers;
+-	Bring in and clean up Solver functionality:
+	-	Add ISolutionDescriptor interface;
+	-	Bring in common Tick functionality in the Solvers;
+	-	Bring in Input Controller for the Solvers;
+	-	GEneral clean up, reorganization and more consistent naming;
+-	Add generic Coroutine to Invoke next frame in ObjectHelpers_UnityObjects;
+
+---
+
 ## 0.0.22
 
 2023-11-27

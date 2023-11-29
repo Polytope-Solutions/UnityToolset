@@ -40,5 +40,14 @@ namespace PolytopeSolutions.Toolset.Input {
             if (this.inputReceivers.ContainsKey(key))
                 this.inputReceivers[key].SetActiveInputs(targetState);
         }
+        public void InputReceiverSetActiveExclusive(string key, bool targetState) {
+            if (this.inputReceivers.Count > 0)
+                foreach (KeyValuePair<string, InputReceiver> receiver in this.inputReceivers) { 
+                    if (receiver.Key == key)
+                        receiver.Value.SetTemporarilyActiveInputs(targetState);
+                    else
+                        receiver.Value.SetTemporarilyActiveInputs(!targetState);
+                }
+        }
     }
 }

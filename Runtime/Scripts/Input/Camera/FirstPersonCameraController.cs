@@ -33,12 +33,6 @@ namespace PolytopeSolutions.Toolset.Input {
         #region INPUT_HANDLING
 
         protected override void EnableInputEvents() {
-            this.cameraRotateLeftRight.action.Enable();
-            this.cameraRotateUpDown.action.Enable();
-            this.cameraMoveLeftRight.action.Enable();
-            this.cameraMoveUpDown.action.Enable();
-            this.cameraMoveForwardBackward.action.Enable();
-
             this.cameraRotateLeftRight.action.performed += RotateLeftRightPerformed;
             this.cameraRotateUpDown.action.performed += RotateUpDownPerformed;
             this.cameraMoveLeftRight.action.performed += MoveLeftRightPerformed;
@@ -50,6 +44,12 @@ namespace PolytopeSolutions.Toolset.Input {
             this.cameraMoveLeftRight.action.canceled += MoveLeftRightEnded;
             this.cameraMoveUpDown.action.canceled += MoveUpDownEnded;
             this.cameraMoveForwardBackward.action.canceled += MoveForwardBackwardEnded;
+
+            this.cameraRotateLeftRight.action.Enable();
+            this.cameraRotateUpDown.action.Enable();
+            this.cameraMoveLeftRight.action.Enable();
+            this.cameraMoveUpDown.action.Enable();
+            this.cameraMoveForwardBackward.action.Enable();
         }
         protected override void DisableInputEvents() {
             this.cameraRotateLeftRight.action.Disable();

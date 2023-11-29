@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using System;
+
 namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 	public static partial class ObjectHelpers {
 		public static void DestroyChildren(this GameObject goItem){
@@ -46,6 +48,15 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                 tFound = gItem.AddComponent<T>();
             }
             return tFound;
+        }
+
+        public static IEnumerator InvokeNextFrame(Action callback) {
+            yield return null;
+            callback();
+        }
+        public static IEnumerator InvokeNextFrame<T>(Action<T> callback, T value) {
+            yield return null;
+            callback(value);
         }
     }
 }

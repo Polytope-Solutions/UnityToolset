@@ -13,7 +13,7 @@ namespace PolytopeSolutions.Toolset.Input {
         protected bool isTemporaryDisabled = false;
         protected bool IsInputEnabled => this.isReceiverEnabled && !this.isTemporaryDisabled;
         public bool IsActiveByDefault => this.isActiveByDefault;
-        private bool IsSelfManaged => InputManager.Instance == null;
+        protected bool IsSelfManaged => InputManager.Instance == null;
 
         protected abstract void EnableInputEvents();
         protected abstract void DisableInputEvents();
@@ -24,6 +24,9 @@ namespace PolytopeSolutions.Toolset.Input {
                 EnableInputEvents();
             else
                 DisableInputEvents();
+        }
+        public virtual void SetTemporarilyActiveInputs(bool targetState) { 
+            this.isTemporaryDisabled = !targetState;
         }
 
         protected virtual void Awake() {

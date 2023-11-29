@@ -16,12 +16,11 @@ namespace PolytopeSolutions.Toolset.Editor.Solvers {
 
         public override void OnInspectorGUI() {
             DrawDefaultInspector();
-            if (GUILayout.Button("Solve")) { 
-                this.targetObject.flagForceResolve = true;
-                this.targetObject.Solve();
+            if (GUILayout.Button("OneTimeSolve")) { 
+                this.targetObject.OneTimeSolve();
             }
-            if (GUILayout.Button("Clear"))
-                this.targetObject.Clear();
+            if (GUILayout.Button("OneTimeClear"))
+                this.targetObject.OneTimeClear();
         }
     }
 }
