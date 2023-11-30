@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System.Linq;
+using Codice.Client.Common.GameUI;
 
 namespace PolytopeSolutions.Toolset.Solvers {
     public abstract class Solver : MonoBehaviour {
@@ -136,10 +137,12 @@ namespace PolytopeSolutions.Toolset.Solvers {
         }
         protected virtual void OnSolutionReset() { }
         private void HandleDependantSolverActivation() {
-            if (this.solution.FlagSolutionActiveInternal && !this.solution.FlagSolutionActiveExternal && this.FlagDependencySolutionsAvailable)
-                this.solution.ActivateSolutionExternal();
+            if (this.solution.FlagSolutionActiveInternal && !this.solution.FlagSolutionActiveExternal && this.FlagDependencySolutionsAvailable) {
+                this.solution.FlagSolutionActiveExternal = true;
+                this.solution.FlagSolutionActiveInternal = true;
+            }
             else if (this.solution.FlagSolutionActiveInternal && this.solution.FlagSolutionActiveExternal && !this.FlagDependencySolutionsAvailable)
-                this.solution.DeactivateSolutionExternal();
+                this.solution.FlagSolutionActiveExternal = false;
         }
 
         private void PrepareSolve() {
@@ -154,11 +157,11 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public virtual void OneTimeSolve() {
             OnSolutionReset();
             if (this.flagLiveUpdate) { 
-                this.solution.ActivateSolutionInternal();
+                this.solution.FlagSolutionActiveInternal = true;
             }
             else { 
                 PrepareSolve();
-                this.solution.ActivateSolutionInternal();
+                this.solution.FlagSolutionActiveInternal = true;
                 this.selectSolutionCoroutine = StartCoroutine(SelectSolutionOnce());
             }
         }
@@ -200,7 +203,8 @@ namespace PolytopeSolutions.Toolset.Solvers {
             #if DEBUG
             Debug.Log("Solver: Starting Continuous Solve");
             #endif
-            this.solution.ActivateSolutionInternal();
+            this.solution.FlagSolutionActiveInternal = true;
+            bool wasFinished = false;
             while (true) {
                 HandleDependantSolverActivation();
                 if (this.flagDebugging) {
@@ -211,8 +215,9 @@ namespace PolytopeSolutions.Toolset.Solvers {
                     yield return null;
 
                 bool finished = this.solution.TickMain(this.randomizer, this.inputController);
-                if (finished)
+                if (!wasFinished && finished)
                     FinishSolve();
+                wasFinished = finished;
                 yield return null;
             }
             //yield return null;
@@ -273,7 +278,11 @@ namespace PolytopeSolutions.Toolset.Solvers {
 
         ///////////////////////////////////////////////////////////////////////
         #region MISC_FUNCTIONS
-        protected void UpdateSeed() {
+        public void SetSeed(string _seed) {
+            this.seed = _seed;
+            this.flagAutoUpdateSeed = false;
+        }
+        protected void UpdateSeed(string _seed = null) {
             if (this.flagAutoUpdateSeed) { 
                 this.seed = DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss:fff");
             }

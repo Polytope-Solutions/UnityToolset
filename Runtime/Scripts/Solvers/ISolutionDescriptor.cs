@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using System;
-using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System.Linq;
+using PolytopeSolutions.Toolset.GlobalTools.Generic;
 
 namespace PolytopeSolutions.Toolset.Solvers {
     public interface ISolutionDescriptor {
@@ -23,29 +23,14 @@ namespace PolytopeSolutions.Toolset.Solvers {
         ///////////////////////////////////////////////////////////////////////
         #region CLEANUP_HANDLING
         // Clear the solution.
-        public virtual void ClearSolution() {
-            DeactivateSolutionInternal();
-        }
+        public void ClearSolution();
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
         #region ACTIVATIONS
-        protected bool FlagSolutionActiveTotal => this.FlagSolutionActiveInternal && this.FlagSolutionActiveExternal;
+        public bool FlagSolutionActiveTotal => this.FlagSolutionActiveInternal && this.FlagSolutionActiveExternal;
         public bool FlagSolutionActiveInternal { get; set; }
         public bool FlagSolutionActiveExternal { get; set; }
-        public virtual void ActivateSolutionInternal() {
-            this.FlagSolutionActiveInternal = true;
-        }
-        public void ActivateSolutionExternal() {
-            this.FlagSolutionActiveExternal = true;
-            ActivateSolutionInternal();
-        }
-        public void DeactivateSolutionInternal() {
-            this.FlagSolutionActiveInternal = false;
-        }
-        public void DeactivateSolutionExternal() {
-            this.FlagSolutionActiveExternal = false;
-        }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
