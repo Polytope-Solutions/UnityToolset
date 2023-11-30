@@ -5,7 +5,6 @@ using UnityEngine;
 using System;
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System.Linq;
-using Codice.Client.Common.GameUI;
 
 namespace PolytopeSolutions.Toolset.Solvers {
     public abstract class Solver : MonoBehaviour {
