@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System.Linq;
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.Solvers {
     public abstract class Solver : MonoBehaviour {
@@ -57,13 +58,13 @@ namespace PolytopeSolutions.Toolset.Solvers {
         // - the solvers this solver depends on (if null - no dependencies)
         protected virtual List<Solver> DependsOnSolvers { get; } = null;
         // - exposed flag for whether the dependencies are available
-        protected bool FlagDependencySolutionsAvailable {
+        protected bool FlagDependencySolutionsFinished {
             get {
-                bool state = (this.DependsOnSolvers == null);
-                if (!state)
-                    this.DependsOnSolvers.ForEach(solver => 
-                        state &= (solver != null || !solver.FlagSolutionAvailable)
-                    );
+                if (this.DependsOnSolvers == null) return true;
+                bool state = true;
+                this.DependsOnSolvers.ForEach(solver => 
+                    state &= solver.FlagSolutionFinished
+                );
                 return state;
             }
         }
@@ -71,6 +72,8 @@ namespace PolytopeSolutions.Toolset.Solvers {
         protected virtual List<Solver> CodependsOnSolvers { get; } = null;
         // - exposed flag for whether the solution is available
         public bool FlagSolutionAvailable => (this.solution != null && this.solution.FlagSolutionAvailable);
+        // - exposed flag for whether the solution is finished
+        public bool FlagSolutionFinished => (this.solution != null && this.solution.FlagSolutionSuccess);
         // - exposed solution descriptor
         public string SolutionLog => this.solution?.SolutionLog;
 
@@ -113,7 +116,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             } while (!inputStable);
             OnStabilizeInputs();
             #if DEBUG
-            Debug.Log("Solver: InputSettled");
+            this.Log("InputSettled");
             #endif
             this.inputUpdateCoroutine = null;
         }
@@ -136,11 +139,11 @@ namespace PolytopeSolutions.Toolset.Solvers {
         }
         protected virtual void OnSolutionReset() { }
         private void HandleDependantSolverActivation() {
-            if (this.solution.FlagSolutionActiveInternal && !this.solution.FlagSolutionActiveExternal && this.FlagDependencySolutionsAvailable) {
+            if (this.solution.FlagSolutionActiveInternal && !this.solution.FlagSolutionActiveExternal && this.FlagDependencySolutionsFinished) {
                 this.solution.FlagSolutionActiveExternal = true;
                 this.solution.FlagSolutionActiveInternal = true;
             }
-            else if (this.solution.FlagSolutionActiveInternal && this.solution.FlagSolutionActiveExternal && !this.FlagDependencySolutionsAvailable)
+            else if (this.solution.FlagSolutionActiveInternal && this.solution.FlagSolutionActiveExternal && !this.FlagDependencySolutionsFinished)
                 this.solution.FlagSolutionActiveExternal = false;
         }
 
@@ -149,7 +152,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             InitializeSolution();
             InitializeSolutionGameObject();
             #if DEBUG
-            Debug.Log("Solver: Solution is initialized.");
+            this.Log("Solution is initialized.");
             #endif
         }
         [ContextMenu("SolveOneTime")]
@@ -167,7 +170,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         // Select a solution.
         private IEnumerator SelectSolutionOnce() {
             #if DEBUG
-            Debug.Log("Solver: Solve");
+            this.Log("Solve");
             #endif
             // Wait for inputs.
             if (this.inputUpdateCoroutine != null) StopCoroutine(this.inputUpdateCoroutine);
@@ -191,8 +194,8 @@ namespace PolytopeSolutions.Toolset.Solvers {
                 cycleCount++;
             } while (!finished);
             #if DEBUG2
-            Debug.Log("Solver: Selection: Time for Solver: " + (DateTime.Now - tempTimeStart).TotalSeconds.ToString("F3") 
-                + ". cycles attemted: " + cycleCount);
+            this.Log($"Selection: Time for Solver: {(DateTime.Now - tempTimeStart).TotalSeconds.ToString("F3")}" 
+                + $". cycles attemted: {cycleCount}");
             #endif
             FinishSolve();
             yield return null;
@@ -200,7 +203,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         private IEnumerator ContinuousSolve() { 
             yield return null;
             #if DEBUG
-            Debug.Log("Solver: Starting Continuous Solve");
+            this.Log("Starting Continuous Solve");
             #endif
             this.solution.FlagSolutionActiveInternal = true;
             bool wasFinished = false;
@@ -223,7 +226,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         }
         private void FinishSolve() {
             #if DEBUG
-            Debug.Log("Solver: Solution Finished: " + this.solution.SolutionLog);
+            this.Log($"Solution Finished: {this.solution.SolutionLog}");
             #endif
             if (this.solution.FlagSolutionSuccess) 
                 this.OnSolutionSucces?.Invoke();
@@ -237,7 +240,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         [ContextMenu("ClearAndRestart")]
         public virtual void ClearAndTryRestart() {
             OneTimeClear();
-            if (this.FlagDependencySolutionsAvailable && this.flagAutoUpdateSolution)
+            if (this.FlagDependencySolutionsFinished && this.flagAutoUpdateSolution)
                 Invoke("Solve", 0.05f); // Delay to allow for cleanup.
         }
         public virtual void OneTimeClear() {
@@ -263,7 +266,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             if (!this.solution.FlagSolutionUpdated)
                 return;
             #if DEBUG2
-            Debug.Log("Solver: Updated: " + this.solution.FlagSolutionUpdated);
+            this.Log($"Updated: {this.solution.FlagSolutionUpdated}");
             #endif
 
             this.solution.TickUpdate(this.randomizer, this.inputController, this.gSolutionHolder,

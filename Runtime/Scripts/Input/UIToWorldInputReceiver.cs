@@ -11,6 +11,8 @@ using System;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
 
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
+
 namespace PolytopeSolutions.Toolset.Input {
     public class UIToWorldInputReceiver : InputReceiver {
         [Header("Events")]
@@ -71,7 +73,7 @@ namespace PolytopeSolutions.Toolset.Input {
                     this.activeHandlers = new List<UIToWorldInputHandler>(this.currentHandlersHovering);
                     this.activeHandlers.ForEach((handler) => handler.OnInteractionStarted());
                     #if DEBUG2
-                    Debug.Log("UIToWorldInputReceiver: Starting interaction. Active Handlers: ["+this.activeHandlers.Count+"]. Block other interactors.");
+                    this.Log($"Starting interaction. Active Handlers: [{this.activeHandlers.Count}]. Block other interactors.");
                     #endif
                     this.isInteracting = true;
                     InputManager.Instance.InputReceiverSetActiveExclusive(this.inputReceiverKeyName, true);
@@ -84,7 +86,7 @@ namespace PolytopeSolutions.Toolset.Input {
                     this.activeHandlers.ForEach((handler) => handler.OnInteractionEnded());
                     this.activeHandlers.Clear();
                     #if DEBUG2
-                    Debug.Log("UIToWorldInputReceiver: Ending interaction. Active Handlers: ["+this.activeHandlers.Count+"]. Unblock other interactors.");
+                    this.Log($"Ending interaction. Active Handlers: [{this.activeHandlers.Count}]. Unblock other interactors.");
                     #endif
                     this.isInteracting = false;
                     InputManager.Instance.InputReceiverSetActiveExclusive(this.inputReceiverKeyName, false);

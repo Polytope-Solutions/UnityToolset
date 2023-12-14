@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.Solvers {
     public interface ISolutionDescriptor {
@@ -23,7 +24,9 @@ namespace PolytopeSolutions.Toolset.Solvers {
         ///////////////////////////////////////////////////////////////////////
         #region CLEANUP_HANDLING
         // Clear the solution.
-        public void ClearSolution();
+        public virtual void ClearSolution() {
+            FlagSolutionActiveInternal = false;
+        }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -39,7 +42,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public void TickInput(ref bool inputStable, SolverInputController inputController) {
             if (inputController.IsComplete) {
                 #if DEBUG2
-                Debug.Log("Solution: InputTick.");
+                this.Log("InputTick.");
                 #endif
                 HandleInputTick(inputController);
 
@@ -56,7 +59,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public bool TickMain(System.Random randomizer, SolverInputController inputController) {
             if (inputController.IsComplete) {
                 #if DEBUG2
-                Debug.Log("Solution: MainTick.");
+                this.Log("MainTick.");
                 #endif
                 return HandleMainTick(randomizer, inputController);
             }
@@ -75,7 +78,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             removeObjects = new Dictionary<object, Transform>();
             if (inputController.IsComplete) {
                 #if DEBUG2
-                Debug.Log("Solution: UpdateTick.");
+                this.Log("UpdateTick.");
                 #endif
                 HandleUpdateTick(randomizer, inputController, gSolutionHolder, ref newObjects, ref removeObjects);
             }

@@ -12,6 +12,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
+
 namespace PolytopeSolutions.Toolset.Threading {
     public class ConcurentTaskController<T>{
         // TODO: Evaluate perforrmance on mobile devices.
@@ -46,7 +48,7 @@ namespace PolytopeSolutions.Toolset.Threading {
         }
         public void Start() {
             #if DEBUG
-            Debug.Log("ConcurrentTaskController ["+this.source+"]: Strating.");
+            this.Log($"[{this.source}]: Strating.");
             #endif
             if (this.concurentLoop != null)
                 Stop();
@@ -58,7 +60,7 @@ namespace PolytopeSolutions.Toolset.Threading {
         }
         public void Stop() {
             #if DEBUG
-            Debug.Log("ConcurrentTaskController ["+this.source+"]: Stopping.");
+            this.Log($"[{this.source}]: Stopping.");
             #endif
             if (this.tokenSource != null) { 
                 this.tokenSource.Cancel();
@@ -85,14 +87,14 @@ namespace PolytopeSolutions.Toolset.Threading {
                     lock (this.requestData)
                         currentItem = this.requestData.Dequeue();
                     #if DEBUG2
-                    Debug.Log("ConcurrentTaskController ["+this.source+"]: Waiting for concurency semaphore: " + this.concurrencySemaphore.CurrentCount);
+                    this.Log($"[{this.source}]: Waiting for concurency semaphore: " + this.concurrencySemaphore.CurrentCount);
                     #endif
                     this.concurrencySemaphore.Wait();
                     // Launch the task.
                     Task currentTask = Task.Factory.StartNew(() => {
                         try {
                             #if DEBUG2
-                            Debug.Log("ConcurrentTaskController ["+this.source+"]: Running action in task");
+                            this.Log($"[{this.source}]: Running action in task");
                             #endif
                             InTaskAction(currentItem.Key, currentItem.Value);
                         }
@@ -106,14 +108,14 @@ namespace PolytopeSolutions.Toolset.Threading {
                 // Wait for all tasks to finish.
                 Task.WaitAll(currentTasks.ToArray());
                 #if DEBUG
-                Debug.Log("ConcurrentTaskController ["+this.source+"]: Finished current tasks: " + currentTasks.Count);
+                this.Log($"[{this.source}]: Finished current tasks: " + currentTasks.Count);
                 #endif
             }
         }
 
         public void AddRequest(T request, Action<T> _OnCompletionAction=null) { 
             #if DEBUG
-            Debug.Log("ConcurrentTaskController ["+this.source+"]: Adding a task");
+            this.Log($"[{this.source}]: Adding a task");
             #endif
             lock (this.requestData) {
                 this.requestData.Enqueue(new KeyValuePair<T,Action<T>>(request, _OnCompletionAction));

@@ -9,6 +9,7 @@ using UnityEngine;
 
 using System;
 using System.Linq;
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
 	public class SpawnSystem : MonoBehaviour {
@@ -39,7 +40,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
 				this.seed = this.poolName + "_" + DateTime.Now.ToString();
 			this.prng = new System.Random(this.seed.GetHashCode());
 			if (this.tHolder == null) {
-				GameObject goHolder = new GameObject(this.poolName + "_PoolHolder");
+				GameObject goHolder = new GameObject($"{this.poolName}_PoolHolder");
 				this.tHolder = goHolder.transform;
 			}
 			InitializePool();
@@ -94,20 +95,20 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
 		protected virtual int NextItem() {
 			int nextIndex = this.prng.Next(0, this.poolCount);
 			#if DEBUG2
-			Debug.Log("SpawnSystem: [" + this.poolName + "]: item selected: " + nextIndex);
+			this.Log($"[{this.poolName}]: item selected: {nextIndex}");
 			#endif
 			return nextIndex;
 		}
 		// Override to handle item reuse.
 		protected virtual void OnItemReused(int i) {
 			#if DEBUG2
-			Debug.Log("SpawnSystem: [" + this.poolName + "]: item reused: " + i);
+			this.Log($"[{this.poolName}]: item reused: {i}");
 			#endif
 		}
 		// Override to handle item spawn.
 		protected virtual void OnItemSpawned(int i) {
 			#if DEBUG2
-			Debug.Log("SpawnSystem: [" + this.poolName + "]: item activated: " + i);
+			this.Log($"[{this.poolName}]: item activated: {i}");
 			#endif
 		}
 

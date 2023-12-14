@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.EventSystems;
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.Input {
     public abstract class UIToWorldInputHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
@@ -17,7 +18,7 @@ namespace PolytopeSolutions.Toolset.Input {
             if (!this.inputReceiver) {
                 this.inputReceiver = GameObject.FindObjectOfType<UIToWorldInputReceiver>();
                 if (!this.inputReceiver)
-                    Debug.LogWarning("UIToWorldInputHandler [" + gameObject.name + "]: No UIToWorldInputReceiver found!");
+                    this.LogWarning("No UIToWorldInputReceiver found!");
             }
         }
 
@@ -25,14 +26,14 @@ namespace PolytopeSolutions.Toolset.Input {
         // Inform the input receiver that this handler is being hovered over
         public void OnPointerEnter(PointerEventData eventData) {
             #if DEBUG2
-            Debug.Log("UIToWorldInputHandler [" + gameObject.name + "]: Pointer Enter");
+            this.Log(Pointer Enter");
             #endif
             this.inputReceiver?.HandlerHoverEnter(this);
         }
         // Inform the input receiver that this handler is not being hovered over anymore
         public void OnPointerExit(PointerEventData eventData) {
             #if DEBUG2
-            Debug.Log("UIToWorldInputHandler [" + gameObject.name + "]: Pointer Exit");
+            this.Log(Pointer Exit");
             #endif
             this.inputReceiver?.HandlerHoverExit(this);
         }

@@ -10,6 +10,8 @@ using UnityEngine;
 using System;
 using System.Linq;
 
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
+
 namespace PolytopeSolutions.Toolset.Solvers {
     [System.Serializable]
     public class SolverInputController {
@@ -151,7 +153,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public bool IsComplete {
             get {
                 #if DEBUG
-                Debug.Log("InputController [" + this.owner + "] IsComplete check");
+                this.Log($"[{this.owner}] IsComplete check");
                 #endif
                 bool complete = true;
                 this.states.Values.ToList().ForEach(states => complete &= states.IsInitialized);
@@ -165,16 +167,16 @@ namespace PolytopeSolutions.Toolset.Solvers {
             for (int i = 0; i < keys.Count; i++)
                 this.states.Add(keys[i], entries[i]);
             #if DEBUG
-            Debug.Log("InputController [" + this.owner + "] created with: " + keys.Count);
+            this.Log($"[{this.owner}] created with: {keys.Count}");
             #endif
         }
         public void Update(string key, object targetValue) {
             if (this.states == null || !this.states.ContainsKey(key)) {
-                Debug.LogError("InputController [" + this.owner + "] updating: key [" + key + "] was not added on initialization.");
+                this.LogError($"[{this.owner}] updating: key [{key}] was not added on initialization.");
                 return;
             }
             #if DEBUG
-            Debug.Log("InputController [" + this.owner + "] updating: key [" + key + "]");
+            this.Log($"[{this.owner}] updating: key [{key}]");
             #endif
             this.states[key].Update(targetValue);
         }
@@ -184,11 +186,11 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public object this[string key] {
             get { 
                 if (this.states == null || !this.states.ContainsKey(key)) {
-                    Debug.LogError("InputController [" + this.owner + "] accessing: key [" + key + "] was not added on initialization.");
+                    this.LogError($"[{this.owner}] accessing: key [" + key + "] was not added on initialization.");
                     return null;
                 }
                 #if DEBUG
-                Debug.Log("InputController [" + this.owner + "] accessing: key [" + key + "]");
+                this.Log($"[{this.owner}] accessing: key [{key}]");
                 #endif
                 return (object)this.states[key].CurrentValue;
             }
@@ -200,7 +202,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             }
             if (!stable) {
                 #if DEBUG
-                Debug.Log("InputController [" + this.owner + "] updating");
+                this.Log($"[{this.owner}] updating");
                 #endif
             }
             return stable;

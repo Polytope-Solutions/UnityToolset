@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
+
 namespace PolytopeSolutions.Toolset.GlobalTools.Types {
 	public abstract class TManager<TItem> : MonoBehaviour
 											where TItem : MonoBehaviour {
@@ -18,7 +20,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
 		}
 		protected virtual void Awake() { 
 			if (!Instance)
-				Debug.LogWarning("No instance of " + typeof(TItem).Name + " found in scene.");
+                this.LogWarning("No instance of found in scene.");
 		}
 	}
 }

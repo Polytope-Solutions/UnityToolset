@@ -12,6 +12,7 @@ using System.Linq;
 
 using UnityEngine.SceneManagement;
 using PolytopeSolutions.Toolset.GlobalTools.Types;
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.Scenes {
     public class SceneManagerExtender : TManager<SceneManagerExtender> {
@@ -80,7 +81,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
             // through intance to ensuere it is assigned from the beginning.
             SceneManagerExtender.Instance.CurrentSceneName = this.ActiveSceneName;
             #if DEBUG
-            Debug.Log("SceneManagerExtender: Starting scene: " + this.CurrentSceneName);
+            this.Log($"Starting scene: {this.CurrentSceneName}");
             #endif
         }
         public void LoadScene(string sceneName, bool skipLoadingScene) {
@@ -107,8 +108,8 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 + extraOperations               // Setup Operations if any
                 + ((skipLoadingScene) ? 0 : 2); // Load Loader, Unload Loader
             #if DEBUG
-            Debug.Log("SceneManagerExtender: Loading scene: " + this.CurrentSceneName + " from: " + this.PreviousSceneName 
-                + ". Skipping loadscene: " + skipLoadingScene + ". Tasks: " + operationCount);
+            this.Log($"Loading scene: {this.CurrentSceneName} from: {this.PreviousSceneName}"
+                + $". Skipping loadscene: {skipLoadingScene}. Tasks: {operationCount}");
             #endif
             if (!skipLoadingScene) {
                 // 1. Load the loading scene if it was specified.
@@ -118,29 +119,29 @@ namespace PolytopeSolutions.Toolset.Scenes {
                     currentOperationIndex, operationCount);
                 currentOperationIndex++;
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Loader scene loaded");
+                this.Log($"Loader scene loaded");
                 #endif
                 // - Trigger SmoothTransition coroutine.
                 yield return SmoothTransition(true, operationCount);
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Loader smooth transitioning in complete");
+                this.Log($"Loader smooth transitioning in complete");
                 #endif
                 // 2. Unload the old scenes
                 yield return UnloadOldScenes(currentSceneNames, currentOperationIndex, operationCount);
                 currentOperationIndex += currentSceneNames.Count();
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Scenes Unloaded.");
+                this.Log($"Scenes Unloaded.");
                 #endif
                 
                 // - In case of async unloading assets don't get released automatically. 
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Unloading assets.");
+                this.Log($"Unloading assets.");
                 #endif
                 AsyncOperation assetUnload = Resources.UnloadUnusedAssets();
                 yield return AwaitSceneAsyncOperation(assetUnload, currentOperationIndex, operationCount);
                 currentOperationIndex++;
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Unloaded assets.");
+                this.Log($"Unloaded assets.");
                 #endif
             }
             // 3. Load the new scene
@@ -151,7 +152,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 currentOperationIndex, operationCount);
             currentOperationIndex += 1 + extraOperations;
             #if DEBUG2
-            Debug.Log("SceneManagerExtender: New scene loaded.");
+            this.Log($"New scene loaded.");
             #endif
             // - Wait for the remaining minimum wait time if relevant.
             float waitTime = (skipLoadingScene) ? 0f :
@@ -161,7 +162,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
             newSceneLoad.allowSceneActivation = true;
             yield return ActivateScene(sceneName);
             #if DEBUG2
-            Debug.Log("SceneManagerExtender: New scene activated.");
+            this.Log($"New scene activated.");
             #endif
 
             if (!skipLoadingScene) {
@@ -169,7 +170,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 // - Trigger SmoothTransition coroutine.
                 yield return SmoothTransition(false, operationCount);
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Loader smooth transitioning out complete");
+                this.Log($"Loader smooth transitioning out complete");
                 #endif
                 // - Unload the loading scene.
                 AsyncOperation loaderSceneUnload = SceneManager.UnloadSceneAsync(this.loaderSceneName);
@@ -177,33 +178,31 @@ namespace PolytopeSolutions.Toolset.Scenes {
                     currentOperationIndex, operationCount);
                 currentOperationIndex++;
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Loader scene unloaded");
+                this.Log($"Loader scene unloaded");
                 #endif
             } else {
                 // 5. Unload the old scenes
                 yield return UnloadOldScenes(currentSceneNames, currentOperationIndex, operationCount);
                 currentOperationIndex += currentSceneNames.Count();
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Scenes Unloaded.");
+                this.Log($"Scenes Unloaded.");
                 #endif
                 
                 // - In case of async unloading assets don't get released automatically. 
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Unloading assets.");
+                this.Log($"Unloading assets.");
                 #endif
                 AsyncOperation assetUnload = Resources.UnloadUnusedAssets();
                 yield return AwaitSceneAsyncOperation(assetUnload, currentOperationIndex, operationCount);
                 currentOperationIndex++;
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Unloaded assets.");
+                this.Log($"Unloaded assets.");
                 #endif
             }
             // 6. Reset loading coroutine.
             this.currentLoadingProcess = null;
             #if DEBUG
-            Debug.Log("SceneManagerExtender: Finished loading scene: " + sceneName 
-                + ". Active scenes: " + SceneManager.loadedSceneCount
-                + ". Active scene: " + this.ActiveSceneName);
+            this.Log($"Finished loading scene: {sceneName}. Active scenes: {SceneManager.loadedSceneCount}. Active scene: {this.ActiveSceneName}");
             #endif
         }
         private List<string> GetLoadedSceneNames() { 
@@ -219,7 +218,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
             this.LoadingProgress = (inTransition) ? 0f : 1f - 1f / operationsCount;
             this.smoothLoadingAnimateInProgress = (inTransition) ? 0f : 1f;
             #if DEBUG2
-            Debug.Log("SceneManagerExtender: Transitioning: " + inTransition + ". Transition time: " + this.smoothTransitionTime);
+            this.Log($"Transitioning: {inTransition}. Transition time: {this.smoothTransitionTime}");
             #endif
             DateTime startTime = DateTime.Now;
             float timePassed = 0f, t = 0f;
@@ -263,13 +262,13 @@ namespace PolytopeSolutions.Toolset.Scenes {
             if (this.OnSceneSetup.ContainsKey(sceneName)) { 
                 foreach (KeyValuePair<string, SceneSetUpCoroutine> setupCoroutine in this.OnSceneSetup[sceneName]) { 
                     #if DEBUG2
-                    Debug.Log("SceneManagerExtender: Executing setup coroutine: " + setupCoroutine.Key);
+                    this.Log($"Executing setup coroutine: {setupCoroutine.Key}");
                     #endif
                     yield return setupCoroutine.Value(currentOperationIndex, operationCount, UpdateProgress);
                     currentOperationIndex++;
                 }
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Setup coroutines finished");
+                this.Log($"Setup coroutines finished");
                 #endif
             }
         }
@@ -289,7 +288,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
                     currentOperationIndex, operationCount);
                 currentOperationIndex++;
                 #if DEBUG2
-                Debug.Log("SceneManagerExtender: Old scene ["+ oldSceneName + "] unloaded");
+                this.Log($"Old scene [{oldSceneName}] unloaded");
                 #endif
             }
         }
@@ -317,7 +316,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
                     loaded = SceneManager.SetActiveScene(newScene);
                 }
                 catch {
-                    Debug.LogWarning("SceneManagerExtender: Scene ["+sceneName+"] not loaded yet. Waiting...");
+                    this.LogWarning($"Scene [{sceneName}] not loaded yet. Waiting...");
                     loaded = false;
                 }
             }

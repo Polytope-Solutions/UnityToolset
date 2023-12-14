@@ -14,6 +14,8 @@ using UnityEngine.InputSystem.Utilities;
 using UnityEditor;
 #endif
 
+using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
+
 namespace PolytopeSolutions.Toolset.Input {
     [StructLayout(LayoutKind.Explicit, Size = sizeof(float)*count)]
     public struct ExtendedTouchState : IInputStateTypeInfo {
@@ -243,7 +245,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 } else if (this._primaryFingerCurrentContact) { 
                     // Single finger touch
                     Vector2 primaryDelta = this._primaryFingerDelta;
-                    //Debug.Log("SingleTouch: " + delta.ToString("F6"));
+                    //this.Log($"SingleTouch: {delta.ToString("F6")}");
                     float allignmentFactorHorizontal = Mathf.Abs(Vector2.Dot(primaryDelta.normalized, Vector2.left));
                     float allignmentFactorVertical = Mathf.Abs(Vector2.Dot(primaryDelta.normalized, Vector2.up));
                     float threshold = 0.5f;

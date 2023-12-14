@@ -2,6 +2,20 @@
 
 ---
 
+## 0.0.24
+
+2023-12-14
+
+-	ObjectHelpers_UnityObjects:
+	-	Add options to Object Finding to have prototype or component list;
+	-	Add option to find Components by type not generic type;
+	-	Create easy accessors to debug log compactly and consistently;
+-	UIFPS:
+	-	Add option to choose between deltaTime or unscaled deltaTime;
+	-	Add option in show lowest FPS in buffer;
+
+---
+
 ## 0.0.23
 
 2023-11-29

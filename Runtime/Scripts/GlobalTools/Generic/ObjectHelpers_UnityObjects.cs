@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using System;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 	public static partial class ObjectHelpers {
@@ -21,31 +23,38 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                 goItem.transform.GetChild(i).gameObject.SetActive(targetState);
 			}
 		}
-		public static GameObject TryFindOrAddByName(this GameObject goItem, string name) {
+		public static GameObject TryFindOrAddByName(this GameObject goItem, string name, GameObject goPrefab=null, Type[] components=null) {
             GameObject goFound = null;
             Transform tFound = goItem.transform.Find(name);
             if (tFound == null){
-                goFound = new GameObject();
+                goFound = (goPrefab == null) ? new GameObject() : GameObject.Instantiate(goPrefab);
                 goFound.name = name;
                 goFound.transform.SetParent(goItem.transform);
             } else {
                 goFound = tFound.gameObject;
             }
+            foreach (Type component in components) 
+                goFound.TryGetOrAddComponent(component);
             return goFound;
         }
-		public static GameObject TryFindOrAddByName(string name) {
+		public static GameObject TryFindOrAddByName(string name, GameObject goPrefab = null, Type[] components = null) {
             GameObject goFound = GameObject.Find(name);
             if (goFound == null){
-                goFound = new GameObject();
+                goFound = (goPrefab == null) ? new GameObject() : GameObject.Instantiate(goPrefab);
                 goFound.name = name;
             }
+            foreach (Type component in components)
+                goFound.TryGetOrAddComponent(component);
             return goFound;
         }
         public static T TryGetOrAddComponent<T>(this GameObject gItem) 
             where T : MonoBehaviour { 
-            T tFound = gItem.GetComponent<T>();
+            return (T)gItem.TryGetOrAddComponent(typeof(T));
+        }
+        public static Component TryGetOrAddComponent(this GameObject gItem, Type componentType){
+            Component tFound = gItem.GetComponent(componentType);
             if (tFound == null) {
-                tFound = gItem.AddComponent<T>();
+                tFound = gItem.AddComponent(componentType);
             }
             return tFound;
         }
@@ -57,6 +66,67 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         public static IEnumerator InvokeNextFrame<T>(Action<T> callback, T value) {
             yield return null;
             callback(value);
+        }
+
+        [HideInCallstack]
+        public static void Log(Type source, string messageContent,
+                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+            Debug.Log(ConditionMessage("STATIC", source.Name, methodName, messageContent, includeTimeStamp));
+        }
+        [HideInCallstack]
+        public static void LogWarning(Type source, string messageContent,
+                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+            Debug.LogWarning(ConditionMessage("STATIC", source.Name, methodName, messageContent, includeTimeStamp));
+        }
+        [HideInCallstack]
+        public static void LogError(Type source, string messageContent,
+                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+            Debug.LogError(ConditionMessage("STATIC", source.Name, methodName, messageContent, includeTimeStamp));
+        }
+
+        [HideInCallstack]
+        public static void Log(this object source, string messageContent,
+                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+            string objectName = (source is MonoBehaviour) ? ((MonoBehaviour)source).gameObject.name : "GENERIC";
+            Debug.Log(ConditionMessage(objectName, source.GetType().Name, methodName, messageContent, includeTimeStamp));
+        }
+        [HideInCallstack]
+        public static void LogWarning(this object source, string messageContent,
+                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+            string objectName = (source is MonoBehaviour) ? ((MonoBehaviour)source).gameObject.name : "GENERIC";
+            Debug.LogWarning(ConditionMessage(objectName, source.GetType().Name, methodName, messageContent, includeTimeStamp));
+        }
+        [HideInCallstack]
+        public static void LogError(this object source, string messageContent,
+                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+            string objectName = (source is MonoBehaviour) ? ((MonoBehaviour)source).gameObject.name : "GENERIC";
+            Debug.LogError(ConditionMessage(objectName, source.GetType().Name, methodName, messageContent, includeTimeStamp));
+        }
+
+        [HideInCallstack]
+        public static void Log(this GameObject goItem, string messageContent,
+                Type type = null, [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+            Debug.Log(ConditionMessage(goItem.name, type.Name, methodName, messageContent, includeTimeStamp));
+        }
+        [HideInCallstack]
+        public static void LogWarning(this GameObject goItem, string messageContent,
+                Type type = null, [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+            Debug.LogWarning(ConditionMessage(goItem.name, type.Name, methodName, messageContent, includeTimeStamp));
+        }
+        [HideInCallstack]
+        public static void LogError(this GameObject goItem, string messageContent,
+                Type type = null, [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+            Debug.LogError(ConditionMessage(goItem.name, type.Name, methodName, messageContent, includeTimeStamp));
+        }
+
+        private static string ConditionMessage(string sourceObjectName, string typeName, string methodName, 
+                string messageContent, bool includeTimeStamp) {
+            string message = (includeTimeStamp) ? $"[{DateTime.Now.ToString("HH:mm:ss.fff")}] " : string.Empty;
+            message += "[";
+            message += string.Join(">", sourceObjectName, typeName, methodName);
+            message += "]";
+            message += $"\n\t{messageContent}\n";
+            return message;
         }
     }
 }
