@@ -33,8 +33,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             } else {
                 goFound = tFound.gameObject;
             }
-            foreach (Type component in components) 
-                goFound.TryGetOrAddComponent(component);
+            if (components)
+                foreach (Type component in components) 
+                    goFound.TryGetOrAddComponent(component);
             return goFound;
         }
 		public static GameObject TryFindOrAddByName(string name, GameObject goPrefab = null, Type[] components = null) {
@@ -43,8 +44,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                 goFound = (goPrefab == null) ? new GameObject() : GameObject.Instantiate(goPrefab);
                 goFound.name = name;
             }
-            foreach (Type component in components)
-                goFound.TryGetOrAddComponent(component);
+            if (components)
+                foreach (Type component in components)
+                    goFound.TryGetOrAddComponent(component);
             return goFound;
         }
         public static T TryGetOrAddComponent<T>(this GameObject gItem) 
