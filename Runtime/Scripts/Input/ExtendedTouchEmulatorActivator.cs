@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 namespace PolytopeSolutions.Toolset.Input {
     public class ExtendedTouchEmulatorActivator : MonoBehaviour {
         private ExtendedTouch extentdedTouch;
+        private bool IsPointerOverUI => InputManager.Instance.IsPointerOverUI;
         private bool IsInteractorEnabled => this.extentdedTouch.enabled;
         private bool isStartingInteraction, isEndingInteraction;
 
@@ -53,7 +54,7 @@ namespace PolytopeSolutions.Toolset.Input {
             if (this.extentdedTouch == null) return;
 
             if (this.isStartingInteraction){
-                bool isPointerOverUI = EventSystem.current.IsPointerOverGameObject();
+                bool isPointerOverUI = (InputManager.Instance) ? this.IsPointerOverUI : EventSystem.current.IsPointerOverGameObject();
                 if (this.IsInteractorEnabled && isPointerOverUI) { 
                     InputSystem.DisableDevice(this.extentdedTouch);
                 }

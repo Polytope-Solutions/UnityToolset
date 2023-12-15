@@ -7,14 +7,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using System;
+using System.Linq;
 using UnityEngine.InputSystem;
-using UnityEngine.EventSystems;
-
-using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
+using System;
 
 namespace PolytopeSolutions.Toolset.Input {
-    public class UIToWorldInputReceiver : InputReceiver {
+    public class ObjectInteractorInputReceiver : InputReceiver {
         [Header("Events")]
         [SerializeField] private InputActionReference pointerClickAction;
         [SerializeField] private float raycastMaxDistance = 1000f;
@@ -22,14 +20,13 @@ namespace PolytopeSolutions.Toolset.Input {
         private bool IsPointerOverUI => InputManager.Instance.IsPointerOverUI;
         private bool isStartingInteraction;
         private bool isEndingInteraction;
-        private bool isInteracting;
 
         private Vector2 screenPointerPosition;
         private Ray ray;
         private RaycastHit hitInfo;
 
-        private HashSet<UIToWorldInputHandler> currentHandlers = new HashSet<UIToWorldInputHandler>();
-        private List<UIToWorldInputHandler> activeHandlers = new List<UIToWorldInputHandler>();
+        private List<InteractableObjectInputHandler> currentHandlers = new List<InteractableObjectInputHandler>();
+        private InteractableObjectInputHandler activeHandler;
 
         ///////////////////////////////////////////////////////////////////////
         #region UNITY_FUNCTIONS
@@ -64,46 +61,41 @@ namespace PolytopeSolutions.Toolset.Input {
         private void HandleInputValues() {
             // Handle Start
             if (this.isStartingInteraction) {
+                if (!this.IsPointerOverUI) {
+                    this.screenPointerPosition = Pointer.current.position.ReadValue();
+                    this.ray = Camera.main.ScreenPointToRay(this.screenPointerPosition);
+                    if (Physics.Raycast(this.ray, out this.hitInfo, this.raycastMaxDistance)) {
+                        foreach (InteractableObjectInputHandler handler in this.currentHandlers) {
+                            if (handler.IsRayValid(this.hitInfo)) { 
+                                // Found relevant handler
+                                if (!this.IsSelfManaged)
+                                    InputManager.Instance.InputReceiverSetActiveExclusive(this.inputReceiverKeyName, true);
+                                this.activeHandler = handler;
+                                this.activeHandler.OnInteractionStarted();
+                                break;
+                            }
+                        }
+                    }
+                }
                 this.isStartingInteraction = false;
-                if (!this.IsSelfManaged && this.IsPointerOverUI && this.currentHandlers.Count>0) {
-                    this.activeHandlers = new List<UIToWorldInputHandler>(this.currentHandlers);
-                    this.activeHandlers.ForEach((handler) => handler.OnInteractionStarted());
-                    #if DEBUG2
-                    this.Log($"Starting interaction. Active Handlers: [{this.activeHandlers.Count}]. Block other interactors.");
-                    #endif
-                    this.isInteracting = true;
-                    InputManager.Instance.InputReceiverSetActiveExclusive(this.inputReceiverKeyName, true);
-                }
-            }
-            // Handle Perform
-            if (this.activeHandlers.Count > 0) {
-                this.screenPointerPosition = Pointer.current.position.ReadValue();
-                this.ray = Camera.main.ScreenPointToRay(this.screenPointerPosition);
-                if (Physics.Raycast(this.ray, out this.hitInfo, this.raycastMaxDistance)) {
-                    this.activeHandlers.ForEach((handler) => handler.OnInteractionPerformed(this.hitInfo));
-                }
             }
             // Handle End
             if (this.isEndingInteraction) {
                 this.isEndingInteraction = false;
-                if (!this.IsSelfManaged && this.isInteracting && this.activeHandlers.Count > 0) {
-                    this.activeHandlers.ForEach((handler) => handler.OnInteractionEnded());
-                    this.activeHandlers.Clear();
-                    #if DEBUG2
-                    this.Log($"Ending interaction. Active Handlers: [{this.activeHandlers.Count}]. Unblock other interactors.");
-                    #endif
-                    this.isInteracting = false;
-                    InputManager.Instance.InputReceiverRestoreExclusive();
+                if (this.activeHandler) {
+                    this.activeHandler.OnInteractionEnded();
+                    this.activeHandler = null;
+                    if (!this.IsSelfManaged)
+                        InputManager.Instance.InputReceiverRestoreExclusive();
                 }
             }
         }
 
-        public void RegisterInputHandler(UIToWorldInputHandler handler) {
+        public void RegisterInputHandler(InteractableObjectInputHandler handler) {
             if (!this.currentHandlers.Contains(handler))
                 this.currentHandlers.Add(handler);
         }
-
-        public void UnregisterInputHandler(UIToWorldInputHandler handler) {
+        public void UnregisterInputHandler(InteractableObjectInputHandler handler) {
             if (this.currentHandlers.Contains(handler))
                 this.currentHandlers.Remove(handler);
         }

@@ -2,6 +2,19 @@
 
 ---
 
+## 0.0.25
+
+2023-12-15
+
+-	Set up Input receiver and handler for 3d object interactions;
+-	Fix exclusive state setting and resetting with multiple possible interactors;
+-	Implement own Pointer over UI check to mittigate weird behaviours;
+-	Simplify UI to World interactors and make it cimilar to 3d object interactor;
+-	Add default Unity Events for input handlers exposed in editor;
+-	Add helper function to check if GameObject's layer is in layermask;
+
+---
+
 ## 0.0.24
 
 2023-12-14

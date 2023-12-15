@@ -3,17 +3,37 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using PolytopeSolutions.Toolset.GlobalTools.Types;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace PolytopeSolutions.Toolset.Input {
     public class InputManager : TManager<InputManager> {
-        protected Dictionary<string, InputReceiver> inputReceivers = new Dictionary<string, InputReceiver>();
-        public void RegisterInputReceiver(string key, InputReceiver receiver) { 
-            if (!this.inputReceivers.ContainsKey(key))
-                this.inputReceivers.Add(key, receiver);
-            else
-                this.inputReceivers[key] = receiver;
-            receiver.SetActiveInputs(receiver.IsActiveByDefault);
+        #region UI_HOVER_CHECK
+        private GraphicRaycaster[] raycasters;
+        private Vector2 pointerPosition;
+        private PointerEventData pointerEventData;
+        private List<RaycastResult> rayCastUIResults = new List<RaycastResult>();
+        public bool IsPointerOverUI {
+            get {
+                this.raycasters = GameObject.FindObjectsOfType<GraphicRaycaster>();
+                this.pointerPosition = Pointer.current.position.ReadValue();
+                this.pointerEventData = new PointerEventData(EventSystem.current);
+                this.pointerEventData.position = this.pointerPosition;
+                this.rayCastUIResults.Clear();
+                foreach (GraphicRaycaster raycaster in this.raycasters) {
+                    raycaster.Raycast(this.pointerEventData, this.rayCastUIResults);
+                    if (this.rayCastUIResults.Count > 0)
+                        break;
+                }
+                return this.rayCastUIResults.Count > 0;
+            }
         }
+        #endregion
+        ///////////////////////////////////////////////////////////////////////
+        protected Dictionary<string, InputReceiver> inputReceivers = new Dictionary<string, InputReceiver>();
+
+        #region UNITY_FUNCTIONS
         protected IEnumerator Start() {
             // Wait one frame for all input receivers to be registered
             yield return null;
@@ -24,6 +44,15 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         protected virtual void OnDisable() {
             DeactivateReceivers();
+        }
+        #endregion
+        ///////////////////////////////////////////////////////////////////////
+        public void RegisterInputReceiver(string key, InputReceiver receiver) { 
+            if (!this.inputReceivers.ContainsKey(key))
+                this.inputReceivers.Add(key, receiver);
+            else
+                this.inputReceivers[key] = receiver;
+            receiver.SetActiveInputs(receiver.IsActiveByDefault);
         }
         private void ActivateReceivers() {
             if (this.inputReceivers.Count > 0)
@@ -47,6 +76,12 @@ namespace PolytopeSolutions.Toolset.Input {
                         receiver.Value.SetTemporarilyActiveInputs(targetState);
                     else
                         receiver.Value.SetTemporarilyActiveInputs(!targetState);
+                }
+        }
+        public void InputReceiverRestoreExclusive() {
+            if (this.inputReceivers.Count > 0)
+                foreach (KeyValuePair<string, InputReceiver> receiver in this.inputReceivers) {
+                    receiver.Value.RestoreFromTemporaryState();
                 }
         }
     }

@@ -60,6 +60,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             }
             return tFound;
         }
+        public static bool IsInLayerMask(this GameObject goItem, LayerMask layerMask) {
+            return (layerMask & (1 << goItem.layer)) != 0;
+        }
 
         public static IEnumerator InvokeNextFrame(Action callback) {
             yield return null;
