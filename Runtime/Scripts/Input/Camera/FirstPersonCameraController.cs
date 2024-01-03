@@ -17,7 +17,9 @@ namespace PolytopeSolutions.Toolset.Input {
 		[SerializeField] private float rotateSpeed = 25f;
 		[SerializeField] private float moveSpeed = 2f;
 
-		private float rotateLeftRightValue;
+        protected virtual Vector3 UpDirection => Vector3.up;
+
+        private float rotateLeftRightValue;
 		private float rotateUpDownValue;
 		private float moveLeftRightValue;
 		private float moveUpDownValue;
@@ -116,7 +118,7 @@ namespace PolytopeSolutions.Toolset.Input {
         private void HandleInputValues() {
             this.tCamera.RotateAround(
 				this.tCamera.position,
-				Vector3.up, 
+				this.UpDirection, 
 				this.rotateLeftRightValue * Time.fixedDeltaTime
 			);
 			this.tCamera.RotateAround(
@@ -126,7 +128,7 @@ namespace PolytopeSolutions.Toolset.Input {
 			);
 			Vector3 direction =
 				- this.tCamera.right * this.moveLeftRightValue +
-				Vector3.up * this.moveUpDownValue +
+                this.UpDirection * this.moveUpDownValue +
 				this.tCamera.forward * this.moveForwardBackwardValue;
 			this.rigidbody.MovePosition(
 				transform.position + direction * Time.fixedDeltaTime

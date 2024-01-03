@@ -62,99 +62,311 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
 
 			return mesh;
 		}
-		
+
+        public struct MeshData {
+            private Vector3[] vertices;
+            private int[] indices;
+            private Vector2[] uvs;
+            private Vector3[] normals;
+
+            public int VertexCount => (this.vertices != null) ? this.vertices.Length : 0;
+            public int IndexCount => (this.indices != null) ? this.indices.Length : 0;
+
+            public UnityEngine.Rendering.IndexFormat IndexFormat => (this.VertexCount > 65535) ?
+                UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
+
+            public MeshData(int vertexCount, int indexCount, 
+                bool allocateUVs = false, bool allocateNormals = false) {
+                this.vertices = new Vector3[vertexCount];
+                this.indices = new int[indexCount];
+                if (allocateUVs)
+                    this.uvs = new Vector2[vertexCount];
+                else
+                    this.uvs = null;
+                if (allocateNormals)
+                    this.normals = new Vector3[vertexCount];
+                else
+                    this.normals = null;
+            }
+            public MeshData(Mesh mesh,
+                bool allocateUVs = false, bool allocateNormals = false) {
+                this.vertices = mesh.vertices;
+                this.indices = mesh.triangles;
+                if (allocateUVs && mesh.uv != null && mesh.uv.Length == mesh.vertexCount)
+                    this.uvs = mesh.uv;
+                else
+                    this.uvs = null;
+                if (allocateNormals && mesh.normals != null && mesh.normals.Length == mesh.vertexCount)
+                    this.normals = mesh.normals;
+                else
+                    this.normals = null;
+            }
+
+            public void SetVertex(int i, Vector3 vertex, Vector2? uv = null, Vector3? normal = null) {
+                if (i < 0 || i >= VertexCount) return;
+                this.vertices[i] = vertex;
+                if (uv != null) this.uvs[i] = uv.Value;
+                if (normal != null) this.normals[i] = normal.Value;
+            }
+            public Vector3 GetVertex(int i) {
+                if (i < 0 || i >= VertexCount) throw new Exception($"InvalidIndex {i}");
+                return this.vertices[i];
+            }
+            public void SetTriangle(int i, int a, int b, int c) { 
+                if (i < 0 || i+2 >= this.IndexCount) return;
+                this.indices[i+0] = a;
+                this.indices[i+1] = b;
+                this.indices[i+2] = c;
+            }
+
+            public void PassData2Mesh(ref Mesh mesh, 
+                bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
+                mesh.indexFormat = this.IndexFormat;
+                mesh.SetVertices(this.vertices);
+                if (this.uvs != null) mesh.SetUVs(0, this.uvs);
+                mesh.SetTriangles(this.indices, 0);
+                if (this.normals != null && computeNormals)
+                    mesh.SetNormals(this.normals);
+                else if (this.normals == null && computeNormals) 
+                    mesh.RecalculateNormals();
+                if (computeBounds) mesh.RecalculateBounds();
+                mesh.MarkModified();
+                mesh.UploadMeshData(isMeshFinal);
+            }
+        }
+
+        // Flat regular grid mesh
+
         // Generates a square regular grid mesh with the specified resolution and size.
         // By default in XY plane, centered at origin, but has Matrix parameter if needs to be modified.
-        public static Mesh RegularSquareGridMesh(int resolution, float size,
+        public static (MeshData meshData, Mesh mesh) FlatSquareGridMesh(int resolution, float size,
             Matrix4x4 modifier = default(Matrix4x4),
             bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
-            return RegularGridMesh(resolution, resolution, size, size,
+            return FlatGridMesh(resolution, resolution, size, size,
                 modifier, computeUVs, computeNormals, computeBounds, isMeshFinal);
         }
         // Generates a regular grid mesh with the specified resolution and size.
         // By default in XY plane, centered at origin, but has Matrix parameter if needs to be modified.
-        public static Mesh RegularGridMesh(int resolutionX, int resolutionY, float sizeX, float sizeY, 
+        public static (MeshData meshData, Mesh mesh) FlatGridMesh(int resolutionX, int resolutionY, float sizeX, float sizeY, 
             Matrix4x4 modifier = default(Matrix4x4), 
             bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
-            if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
             Mesh mesh = new Mesh();
-
+            MeshData meshData = FlatGridMeshData(resolutionX, resolutionY, sizeX, sizeY,
+                modifier, computeUVs, computeNormals);
+            meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
+            return (meshData, mesh);
+        }
+        public static MeshData FlatGridMeshData(int resolutionX, int resolutionY, float sizeX, float sizeY,
+            Matrix4x4 modifier = default(Matrix4x4),
+            bool computeUVs = true, bool computeNormals = true) {
+            
+            if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
+        
             int vertexCount = (resolutionX + 1) * (resolutionY + 1);
             int triangleCount = resolutionX * resolutionY * 2;
+            MeshData meshData = new MeshData(vertexCount, triangleCount*3, computeUVs);
 
-            Vector3[] vertices = new Vector3[vertexCount];
-            Vector2[] uvs = new Vector2[vertexCount];
-            int[] triangles = new int[triangleCount * 3];
             Vector3 bottomLeft = new Vector3(-sizeX / 2, 0, -sizeY / 2);
-
-            for(int y = 0; y <= resolutionY; y++) {
+            for (int y = 0; y <= resolutionY; y++) {
                 for (int x = 0; x <= resolutionX; x++) {
                     int i = x + y * (resolutionX + 1);
                     Vector2 uv = new Vector2(x / (float)resolutionX, y / (float)resolutionY);
-                    vertices[i] = modifier.MultiplyPoint3x4(bottomLeft + 
-                        new Vector3(uv.x*sizeX, 0, uv.y*sizeY));
-                    if (computeUVs) 
-                        uvs[i] = uv;
+                    meshData.SetVertex(i, modifier.MultiplyPoint3x4(bottomLeft +
+                        new Vector3(uv.x * sizeX, 0, uv.y * sizeY)), (computeUVs) ? uv : null);
                 }
             }
             for (int y = 0; y < resolutionY; y++) {
                 for (int x = 0; x < resolutionX; x++) {
                     int i = (x + y * resolutionX) * 6;
-                    triangles[i + 0] = x + y * (resolutionX + 1);
-                    triangles[i + 1] = x + (y + 1) * (resolutionX + 1);
-                    triangles[i + 2] = x + 1 + y * (resolutionX + 1);
-                    triangles[i + 3] = x + 1 + y * (resolutionX + 1);
-                    triangles[i + 4] = x + (y + 1) * (resolutionX + 1);
-                    triangles[i + 5] = x + 1 + (y + 1) * (resolutionX + 1);
+                    meshData.SetTriangle(i,
+                        x + y * (resolutionX + 1),
+                        x + (y + 1) * (resolutionX + 1),
+                        x + 1 + y * (resolutionX + 1));
+                    meshData.SetTriangle(i + 3,
+                        x + 1 + y * (resolutionX + 1),
+                        x + (y + 1) * (resolutionX + 1),
+                        x + 1 + (y + 1) * (resolutionX + 1));
                 }
             }
-            mesh.indexFormat = (vertexCount > 65535) ? 
-                UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
-            mesh.SetVertices(vertices);
-            if (computeUVs) mesh.SetUVs(0, uvs);
-            mesh.SetTriangles(triangles, 0);
-            if (computeNormals) mesh.RecalculateNormals();
-            if (computeBounds) mesh.RecalculateBounds();
-            mesh.UploadMeshData(isMeshFinal);
-            return mesh;
+            return meshData;
         }
-        public static void SetMeshHeights(this Mesh mesh,
-            int meshResolution, Texture2D heightMap,
-            Vector2 heightRange,
-            bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
-            mesh.SetMeshHeights(meshResolution, meshResolution, heightMap, heightRange, 
+
+        // Spherical Mesh Segment
+        public static (MeshData meshData, Mesh mesh) SphericalSquareGridMesh(int resolution,
+            Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
+            Matrix4x4 modifier = default(Matrix4x4),
+            bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
+            return SphericalGridMesh(resolution, resolution, 
+                angleYawRange, anglePitchRange, radius,
+                modifier, computeUVs, computeNormals, computeBounds, isMeshFinal);
+        }
+        public static (MeshData meshData, Mesh mesh) SphericalGridMesh(int resolutionX, int resolutionY,
+            Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
+            Matrix4x4 modifier = default(Matrix4x4),
+            bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
+            Mesh mesh = new Mesh();
+            MeshData meshData = SphericalGridMeshData(resolutionX, resolutionY, 
+                angleYawRange, anglePitchRange, radius,
+                modifier, computeUVs, computeNormals);
+            meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
+            return (meshData, mesh);
+        }
+        public static MeshData SphericalGridMeshData(int resolutionX, int resolutionY,
+            Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
+            Matrix4x4 modifier = default(Matrix4x4),
+            bool computeUVs = true, bool computeNormals = true) {
+
+            if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
+
+            int vertexCount = (resolutionX + 1) * (resolutionY + 1);
+            int triangleCount = resolutionX * resolutionY * 2;
+            MeshData meshData = new MeshData(vertexCount, triangleCount * 3, computeUVs);
+
+            Vector2 bottomLeft = new Vector2(angleYawRange.x, anglePitchRange.x);
+            Vector2 range = new Vector2(angleYawRange.y - angleYawRange.x,
+                anglePitchRange.y - anglePitchRange.x);
+            for (int y = 0; y <= resolutionY; y++) {
+                for (int x = 0; x <= resolutionX; x++) {
+                    int i = x + y * (resolutionX + 1);
+                    Vector2 uv = new Vector2(x / (float)resolutionX, y / (float)resolutionY);
+                    Vector2 angleYawPitch = bottomLeft 
+                        + Vector2.right * range.x * uv.x
+                        + Vector2.up * range.y * uv.y;
+                    Vector3 vertex = Quaternion.AngleAxis(angleYawPitch.x, Vector3.up) *
+                        (Quaternion.AngleAxis(angleYawPitch.y, Vector3.right)
+                        * -Vector3.forward * radius);
+                    meshData.SetVertex(i, modifier.MultiplyPoint3x4(vertex), (computeUVs) ? uv : null);
+                }
+            }
+            for (int y = 0; y < resolutionY; y++) {
+                for (int x = 0; x < resolutionX; x++) {
+                    int i = (x + y * resolutionX) * 6;
+                    meshData.SetTriangle(i,
+                        x + y * (resolutionX + 1),
+                        x + 1 + y * (resolutionX + 1),
+                        x + (y + 1) * (resolutionX + 1)
+                    );
+                    meshData.SetTriangle(i + 3,
+                        x + 1 + y * (resolutionX + 1),
+                        x + 1 + (y + 1) * (resolutionX + 1),
+                        x + (y + 1) * (resolutionX + 1)
+                    );
+                }
+            }
+            return meshData;
+        }
+
+        // Alter mesh heights
+        private static float[] SampleGrayscaleHeightMap(this Texture2D heightMap, int resolutionX, int resolutionY,
+            Vector2 heightRange) {
+            int sampleCount = (resolutionX + 1) * (resolutionY + 1);
+            Color[] heightColors = heightMap.SampleTexture(resolutionX, resolutionY);
+            float[] heights = new float[sampleCount];
+            for (int i = 0; i < sampleCount; i++)
+                heights[i] = Mathf.Lerp(heightRange.x, heightRange.y, heightColors[i].grayscale);
+            return heights;
+        }
+        // - Flat
+        public static void SetFlatSquareGridMeshHeights(this Mesh mesh,
+                int meshResolution, Texture2D heightMap,
+                Vector2 heightRange,
+                Matrix4x4 modifier = default(Matrix4x4),
+                bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
+            mesh.SetFlatGridMeshHeights(meshResolution, meshResolution, heightMap, heightRange,
+                modifier,
                 computeNormals, computeBounds, isMeshFinal);
         }
-        public static void SetMeshHeights(this Mesh mesh, 
-            int meshResolutionX, int meshResolutionY, Texture2D heightMap, 
-            Vector2 heightRange,
-            bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) { 
-            int vertexCount = (meshResolutionX + 1) * (meshResolutionY + 1);
-            if (mesh.vertexCount != vertexCount)
-                throw new Exception("Mesh resolution doesn't match mesh topology.");
-            Color[] heightColors = heightMap.SampleTexture(meshResolutionX, meshResolutionY);
-            float[] heights = new float[vertexCount];
-            for (int i = 0; i < vertexCount; i++)
-                heights[i] = Mathf.Lerp(heightRange.x, heightRange.y, heightColors[i].grayscale);
-            mesh.SetMeshHeights(heights, computeNormals, computeBounds, isMeshFinal);
+        public static void SetFlatGridMeshHeights(this Mesh mesh, 
+                int meshResolutionX, int meshResolutionY, Texture2D heightMap, 
+                Vector2 heightRange,
+                Matrix4x4 modifier = default(Matrix4x4),
+                bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
+            float[] heights = heightMap.SampleGrayscaleHeightMap(meshResolutionX, meshResolutionY, heightRange);
+            mesh.SetFlatGridMeshHeights(heights, modifier, computeNormals, computeBounds, isMeshFinal);
         }
-        public static void SetMeshHeights(this Mesh mesh, float[] heights,
-            bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
-            List<Vector3> vertices = new List<Vector3>();
-            mesh.GetVertices(vertices);
-            if (vertices.Count == 0) 
+        public static void SetFlatGridMeshHeights(this Mesh mesh, float[] heights,
+                Matrix4x4 modifier = default(Matrix4x4),
+                bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
+            MeshData meshData = new MeshData(mesh, allocateNormals: computeNormals);
+            meshData.SetFlatGridMeshDataHeights(heights, modifier);
+            meshData.PassData2Mesh(ref mesh, computeNormals,computeBounds,isMeshFinal);
+        }
+        public static void SetFlatSquareGridMeshDataHeights(this MeshData meshData,
+                int meshResolution, Texture2D heightMap,
+                Vector2 heightRange,
+                Matrix4x4 modifier = default(Matrix4x4)) {
+            meshData.SetFlatGridMeshDataHeights(meshResolution, meshResolution, heightMap, heightRange, modifier);
+        }
+        public static void SetFlatGridMeshDataHeights(this MeshData meshData,
+                int meshResolutionX, int meshResolutionY, Texture2D heightMap,
+                Vector2 heightRange,
+                Matrix4x4 modifier = default(Matrix4x4)) {
+            float[] heights = heightMap.SampleGrayscaleHeightMap(meshResolutionX, meshResolutionY, heightRange);
+            meshData.SetFlatGridMeshDataHeights(heights, modifier);
+        }
+        public static void SetFlatGridMeshDataHeights(this MeshData meshData, float[] heights,
+                Matrix4x4 modifier = default(Matrix4x4)) {
+            if (meshData.VertexCount == 0)
                 throw new Exception("Mesh topology is invalid.");
-            if (vertices.Count != heights.Length)
+            if (meshData.VertexCount != heights.Length)
                 throw new Exception("Mesh and heights must have the same number of vertices.");
 
-            for (int i = 0; i < vertices.Count; i++) {
-                vertices[i] = vertices[i].XZ().ToXZ(heights[i]);
-            }
-            mesh.SetVertices(vertices);
-            if (computeNormals) mesh.RecalculateNormals();
-            if (computeBounds) mesh.RecalculateBounds();
-            mesh.MarkModified();
-            mesh.UploadMeshData(isMeshFinal);
+            if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
+
+            for (int i = 0; i < meshData.VertexCount; i++) 
+                meshData.SetVertex(i, modifier.MultiplyPoint3x4(meshData.GetVertex(i).XZ().ToXZ(heights[i])));
         }
-	}
+
+
+        // - Spherical
+        public static void SetSphericalSquareGridMeshHeights(this Mesh mesh,
+                int meshResolution, Texture2D heightMap,
+                Vector2 heightRange, float radius,
+                Matrix4x4 modifier = default(Matrix4x4),
+                bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
+            mesh.SetSphericalGridMeshHeights(meshResolution, meshResolution, heightMap, heightRange, radius,
+                modifier, computeNormals, computeBounds, isMeshFinal);
+        }
+        public static void SetSphericalGridMeshHeights(this Mesh mesh,
+                int meshResolutionX, int meshResolutionY, Texture2D heightMap,
+                Vector2 heightRange, float radius,
+                Matrix4x4 modifier = default(Matrix4x4),
+                bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
+            float[] heights = heightMap.SampleGrayscaleHeightMap(meshResolutionX, meshResolutionY, heightRange);
+            mesh.SetSphericalGridMeshHeights(heights, radius,
+                modifier, computeNormals, computeBounds, isMeshFinal);
+        }
+        public static void SetSphericalGridMeshHeights(this Mesh mesh, float[] heights, float radius,
+                Matrix4x4 modifier = default(Matrix4x4),
+                bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
+            MeshData meshData = new MeshData(mesh, allocateNormals: computeNormals);
+            meshData.SetSphericalGridMeshDataHeights(heights, radius, modifier);
+            meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
+        }
+        public static void SetSphericalSquareGridMeshDataHeights(this MeshData meshData,
+                int meshResolution, Texture2D heightMap,
+                Vector2 heightRange, float radius,
+                Matrix4x4 modifier = default(Matrix4x4)) {
+            meshData.SetSphericalGridMeshDataHeights(meshResolution, meshResolution, heightMap, heightRange, radius, modifier);
+        }
+        public static void SetSphericalGridMeshDataHeights(this MeshData meshData,
+                int meshResolutionX, int meshResolutionY, Texture2D heightMap,
+                Vector2 heightRange, float radius,
+                Matrix4x4 modifier = default(Matrix4x4)) {
+            float[] heights = heightMap.SampleGrayscaleHeightMap(meshResolutionX, meshResolutionY, heightRange);
+            meshData.SetSphericalGridMeshDataHeights(heights, radius, modifier);
+        }
+        public static void SetSphericalGridMeshDataHeights(this MeshData meshData, float[] heights, float radius,
+                Matrix4x4 modifier = default(Matrix4x4)) {
+            if (meshData.VertexCount == 0)
+                throw new Exception("Mesh topology is invalid.");
+            if (meshData.VertexCount != heights.Length)
+                throw new Exception("Mesh and heights must have the same number of vertices.");
+
+            if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
+
+            for (int i = 0; i < meshData.VertexCount; i++)
+                meshData.SetVertex(i, modifier.MultiplyPoint3x4(meshData.GetVertex(i).normalized * (radius + heights[i])));
+        }
+    }
 }

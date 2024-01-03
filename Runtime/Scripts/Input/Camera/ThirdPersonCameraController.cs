@@ -24,6 +24,8 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] private float rotateSpeed = 25f;
         [SerializeField] private float moveSpeed = 2f;
 
+        protected virtual Vector3 UpDirection => Vector3.up;
+
         private float rotateLeftRightValue;
         private float rotateUpDownValue;
         private float moveLeftRightValue;
@@ -128,7 +130,7 @@ namespace PolytopeSolutions.Toolset.Input {
         private void HandleInputValues() { 
 			this.tCamera.RotateAround(
 				this.tTarget.position,
-				Vector3.up, 
+				this.UpDirection, 
 				this.rotateLeftRightValue * Time.fixedDeltaTime
 			);
             this.tCamera.transform.RotateAround(
@@ -152,8 +154,8 @@ namespace PolytopeSolutions.Toolset.Input {
             // Ensure camera within distance range
             distance = Mathf.Clamp(distance, this.distanceRange.x, this.distanceRange.y);
             // Ensure camera is in correct angular position
-            Vector3 inPlaneNormal = Vector3.Cross(lookDirection, Vector3.up);
-            Vector3 horizontalDirection = Vector3.ProjectOnPlane(lookDirection, Vector3.up);
+            Vector3 inPlaneNormal = Vector3.Cross(lookDirection, this.UpDirection);
+            Vector3 horizontalDirection = Vector3.ProjectOnPlane(lookDirection, this.UpDirection);
             float verticalAngle = Vector3.Angle(horizontalDirection, lookDirection);
             verticalAngle = Mathf.Clamp(verticalAngle, this.verticalAngleRange.x, this.verticalAngleRange.y);
             lookDirection = Quaternion.AngleAxis(-verticalAngle, inPlaneNormal) * horizontalDirection.normalized;

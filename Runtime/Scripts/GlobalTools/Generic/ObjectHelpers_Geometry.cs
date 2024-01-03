@@ -22,6 +22,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         public static Vector2Int FloorToInt(this Vector2 vector) => new Vector2Int(Mathf.FloorToInt(vector.x), Mathf.FloorToInt(vector.y));
         public static Vector2Int CeilToInt(this Vector2 vector) => new Vector2Int(Mathf.CeilToInt(vector.x), Mathf.CeilToInt(vector.y));
         public static Vector2Int RoundToInt(this Vector2 vector) => new Vector2Int(Mathf.RoundToInt(vector.x), Mathf.RoundToInt(vector.y));
+        public static Vector3Int FloorToInt(this Vector3 vector) => new Vector3Int(Mathf.FloorToInt(vector.x), Mathf.FloorToInt(vector.y), Mathf.FloorToInt(vector.z));
+        public static Vector3Int CeilToInt(this Vector3 vector) => new Vector3Int(Mathf.CeilToInt(vector.x), Mathf.CeilToInt(vector.y), Mathf.FloorToInt(vector.z));
+        public static Vector3Int RoundToInt(this Vector3 vector) => new Vector3Int(Mathf.RoundToInt(vector.x), Mathf.RoundToInt(vector.y), Mathf.FloorToInt(vector.z));
 
         public static Vector2 XY(this Vector3 vector) => new Vector2(vector.x, vector.y);
         public static Vector2 YX(this Vector3 vector) => new Vector2(vector.y, vector.x);

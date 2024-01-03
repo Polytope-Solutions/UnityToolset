@@ -2,6 +2,21 @@
 
 ---
 
+## 0.0.26
+
+2024-01-03
+
+-	Create Mesh Data struct to transition generation to separate threads and allow to split mesh preparation and uploading to GPU;
+-	Split Regular Grid Mesh generation and add versions working with MeshData;
+-	Create Spherical Grid Mesh generation and add Height Setting relative to orientation from 0;
+-	Add optional matrix modifier for height setting;
+-	Rewrite geoconverters to reference result holder to minimize temporary variable generation;
+-	Add spherical coordinate converters;
+-	Unify Geo converters to work with Vector3s and Vector3Ints for indicies;
+-	Allow camera controllers to override Up direction.
+
+---
+
 ## 0.0.25
 
 2023-12-15
@@ -94,7 +109,8 @@
 2023-11-13
 
 -	Fix Scene loading for builds (didn't waot enough time to load scene before setting it active);
--	Redo Geography converters: 		-	Switch to fractional tile indices encoding UVs directly;
+-	Redo Geography converters: 	
+	-	Switch to fractional tile indices encoding UVs directly;
 	-	Simplify and minimize cross calls;
 	-	Improve precision;
 
@@ -105,7 +121,8 @@
 2023-11-10
 
 -	Fix Third Person Camera Controller to not allow rig to zoom out pushing the target;
--	Extend Scene Manager Extender:	-	Add OnSceneLoaded and OnSceneUnloaded events;
+-	Extend Scene Manager Extender:
+	-	Add OnSceneLoaded and OnSceneUnloaded events;
 	-	Make loading scene additive - for smooth transitioning;
 	-	Make unloading old scene asyncronous;
 -	Add Loading Scene camera Preset;
