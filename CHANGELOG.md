@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.27.3
+
+2024-01-05
+
+-	Create Vector3Double struct;
+-	Switch all geohelpers to Vector3Double;
+
+---
+
 ## 0.0.27.2
 
 2024-01-05

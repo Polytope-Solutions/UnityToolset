@@ -27,5 +27,11 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 		public static float Fraction(this float value) {
             return (float)((decimal)value % 1);
         }
-	}
+        public static double FlipReference(this double value) {
+            return value + 1 - 2 * value.Fraction();
+        }
+        public static double Fraction(this double value) {
+            return (double)((decimal)value % 1);
+        }
+    }
 }
