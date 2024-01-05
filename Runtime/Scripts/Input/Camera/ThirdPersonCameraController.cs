@@ -34,11 +34,11 @@ namespace PolytopeSolutions.Toolset.Input {
 
         ///////////////////////////////////////////////////////////////////////
         #region UNITY_FUNCTIONS
-        private void FixedUpdate() {
+        protected virtual void FixedUpdate() {
             HandleInputValues();
             ConstrainCameraToTraget();
         }
-        private void OnDrawGizmos() {
+        protected virtual void OnDrawGizmos() {
             if (this.tCamera == null || this.tTarget == null) return;
             Gizmos.color = Color.red;
             Gizmos.DrawLine(this.tCamera.position, this.tTarget.position);
@@ -127,7 +127,8 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         #endregion
         ///////////////////////////////////////////////////////////////////////
-        private void HandleInputValues() { 
+        private void HandleInputValues() {
+            transform.up = this.UpDirection;
 			this.tCamera.RotateAround(
 				this.tTarget.position,
 				this.UpDirection, 

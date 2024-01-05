@@ -27,7 +27,7 @@ namespace PolytopeSolutions.Toolset.Input {
 
         ///////////////////////////////////////////////////////////////////////
         #region UNITY_FUNCTIONS
-		private void FixedUpdate() {
+        protected virtual void FixedUpdate() {
 			HandleInputValues();
         }
         #endregion
@@ -116,6 +116,7 @@ namespace PolytopeSolutions.Toolset.Input {
         #endregion
         ///////////////////////////////////////////////////////////////////////
         private void HandleInputValues() {
+            transform.up = this.UpDirection;
             this.tCamera.RotateAround(
 				this.tCamera.position,
 				this.UpDirection, 

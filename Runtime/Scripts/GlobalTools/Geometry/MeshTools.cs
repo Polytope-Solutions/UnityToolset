@@ -141,24 +141,24 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         // By default in XY plane, centered at origin, but has Matrix parameter if needs to be modified.
         public static (MeshData meshData, Mesh mesh) FlatSquareGridMesh(int resolution, float size,
             Matrix4x4 modifier = default(Matrix4x4),
-            bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
+            bool orientUpwards = true, bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             return FlatGridMesh(resolution, resolution, size, size,
-                modifier, computeUVs, computeNormals, computeBounds, isMeshFinal);
+                modifier, orientUpwards, computeUVs, computeNormals, computeBounds, isMeshFinal);
         }
         // Generates a regular grid mesh with the specified resolution and size.
         // By default in XY plane, centered at origin, but has Matrix parameter if needs to be modified.
         public static (MeshData meshData, Mesh mesh) FlatGridMesh(int resolutionX, int resolutionY, float sizeX, float sizeY, 
-            Matrix4x4 modifier = default(Matrix4x4), 
-            bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
+            Matrix4x4 modifier = default(Matrix4x4),
+            bool orientUpwards = true, bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             Mesh mesh = new Mesh();
             MeshData meshData = FlatGridMeshData(resolutionX, resolutionY, sizeX, sizeY,
-                modifier, computeUVs, computeNormals);
+                modifier, orientUpwards, computeUVs, computeNormals);
             meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
             return (meshData, mesh);
         }
         public static MeshData FlatGridMeshData(int resolutionX, int resolutionY, float sizeX, float sizeY,
             Matrix4x4 modifier = default(Matrix4x4),
-            bool computeUVs = true, bool computeNormals = true) {
+            bool orientUpwards = true, bool computeUVs = true, bool computeNormals = true) {
             
             if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
         
@@ -178,14 +178,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             for (int y = 0; y < resolutionY; y++) {
                 for (int x = 0; x < resolutionX; x++) {
                     int i = (x + y * resolutionX) * 6;
-                    meshData.SetTriangle(i,
-                        x + y * (resolutionX + 1),
-                        x + (y + 1) * (resolutionX + 1),
-                        x + 1 + y * (resolutionX + 1));
-                    meshData.SetTriangle(i + 3,
-                        x + 1 + y * (resolutionX + 1),
-                        x + (y + 1) * (resolutionX + 1),
-                        x + 1 + (y + 1) * (resolutionX + 1));
+                    int a = x + y * (resolutionX + 1),
+                        b = x + (y + 1) * (resolutionX + 1),
+                        c = x + 1 + y * (resolutionX + 1),
+                        d = x + 1 + (y + 1) * (resolutionX + 1);
+                    meshData.SetTriangle(i, a, (orientUpwards) ? b : c, (orientUpwards) ? c : b);
+                    meshData.SetTriangle(i + 3, c, (orientUpwards) ? b : d, (orientUpwards) ? d : b);
                 }
             }
             return meshData;
@@ -195,26 +193,26 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         public static (MeshData meshData, Mesh mesh) SphericalSquareGridMesh(int resolution,
             Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
             Matrix4x4 modifier = default(Matrix4x4),
-            bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
+            bool orientOutwards = true, bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             return SphericalGridMesh(resolution, resolution, 
                 angleYawRange, anglePitchRange, radius,
-                modifier, computeUVs, computeNormals, computeBounds, isMeshFinal);
+                modifier, orientOutwards, computeUVs, computeNormals, computeBounds, isMeshFinal);
         }
         public static (MeshData meshData, Mesh mesh) SphericalGridMesh(int resolutionX, int resolutionY,
             Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
-            Matrix4x4 modifier = default(Matrix4x4),
-            bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
+            Matrix4x4 modifier = default(Matrix4x4), 
+            bool orientOutwards = true, bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             Mesh mesh = new Mesh();
             MeshData meshData = SphericalGridMeshData(resolutionX, resolutionY, 
                 angleYawRange, anglePitchRange, radius,
-                modifier, computeUVs, computeNormals);
+                modifier, orientOutwards, computeUVs, computeNormals);
             meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
             return (meshData, mesh);
         }
         public static MeshData SphericalGridMeshData(int resolutionX, int resolutionY,
             Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
             Matrix4x4 modifier = default(Matrix4x4),
-            bool computeUVs = true, bool computeNormals = true) {
+            bool orientOutwards = true, bool computeUVs = true, bool computeNormals = true) {
 
             if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
 
@@ -232,7 +230,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                     Vector2 angleYawPitch = bottomLeft 
                         + Vector2.right * range.x * uv.x
                         + Vector2.up * range.y * uv.y;
-                    Vector3 vertex = Quaternion.AngleAxis(angleYawPitch.x, Vector3.up) *
+                    Vector3 vertex = Quaternion.AngleAxis(-angleYawPitch.x, Vector3.up) *
                         (Quaternion.AngleAxis(angleYawPitch.y, Vector3.right)
                         * -Vector3.forward * radius);
                     meshData.SetVertex(i, modifier.MultiplyPoint3x4(vertex), (computeUVs) ? uv : null);
@@ -241,16 +239,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             for (int y = 0; y < resolutionY; y++) {
                 for (int x = 0; x < resolutionX; x++) {
                     int i = (x + y * resolutionX) * 6;
-                    meshData.SetTriangle(i,
-                        x + y * (resolutionX + 1),
-                        x + 1 + y * (resolutionX + 1),
-                        x + (y + 1) * (resolutionX + 1)
-                    );
-                    meshData.SetTriangle(i + 3,
-                        x + 1 + y * (resolutionX + 1),
-                        x + 1 + (y + 1) * (resolutionX + 1),
-                        x + (y + 1) * (resolutionX + 1)
-                    );
+                    int a = x + y * (resolutionX + 1),
+                        b = x + (y + 1) * (resolutionX + 1),
+                        c = x + 1 + y * (resolutionX + 1),
+                        d = x + 1 + (y + 1) * (resolutionX + 1);
+                    meshData.SetTriangle(i, a, (orientOutwards) ? b : c, (orientOutwards) ? c : b);
+                    meshData.SetTriangle(i + 3, c, (orientOutwards) ? b : d, (orientOutwards) ? d : b);
                 }
             }
             return meshData;

@@ -2,6 +2,18 @@
 
 ---
 
+## 0.0.27
+
+2024-01-05
+
+-	Fix spherical mesh generation orientation inversion;
+-	Add option to flip faces of generated meshes;
+-	Add a default Loading Scene;
+-	Fix missing default action for object interactor input receiver;
+-	Orient Camera controllers to up direction and expose overriden Unity Functions;
+
+---
+
 ## 0.0.26
 
 2024-01-03
