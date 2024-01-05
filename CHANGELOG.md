@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.27.1
+
+2024-01-05
+
+-	Try fix third person camera controller orientation calculations for a general case.
+
+---
+
 ## 0.0.27
 
 2024-01-05

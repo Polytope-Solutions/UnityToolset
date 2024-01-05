@@ -139,11 +139,13 @@ namespace PolytopeSolutions.Toolset.Input {
                 this.tCamera.right,
                 this.rotateUpDownValue * Time.fixedDeltaTime
             );
+            Vector3 localForward = Vector3.Cross(this.UpDirection, this.tCamera.right);
             Vector3 directionHorizontal =
                 -this.tCamera.right * this.moveLeftRightValue +
-                this.tCamera.forward.XZ().ToXZ().normalized * this.moveForwardBackwardValue;
+                localForward.normalized * this.moveForwardBackwardValue;
+            Vector3 targetDirection = this.tCamera.position - this.tTarget.position;
             Vector3 directionInRig =
-                this.tCamera.forward * this.moveZoomInOutValue;
+                targetDirection.normalized * this.moveZoomInOutValue;
             this.rigidbody.MovePosition(
                 transform.position + directionHorizontal * Time.fixedDeltaTime
             );
