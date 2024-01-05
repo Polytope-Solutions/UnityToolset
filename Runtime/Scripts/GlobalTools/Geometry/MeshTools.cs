@@ -192,28 +192,29 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         // Spherical Mesh Segment
         public static (MeshData meshData, Mesh mesh) SphericalSquareGridMesh(int resolution,
             Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
-            Matrix4x4 modifier = default(Matrix4x4),
+            Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
             bool orientOutwards = true, bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             return SphericalGridMesh(resolution, resolution, 
                 angleYawRange, anglePitchRange, radius,
-                modifier, orientOutwards, computeUVs, computeNormals, computeBounds, isMeshFinal);
+                center, modifier, orientOutwards, computeUVs, computeNormals, computeBounds, isMeshFinal);
         }
         public static (MeshData meshData, Mesh mesh) SphericalGridMesh(int resolutionX, int resolutionY,
             Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
-            Matrix4x4 modifier = default(Matrix4x4), 
+            Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4), 
             bool orientOutwards = true, bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             Mesh mesh = new Mesh();
             MeshData meshData = SphericalGridMeshData(resolutionX, resolutionY, 
                 angleYawRange, anglePitchRange, radius,
-                modifier, orientOutwards, computeUVs, computeNormals);
+                center, modifier, orientOutwards, computeUVs, computeNormals);
             meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
             return (meshData, mesh);
         }
         public static MeshData SphericalGridMeshData(int resolutionX, int resolutionY,
             Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
-            Matrix4x4 modifier = default(Matrix4x4),
+            Vector3 center=default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
             bool orientOutwards = true, bool computeUVs = true, bool computeNormals = true) {
 
+            if (center == default(Vector3)) center = Vector3.zero;
             if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
 
             int vertexCount = (resolutionX + 1) * (resolutionY + 1);
@@ -230,7 +231,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                     Vector2 angleYawPitch = bottomLeft 
                         + Vector2.right * range.x * uv.x
                         + Vector2.up * range.y * uv.y;
-                    Vector3 vertex = Quaternion.AngleAxis(-angleYawPitch.x, Vector3.up) *
+                    Vector3 vertex = center + Quaternion.AngleAxis(-angleYawPitch.x, Vector3.up) *
                         (Quaternion.AngleAxis(angleYawPitch.y, Vector3.right)
                         * -Vector3.forward * radius);
                     meshData.SetVertex(i, modifier.MultiplyPoint3x4(vertex), (computeUVs) ? uv : null);
@@ -316,42 +317,42 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         public static void SetSphericalSquareGridMeshHeights(this Mesh mesh,
                 int meshResolution, Texture2D heightMap,
                 Vector2 heightRange, float radius,
-                Matrix4x4 modifier = default(Matrix4x4),
+                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
             mesh.SetSphericalGridMeshHeights(meshResolution, meshResolution, heightMap, heightRange, radius,
-                modifier, computeNormals, computeBounds, isMeshFinal);
+                center, modifier, computeNormals, computeBounds, isMeshFinal);
         }
         public static void SetSphericalGridMeshHeights(this Mesh mesh,
                 int meshResolutionX, int meshResolutionY, Texture2D heightMap,
                 Vector2 heightRange, float radius,
-                Matrix4x4 modifier = default(Matrix4x4),
+                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
             float[] heights = heightMap.SampleGrayscaleHeightMap(meshResolutionX, meshResolutionY, heightRange);
             mesh.SetSphericalGridMeshHeights(heights, radius,
-                modifier, computeNormals, computeBounds, isMeshFinal);
+                center, modifier, computeNormals, computeBounds, isMeshFinal);
         }
         public static void SetSphericalGridMeshHeights(this Mesh mesh, float[] heights, float radius,
-                Matrix4x4 modifier = default(Matrix4x4),
+                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
             MeshData meshData = new MeshData(mesh, allocateNormals: computeNormals);
-            meshData.SetSphericalGridMeshDataHeights(heights, radius, modifier);
+            meshData.SetSphericalGridMeshDataHeights(heights, radius, center, modifier);
             meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
         }
         public static void SetSphericalSquareGridMeshDataHeights(this MeshData meshData,
                 int meshResolution, Texture2D heightMap,
                 Vector2 heightRange, float radius,
-                Matrix4x4 modifier = default(Matrix4x4)) {
-            meshData.SetSphericalGridMeshDataHeights(meshResolution, meshResolution, heightMap, heightRange, radius, modifier);
+                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4)) {
+            meshData.SetSphericalGridMeshDataHeights(meshResolution, meshResolution, heightMap, heightRange, radius, center, modifier);
         }
         public static void SetSphericalGridMeshDataHeights(this MeshData meshData,
                 int meshResolutionX, int meshResolutionY, Texture2D heightMap,
                 Vector2 heightRange, float radius,
-                Matrix4x4 modifier = default(Matrix4x4)) {
+                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4)) {
             float[] heights = heightMap.SampleGrayscaleHeightMap(meshResolutionX, meshResolutionY, heightRange);
-            meshData.SetSphericalGridMeshDataHeights(heights, radius, modifier);
+            meshData.SetSphericalGridMeshDataHeights(heights, radius, center, modifier);
         }
         public static void SetSphericalGridMeshDataHeights(this MeshData meshData, float[] heights, float radius,
-                Matrix4x4 modifier = default(Matrix4x4)) {
+                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4)) {
             if (meshData.VertexCount == 0)
                 throw new Exception("Mesh topology is invalid.");
             if (meshData.VertexCount != heights.Length)
@@ -360,7 +361,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
 
             for (int i = 0; i < meshData.VertexCount; i++)
-                meshData.SetVertex(i, modifier.MultiplyPoint3x4(meshData.GetVertex(i).normalized * (radius + heights[i])));
+                meshData.SetVertex(i, modifier.MultiplyPoint3x4(
+                    center + (meshData.GetVertex(i) - center).normalized * (radius + heights[i])));
         }
     }
 }

@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.27.2
+
+2024-01-05
+
+-	Fix moving forward backward flip for the third person controller;
+-	Account for center offset for Spherical mesh generation and geo Converters;
+
+---
+
 ## 0.0.27.1
 
 2024-01-05
