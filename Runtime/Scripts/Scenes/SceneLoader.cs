@@ -6,15 +6,15 @@ using PolytopeSolutions.Toolset.GlobalTools.Types;
 
 namespace PolytopeSolutions.Toolset.Scenes {
     public class SceneLoader : MonoBehaviour {
-        [SerializeField] private string sceneName;
-        [SerializeField] private bool skipLoadingScene = false;
-        [SerializeField] private bool autoloadOnStart = false;
+        [SerializeField] protected string sceneName;
+        [SerializeField] protected bool skipLoadingScene = false;
+        [SerializeField] protected bool autoloadOnStart = false;
 
-        private void Start() {
+        protected virtual void Start() {
             if (this.autoloadOnStart)
                 LoadScene();
         }
-        public void LoadScene() {
+        public virtual void LoadScene() {
             SceneManagerExtender.Instance?.LoadScene(this.sceneName, this.skipLoadingScene);
         }
     }

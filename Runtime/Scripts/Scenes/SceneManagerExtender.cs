@@ -19,16 +19,19 @@ namespace PolytopeSolutions.Toolset.Scenes {
         [SerializeField] private string loaderSceneName;
         [SerializeField] private float smoothTransitionTime = 0.5f;
         [SerializeField] private float minWaitTime = 2f;
-        private Coroutine currentLoadingProcess;
+        private Coroutine currentLoadingProcess, addingSceneProcess;
         private float smoothLoadingAnimateInProgress;
         public float SmoothLoadingAnimateInProgress => this.smoothLoadingAnimateInProgress;
         public float LoadingProgress { get; private set; }
         private void UpdateProgress(float t) {
             this.LoadingProgress = t;
         }
+        public bool IsTransitioning => this.currentLoadingProcess != null;
 
         public string PreviousSceneName { get; private set; }
         public string CurrentSceneName { get; private set; }
+        private List<string> addedSceneNames = new List<string>();
+        public List<string> AddedSceneNames => this.addedSceneNames;
 
         public Scene ActiveScene => SceneManager.GetActiveScene();
         public string ActiveSceneName => this.ActiveScene.name;
@@ -36,6 +39,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
         public delegate IEnumerator SceneSetUpCoroutine(int currentOperationIndex, int operationCount, Action<float> updateProgress);
         private Dictionary<string, Dictionary<string, SceneSetUpCoroutine>> OnSceneSetup = new Dictionary<string, Dictionary<string, SceneSetUpCoroutine>>();
         private Dictionary<string, Dictionary<string, Action>> OnAfterSceneLoaded = new Dictionary<string, Dictionary<string, Action>>();
+        private Dictionary<string, Dictionary<string, Action<string>>> OnAfterSceneActivated = new Dictionary<string, Dictionary<string, Action<string>>>();
         private Dictionary<string, Dictionary<string, Action>> OnBeforeSceneUnloaded = new Dictionary<string, Dictionary<string, Action>>();
         
         public void RegisterSingletonOnSceneSetupEvent(string sceneName, string source, SceneSetUpCoroutine sceneEvent) { 
@@ -54,6 +58,14 @@ namespace PolytopeSolutions.Toolset.Scenes {
             else
                 this.OnAfterSceneLoaded[sceneName][source] = sceneEvent;
         }
+        public void RegisterSingletonOnAfterSceneActivatedEvent(string sceneName, string source, Action<string> sceneEvent) {
+            if (!this.OnAfterSceneActivated.ContainsKey(sceneName))
+                this.OnAfterSceneActivated.Add(sceneName, new Dictionary<string, Action<string>>());
+            if (!this.OnAfterSceneActivated[sceneName].ContainsKey(source))
+                this.OnAfterSceneActivated[sceneName].Add(source, sceneEvent);
+            else
+                this.OnAfterSceneActivated[sceneName][source] = sceneEvent;
+        }
         public void RegisterSingletonOnBeforeSceneUnloadedEvent(string sceneName, string source, Action sceneEvent) {
             if (!this.OnBeforeSceneUnloaded.ContainsKey(sceneName))
                 this.OnBeforeSceneUnloaded.Add(sceneName, new Dictionary<string, Action>());
@@ -70,6 +82,10 @@ namespace PolytopeSolutions.Toolset.Scenes {
         public void UnregisterSingletonOnAfterSceneLoadedEvent(string sceneName, string source) {
             if (this.OnAfterSceneLoaded.ContainsKey(sceneName) && this.OnAfterSceneLoaded[sceneName].ContainsKey(source))
                 this.OnAfterSceneLoaded[sceneName].Remove(source);
+        }
+        public void UnregisterSingletonOnAfterSceneActivatedEvent(string sceneName, string source) {
+            if (this.OnAfterSceneActivated.ContainsKey(sceneName) && this.OnAfterSceneActivated[sceneName].ContainsKey(source))
+                this.OnAfterSceneActivated[sceneName].Remove(source);
         }
         public void UnregisterSingletonOnBeforeSceneUnloadedEvent(string sceneName, string source){
             if (this.OnBeforeSceneUnloaded.ContainsKey(sceneName) && this.OnBeforeSceneUnloaded[sceneName].ContainsKey(source))
@@ -88,8 +104,56 @@ namespace PolytopeSolutions.Toolset.Scenes {
             if (this.ActiveSceneName != sceneName) {
                 if (this.currentLoadingProcess != null) StopCoroutine(this.currentLoadingProcess);
                 this.currentLoadingProcess = StartCoroutine(LoadSceneCoroutine(sceneName, skipLoadingScene));
+            } else if (this.addedSceneNames.Contains(sceneName)) {
+
             }
         }
+        public void AddScene(string sceneName) {
+            if (this.addingSceneProcess != null) {
+                this.LogError("Already adding a scene. Wait for it to complete");
+                return;
+            }
+
+            if (!this.addedSceneNames.Contains(sceneName) && this.ActiveSceneName != sceneName)
+                this.addingSceneProcess = StartCoroutine(AddSceneCoroutine(sceneName));
+            else
+                this.LogWarning($"Scene {sceneName} is already added");
+        }
+        public void RemoveScene(string sceneName) {
+            // TODO
+        }
+        private IEnumerator AddSceneCoroutine(string sceneName) {
+            int currentOperationIndex = 0, operationCount = 2;
+            int extraOperations = (this.OnSceneSetup.ContainsKey(sceneName)) ?
+                this.OnSceneSetup[sceneName].Count : 0;
+            DateTime startTime = DateTime.Now;
+
+            AsyncOperation newSceneLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            newSceneLoad.allowSceneActivation = false;
+            // - Wait until the next scene fully loads asynchronously.
+            yield return AwaitSceneAsyncOperation(newSceneLoad,
+                currentOperationIndex, operationCount);
+            currentOperationIndex++;
+            yield return LoadNewScene(sceneName, startTime,
+                currentOperationIndex, operationCount);
+            currentOperationIndex += extraOperations;
+            newSceneLoad.allowSceneActivation = true;
+            this.addedSceneNames.Add(sceneName);
+            #if DEBUG2
+            this.Log($"New scene added.");
+            #endif
+            this.addingSceneProcess = null;
+        }
+        public void MoveGameObjectToAddedScene(string sceneName, GameObject goItem) {
+            if (!this.addedSceneNames.Contains(sceneName)) {
+                this.LogError("Scene is not present");
+                return;
+            }
+            Scene targetScene = SceneManager.GetSceneByName(sceneName);
+            SceneManager.MoveGameObjectToScene(goItem, targetScene);
+        }
+
+        protected virtual bool IsSceneReady(string scene) => true;
         private IEnumerator LoadSceneCoroutine(string sceneName, bool skipLoadingScene) {
             if (this.ActiveScene == null)
                 yield return ActivateScene(this.CurrentSceneName);
@@ -101,6 +165,9 @@ namespace PolytopeSolutions.Toolset.Scenes {
             this.LoadingProgress = 0f;
             int currentOperationIndex = 0;
             List<string> currentSceneNames = GetLoadedSceneNames();
+            this.addedSceneNames.ForEach(addedSceneName => {
+                if (currentSceneNames.Contains(addedSceneName)) currentSceneNames.Remove(addedSceneName);
+            });
             int extraOperations = (this.OnSceneSetup.ContainsKey(sceneName)) ?
                 this.OnSceneSetup[sceneName].Count : 0;
             int operationCount = 2              // Load New, Unload Current Assets
@@ -148,12 +215,17 @@ namespace PolytopeSolutions.Toolset.Scenes {
             // - Launch new scene loading and pause it's activation until complete.
             AsyncOperation newSceneLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
             newSceneLoad.allowSceneActivation = false;
-            yield return LoadNewScene(newSceneLoad, sceneName, startTime,
+            // - Wait until the next scene fully loads asynchronously.
+            yield return AwaitSceneAsyncOperation(newSceneLoad,
                 currentOperationIndex, operationCount);
-            currentOperationIndex += 1 + extraOperations;
+            currentOperationIndex++;
+            yield return LoadNewScene(sceneName, startTime,
+                currentOperationIndex, operationCount);
+            currentOperationIndex += extraOperations;
             #if DEBUG2
             this.Log($"New scene loaded.");
             #endif
+            yield return WaitForSceneReady(sceneName);
             // - Wait for the remaining minimum wait time if relevant.
             float waitTime = (skipLoadingScene) ? 0f :
                 Mathf.Max(0, this.minWaitTime - (float)(DateTime.Now - startTime).TotalSeconds - this.smoothTransitionTime * 2);
@@ -199,6 +271,12 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 this.Log($"Unloaded assets.");
                 #endif
             }
+            // - Trigger OnScene Activated events
+            yield return null;
+            if (this.OnAfterSceneActivated.ContainsKey(sceneName))
+                this.OnAfterSceneActivated[sceneName].Values.ToList().ForEach(item => item?.Invoke(sceneName));
+            if (this.OnAfterSceneActivated.ContainsKey("*"))
+                this.OnAfterSceneActivated["*"].Values.ToList().ForEach(item => item?.Invoke(sceneName));
             // 6. Reset loading coroutine.
             this.currentLoadingProcess = null;
             #if DEBUG
@@ -248,15 +326,18 @@ namespace PolytopeSolutions.Toolset.Scenes {
             }
             this.LoadingProgress = progressTargetRange.y;
         }
-        private IEnumerator LoadNewScene(AsyncOperation newSceneLoad, string sceneName, DateTime startTime,
+        private IEnumerator WaitForSceneReady(string sceneName) {
+            while (!IsSceneReady(sceneName)) {
+                yield return null;
+            }
+        }
+        private IEnumerator LoadNewScene(string sceneName, DateTime startTime,
                 int currentOperationIndex, int operationCount) {
-            // - Wait until the next scene fully loads asynchronously.
-            yield return AwaitSceneAsyncOperation(newSceneLoad, 
-                currentOperationIndex, operationCount);
-            currentOperationIndex++;
             // - Trigger OnScene Loaded events
             if (this.OnAfterSceneLoaded.ContainsKey(sceneName))
                 this.OnAfterSceneLoaded[sceneName].Values.ToList().ForEach(item => item?.Invoke());
+            if (this.OnAfterSceneLoaded.ContainsKey("*"))
+                this.OnAfterSceneLoaded["*"].Values.ToList().ForEach(item => item?.Invoke());
             yield return null;
             // - Wait for setup events to finish
             if (this.OnSceneSetup.ContainsKey(sceneName)) { 
@@ -267,24 +348,36 @@ namespace PolytopeSolutions.Toolset.Scenes {
                     yield return setupCoroutine.Value(currentOperationIndex, operationCount, UpdateProgress);
                     currentOperationIndex++;
                 }
-                #if DEBUG2
-                this.Log($"Setup coroutines finished");
-                #endif
             }
+            if (this.OnSceneSetup.ContainsKey("*")) { 
+                foreach (KeyValuePair<string, SceneSetUpCoroutine> setupCoroutine in this.OnSceneSetup["*"]) { 
+                    #if DEBUG2
+                    this.Log($"Executing setup coroutine: {setupCoroutine.Key}");
+                    #endif
+                    yield return setupCoroutine.Value(currentOperationIndex, operationCount, UpdateProgress);
+                    currentOperationIndex++;
+                }
+            }
+            #if DEBUG2
+            this.Log($"Setup coroutines finished");
+            #endif
         }
         private void BeforeSceneUnload(string oldSceneName) {
             // - Trigger OnBeforeSceneUnloaded events
             if (this.OnBeforeSceneUnloaded.ContainsKey(oldSceneName))
                 this.OnBeforeSceneUnloaded[oldSceneName].Values.ToList().ForEach(item => item?.Invoke());
+            if (this.OnBeforeSceneUnloaded.ContainsKey("*"))
+                this.OnBeforeSceneUnloaded["*"].Values.ToList().ForEach(item => item?.Invoke());
         }
         private IEnumerator UnloadOldScenes(List<string> currentScenes, int currentOperationIndex, int operationCount) {
-            foreach (string oldSceneName in currentScenes) { 
+            foreach (string oldSceneName in currentScenes) {
+                if (this.addedSceneNames.Contains(oldSceneName)) continue;
                 // - Trigger OnBeforeSceneUnloaded events
                 BeforeSceneUnload(oldSceneName);
                 // - Unload the old scene
                 // (NB! after loading loading scene as unloading can't happen without any scenes)
                 AsyncOperation oldSceneUnload = SceneManager.UnloadSceneAsync(oldSceneName);
-                yield return UnloadOldScene(oldSceneUnload, oldSceneName, 
+                yield return UnloadOldScene(oldSceneUnload, oldSceneName,
                     currentOperationIndex, operationCount);
                 currentOperationIndex++;
                 #if DEBUG2

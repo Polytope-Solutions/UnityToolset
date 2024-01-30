@@ -2,6 +2,23 @@
 
 ---
 
+## 0.0.28
+
+2024-01-30
+
+-	Expand Scene Loading Manager:
+	-	allow for additive scene in the process;
+	-	add transitioning check;
+	-	add on after scene activated callbacks;
+	-	add support to '*' scene callback subscription for any scene;
+	-	add object transitioning support between scenes;
+	-	add overridable SceneReady check;
+	-	split new scene loading and callbacks;
+-	Make Scene Loader protected to be able to override it;
+-	Make Default loading scene canvas last in order to always be on top.
+
+---
+
 ## 0.0.27.3
 
 2024-01-05
