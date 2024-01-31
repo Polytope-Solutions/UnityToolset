@@ -7,7 +7,90 @@ using System.Linq;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 	public static partial class ObjectHelpers {
-		public static int NextWeightedIndex(this System.Random randomizer, List<float> weights) {
+        public abstract class MinMaxArray <T> {
+            [SerializeField] protected T[] min;
+            [SerializeField] protected T[] max;
+            protected int dimensionSize;
+            public bool IsMatchingDimension(int _dimension) => this.dimensionSize == _dimension;
+            public bool IsValidIndex(int _dimension) => _dimension < this.dimensionSize;
+            protected abstract T MinValue { get; }
+            protected abstract T MaxValue { get; }
+            protected abstract T DefaultInvalidValue { get; }
+            protected abstract T Difference(T _value1, T _value2);
+            protected abstract T Min(T _value1, T _value2);
+            protected abstract T Max(T _value1, T _value2);
+            protected abstract float NormalizedValue(T _min, T _max, T _value);
+            public T Min(int _dimension) => this.IsValidIndex(_dimension) ? this.min[_dimension] : this.DefaultInvalidValue;
+            public T Max(int _dimension) => this.IsValidIndex(_dimension) ? this.max[_dimension] : this.DefaultInvalidValue;
+            public T[] Range {
+                get {
+                    T[] size = new T[this.dimensionSize];
+                    for (int i = 0; i < this.dimensionSize; i++) {
+                        size[i] = this.Difference(this.max[i], this.min[i]);
+                    }
+                    return size;
+                }
+            }
+            public MinMaxArray(int _dimensionSize) {
+                this.dimensionSize = _dimensionSize;
+                this.min = new T[_dimensionSize];
+                this.max = new T[_dimensionSize];
+                for (int i = 0; i < _dimensionSize; i++) {
+                    this.min[i] = this.MaxValue;
+                    this.max[i] = this.MinValue;
+                }
+            }
+            public void Update(T[] values) {
+                if (!this.IsMatchingDimension(values.Length)) return;
+                for (int i = 0; i < this.dimensionSize; i++) {
+                    this.min[i] = this.Min(this.min[i], values[i]);
+                    this.max[i] = this.Max(this.max[i], values[i]);
+                }
+            }
+
+            public override string ToString() {
+                return $"Min:[{string.Join(",", this.min)}],Max[{string.Join(",", this.max)}]";
+            }
+            public float[] Evaluate(T[] values) {
+                if (!this.IsMatchingDimension(values.Length)) return null;
+                float[] normalizedValues = new float[this.dimensionSize];
+                for (int i = 0; i < this.dimensionSize; i++) {
+                    normalizedValues[i] = Evaluate(i, values[i]);
+                }
+                return normalizedValues;
+            }
+            public float Evaluate(int dimension, T value) {
+                float normalizedValue = -1f;
+                if (!this.IsMatchingDimension(dimension)) return normalizedValue;
+                normalizedValue = this.NormalizedValue(this.min[dimension], this.max[dimension], value);
+                return normalizedValue;
+            }
+        }
+        [System.Serializable]
+        public class FloatMinMaxArray : MinMaxArray<float> {
+            protected override float MinValue => float.MinValue;
+            protected override float MaxValue => float.MaxValue;
+            protected override float DefaultInvalidValue => -1f;
+            protected override float Difference(float _value1, float _value2) => _value1 - _value2;
+            protected override float Min(float _value1, float _value2) => Mathf.Min(_value1, _value2);
+            protected override float Max(float _value1, float _value2) => Mathf.Min(_value1, _value2);
+            protected override float NormalizedValue(float _min, float _max, float _value) => Mathf.InverseLerp(_min, _max, _value);
+
+
+            public FloatMinMaxArray(int _dimensionSize) : base(_dimensionSize) { }
+
+            public float[] OneOverRange {
+                get {
+                    float[] range = this.Range;
+                    for (int i = 0; i < this.dimensionSize; i++) {
+                        range[i] = 1 / range[i];
+                    }
+                    return range;
+                }
+            }
+        }
+
+        public static int NextWeightedIndex(this System.Random randomizer, List<float> weights) {
 			float totalWeight = 0f;
 			weights.ForEach(weight => { totalWeight += weight; });
 			float randomValue = ((float)randomizer.NextDouble()) * totalWeight;

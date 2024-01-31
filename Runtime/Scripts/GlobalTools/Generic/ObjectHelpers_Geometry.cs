@@ -12,11 +12,28 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         public static int[] ToIntArray(this Vector2Int vector) { 
             return new int[] { vector.x, vector.y };
         }
+        public static float[] ToArray(this Vector3 vector) {
+            return new float[] { vector.x, vector.y, vector.z };
+        }
+        public static float[] ToArray(this Vector2 vector) {
+            return new float[] { vector.x, vector.y };
+        }
+
         public static Vector3Int ToVector3Int(this int[] array) {
             if (array.Length == 3) {
                 return new Vector3Int(array[0], array[1], array[2]);
             }
             return Vector3Int.zero;
+        }
+        public static Vector3 ToVector3(this float[] values) {
+            if (values.Length < 3)
+                return Vector3.zero;
+            return new Vector3(values[0], values[1], values[2]);
+        }
+        public static Vector2 ToVector2(this float[] values) {
+            if (values.Length < 2)
+                return Vector2.zero;
+            return new Vector2(values[0], values[1]);
         }
 
         public static Vector2Int FloorToInt(this Vector2 vector) => new Vector2Int(Mathf.FloorToInt(vector.x), Mathf.FloorToInt(vector.y));

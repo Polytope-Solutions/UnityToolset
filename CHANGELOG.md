@@ -2,6 +2,16 @@
 
 ---
 
+## 0.0.29
+
+2024-01-31
+
+-	Add vector translation to arrays and back;
+-	Add MinMax array abstract class and default float implementation;
+-	Add an abstract OptionsGenerator - script generating GameObjects for a given collection;
+
+---
+
 ## 0.0.28
 
 2024-01-30
