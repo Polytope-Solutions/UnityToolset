@@ -2,6 +2,16 @@
 
 ---
 
+## 0.0.29-1
+
+2024-02-05
+
+-	Add Vector to double array conversion;
+-	Fix float minmax calculations;
+-	Add double minmax object implementation.
+
+---
+
 ## 0.0.29
 
 2024-01-31

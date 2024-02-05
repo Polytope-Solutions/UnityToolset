@@ -18,6 +18,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         public static float[] ToArray(this Vector2 vector) {
             return new float[] { vector.x, vector.y };
         }
+        public static double[] ToDoubleArray(this Vector3 vector) {
+            return new double[] { (double)vector.x, (double)vector.y, (double)vector.z };
+        }
+        public static double[] ToDoubleArray(this Vector2 vector) {
+            return new double[] { (double)vector.x, (double)vector.y };
+        }
 
         public static Vector3Int ToVector3Int(this int[] array) {
             if (array.Length == 3) {

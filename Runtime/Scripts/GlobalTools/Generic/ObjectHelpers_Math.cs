@@ -73,21 +73,24 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             protected override float DefaultInvalidValue => -1f;
             protected override float Difference(float _value1, float _value2) => _value1 - _value2;
             protected override float Min(float _value1, float _value2) => Mathf.Min(_value1, _value2);
-            protected override float Max(float _value1, float _value2) => Mathf.Min(_value1, _value2);
+            protected override float Max(float _value1, float _value2) => Mathf.Max(_value1, _value2);
             protected override float NormalizedValue(float _min, float _max, float _value) => Mathf.InverseLerp(_min, _max, _value);
 
 
             public FloatMinMaxArray(int _dimensionSize) : base(_dimensionSize) { }
+        }
+        [System.Serializable]
+        public class DoubleMinMaxArray : MinMaxArray<double> {
+            protected override double MinValue => double.MinValue;
+            protected override double MaxValue => double.MaxValue;
+            protected override double DefaultInvalidValue => -1;
+            protected override double Difference(double _value1, double _value2) => _value1 - _value2;
+            protected override double Min(double _value1, double _value2) => Math.Min(_value1, _value2);
+            protected override double Max(double _value1, double _value2) => Math.Max(_value1, _value2);
+            protected override float NormalizedValue(double _min, double _max, double _value) => (float)((_value - _min) / (_max - _min));
 
-            public float[] OneOverRange {
-                get {
-                    float[] range = this.Range;
-                    for (int i = 0; i < this.dimensionSize; i++) {
-                        range[i] = 1 / range[i];
-                    }
-                    return range;
-                }
-            }
+
+            public DoubleMinMaxArray(int _dimensionSize) : base(_dimensionSize) { }
         }
 
         public static int NextWeightedIndex(this System.Random randomizer, List<float> weights) {
