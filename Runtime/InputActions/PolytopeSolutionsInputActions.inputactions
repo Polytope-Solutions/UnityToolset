@@ -297,7 +297,7 @@
                 {
                     "name": "negative",
                     "id": "487dba6a-d5c6-4952-a63c-ab6bc40ad671",
-                    "path": "<ExtendedTouch>/twoFingerPinch",
+                    "path": "<ExtendedTouch>/twoFingerZoom",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -319,7 +319,7 @@
                 {
                     "name": "positive",
                     "id": "d54b5fb0-9e1c-4782-bce6-359ee9931e76",
-                    "path": "<ExtendedTouch>/twoFingerZoom",
+                    "path": "<ExtendedTouch>/twoFingerPinch",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

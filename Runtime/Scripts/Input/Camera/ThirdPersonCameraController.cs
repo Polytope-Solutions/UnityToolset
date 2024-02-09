@@ -23,8 +23,10 @@ namespace PolytopeSolutions.Toolset.Input {
 
         [SerializeField] private float rotateSpeed = 25f;
         [SerializeField] private float moveSpeed = 2f;
+        [SerializeField] private float zoomSpeed = 25f;
 
         protected virtual Vector3 UpDirection => Vector3.up;
+        private Vector3 cameraLocalUp = Vector3.up;
 
         private float rotateLeftRightValue;
         private float rotateUpDownValue;
@@ -106,7 +108,7 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         private void MoveZoomInOutPerformed(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
-            this.moveZoomInOutValue = context.ReadValue<float>() * this.moveSpeed;
+            this.moveZoomInOutValue = context.ReadValue<float>() * this.zoomSpeed;
         }
         private void MoveZoomInOutEnded(InputAction.CallbackContext context) {
             this.moveZoomInOutValue = 0f;
@@ -129,16 +131,6 @@ namespace PolytopeSolutions.Toolset.Input {
         ///////////////////////////////////////////////////////////////////////
         private void HandleInputValues() {
             transform.up = this.UpDirection;
-			this.tCamera.RotateAround(
-				this.tTarget.position,
-				this.UpDirection, 
-				this.rotateLeftRightValue * Time.fixedDeltaTime
-			);
-            this.tCamera.transform.RotateAround(
-                this.tTarget.position,
-                this.tCamera.right,
-                this.rotateUpDownValue * Time.fixedDeltaTime
-            );
             Vector3 localForward = Vector3.Cross(this.UpDirection, this.tCamera.right);
             Vector3 directionHorizontal =
                 -this.tCamera.right * this.moveLeftRightValue +
@@ -148,6 +140,16 @@ namespace PolytopeSolutions.Toolset.Input {
                 targetDirection.normalized * this.moveZoomInOutValue;
             this.rigidbody.MovePosition(
                 transform.position + directionHorizontal * Time.fixedDeltaTime
+            );
+            this.tCamera.RotateAround(
+                this.tTarget.position,
+                this.tCamera.right,
+                this.rotateUpDownValue * Time.fixedDeltaTime
+            );
+            this.tCamera.RotateAround(
+                this.tTarget.position,
+                this.UpDirection,
+                this.rotateLeftRightValue * Time.fixedDeltaTime
             );
             this.tCamera.position += directionInRig * Time.fixedDeltaTime;
         }
@@ -164,7 +166,8 @@ namespace PolytopeSolutions.Toolset.Input {
             lookDirection = Quaternion.AngleAxis(-verticalAngle, inPlaneNormal) * horizontalDirection.normalized;
             // Update the position and rotation of the camera
             this.tCamera.position = this.tTarget.position - lookDirection * distance;
-            this.tCamera.LookAt(this.tTarget);
+            cameraLocalUp = Vector3.Cross(lookDirection, this.tCamera.right);
+            this.tCamera.LookAt(this.tTarget, cameraLocalUp);
         }
     }
 }

@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.29-2
+
+2024-02-09
+
+-	Try fix third person camera controller rotation strangeness;
+-	Fix touch events inversion in extended touch.
+
+---
+
 ## 0.0.29-1
 
 2024-02-05
