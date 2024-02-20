@@ -5,17 +5,12 @@ using UnityEngine;
 using PolytopeSolutions.Toolset.GlobalTools.Types;
 
 namespace PolytopeSolutions.Toolset.Scenes {
-    public class SceneLoader : MonoBehaviour {
-        [SerializeField] protected string sceneName;
-        [SerializeField] protected bool skipLoadingScene = false;
+    public class SceneLoader : SceneLoaderBase {
         [SerializeField] protected bool autoloadOnStart = false;
 
         protected virtual void Start() {
             if (this.autoloadOnStart)
                 LoadScene();
-        }
-        public virtual void LoadScene() {
-            SceneManagerExtender.Instance?.LoadScene(this.sceneName, this.skipLoadingScene);
         }
     }
 }

@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.30
+
+-	Add WebCamera Accessor, abstract TextureReceiver and RawTexture visualizer;
+-	Add a simple pop up control for UI to display messages upon callback;
+-	Add a base scene loader to allow for more customizable scene loading;
+
+---
+
 ## 0.0.29-2
 
 2024-02-09
