@@ -93,6 +93,32 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             public DoubleMinMaxArray(int _dimensionSize) : base(_dimensionSize) { }
         }
 
+        public static (float mean, float standardDeviation) EvaluateStandardDeviation(IEnumerable<float> data) {
+            int count = data.Count();
+
+            float mean = 0;
+            foreach(float value in data)
+                mean += value;
+            mean /= count;
+            
+            float standardDeviation = 0;
+            foreach (float value in data)
+                standardDeviation += Mathf.Pow(value - mean, 2);
+            standardDeviation = Mathf.Sqrt(standardDeviation / count);
+
+            return (mean, standardDeviation);
+        }
+        public static IEnumerable<float> NormalizeData(IEnumerable<float> data) {
+            float mean = 0;
+            float standardDeviation = 0;
+            (mean, standardDeviation) = EvaluateStandardDeviation(data);
+            float[] normalizedData = new float[data.Count()];
+            int i = 0;
+            foreach (float value in data) 
+                normalizedData[i++] = (value - mean) / standardDeviation;
+            return normalizedData;
+        }
+
         public static int NextWeightedIndex(this System.Random randomizer, List<float> weights) {
 			float totalWeight = 0f;
 			weights.ForEach(weight => { totalWeight += weight; });

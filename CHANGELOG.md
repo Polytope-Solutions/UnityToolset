@@ -2,7 +2,20 @@
 
 ---
 
+## 0.0.31
+
+2024-02-25
+
+-	Introduce Standard Deviation evalutation for float collections and add normalization based on it;
+-	Expand accessors of the CSV data;
+-	Expand WebCamera accessor functionality and usability and expand default interface;
+-	Handle WebCamera texture resolution not being set immediately;
+
+---
+
 ## 0.0.30
+
+2024-02-20
 
 -	Add WebCamera Accessor, abstract TextureReceiver and RawTexture visualizer;
 -	Add a simple pop up control for UI to display messages upon callback;
