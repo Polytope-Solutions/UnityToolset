@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Reflection;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 	public static partial class ObjectHelpers {
@@ -59,6 +60,21 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                 tFound = gItem.AddComponent(componentType);
             }
             return tFound;
+        }
+        public static T CopyComponent<T>(this GameObject goTarget, T source) where T: Component {
+            Type type = source.GetType();
+            Component copy = goTarget.AddComponent(type);
+            FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (FieldInfo field in fields) {
+                field.SetValue(copy, field.GetValue(source));
+            }
+            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (PropertyInfo property in properties) {
+                if (property.CanWrite) {
+                    property.SetValue(copy, property.GetValue(source, null), null);
+                }
+            }
+            return (T)copy;
         }
         public static bool IsInLayerMask(this GameObject goItem, LayerMask layerMask) {
             return (layerMask & (1 << goItem.layer)) != 0;

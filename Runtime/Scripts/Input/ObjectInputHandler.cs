@@ -22,7 +22,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 this.inputReceiver.RegisterInputHandler(this);
         }
         ///////////////////////////////////////////////////////////////////////
-        public bool DidRayHitHandler(RaycastHit hitInfo) {
+        protected override bool IsRelevantHandler(RaycastHit hitInfo) {
             bool isValid = this.colliders.Contains(hitInfo.collider);
             #if DEBUG2
             this.Log($"Clicked on an interactable object: {isValid}");

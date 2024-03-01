@@ -13,25 +13,66 @@ namespace PolytopeSolutions.Toolset.Input {
 
         [Header("General")]
         [SerializeField] protected Transform tCamera;
+        [SerializeField] protected bool useProxies;
 
-        protected new Rigidbody rigidbody;
+        protected new Rigidbody objectRigidbody;
         protected Camera cCamera;
 
-        private float epsilon = 0.0001f;
+        private readonly float epsilon = 0.0001f;
         private Coroutine movementMonitor;
         private float farCornerDistanceCache;
         public event Action onCameraViewChanged = null;
+
+        protected Transform tObjectProxy;
+        protected Transform tCameraProxy;
+
+        private Vector3 objectMovementVelocity, objectRotationVelocity;
+        private Vector3 cameraMovementVelocity, cameraRotationVelocity;
+        [SerializeField] protected float smoothTime = 0.3f;
+        [SerializeField] protected float maxDegreesDelta = 10f;
 
         protected override void OnEnable() { 
             base.OnEnable();
             ObjectSetup();
         }
-        protected void ObjectSetup() {
-            this.rigidbody = gameObject.GetComponent<Rigidbody>();
+        protected virtual void LateUpdate() {
+            ApplyProxies();
+        }
+        protected virtual void ObjectSetup() {
             this.cCamera = this.tCamera?.GetComponent<Camera>();
             if (this.tCamera == null){
                 this.cCamera = Camera.main;
                 this.tCamera = this.cCamera?.transform;
+            }
+
+            if (this.useProxies) {
+                if (!this.tObjectProxy) { 
+                    this.tObjectProxy = TryFindOrAddByName("ObjectProxy").transform;
+                    if (transform.parent)
+                        this.tObjectProxy.SetParent(transform.parent);
+                    this.tObjectProxy.gameObject.tag = transform.gameObject.tag;
+                    this.tObjectProxy.gameObject.layer = transform.gameObject.layer;
+                    this.tObjectProxy.position = transform.position;
+                    this.tObjectProxy.rotation = transform.rotation;
+                    this.tObjectProxy.localScale = transform.localScale;
+                }
+                if (!this.tCameraProxy) { 
+                    this.tCameraProxy = this.tObjectProxy.gameObject.TryFindOrAddByName("CameraProxy").transform;
+                    this.tCameraProxy.position = this.tCamera.position;
+                    this.tCameraProxy.rotation = this.tCamera.rotation;
+                    this.tCameraProxy.localScale = this.tCamera.localScale;
+                }
+
+                Rigidbody currentRigidbody = GetComponent<Rigidbody>();
+                Collider currentCollider = GetComponent<Collider>();
+                this.objectRigidbody = this.tObjectProxy.gameObject.CopyComponent<Rigidbody>(currentRigidbody);
+                Collider objectCollider = this.tObjectProxy.gameObject.CopyComponent<Collider>(currentCollider);
+                currentRigidbody.isKinematic = true;
+                currentCollider.enabled = false;
+            }
+            else {
+                this.tObjectProxy = transform;
+                this.tCameraProxy = this.tCamera;
             }
 
             float frustumHeight = 2.0f * this.cCamera.farClipPlane * Mathf.Tan(this.cCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
@@ -44,6 +85,24 @@ namespace PolytopeSolutions.Toolset.Input {
 
             if (this.movementMonitor == null)
                 this.movementMonitor = StartCoroutine(MovementMonitor());
+        }
+        protected virtual void ApplyProxies() {
+            if (this.useProxies) {
+                transform.position = Vector3.SmoothDamp(transform.position, this.tObjectProxy.position, ref this.objectMovementVelocity, this.smoothTime);
+                transform.rotation = Quaternion.Euler(
+                    Mathf.SmoothDampAngle(transform.rotation.eulerAngles.x, this.tObjectProxy.rotation.eulerAngles.x, ref this.objectRotationVelocity.x, this.smoothTime),
+                    Mathf.SmoothDampAngle(transform.rotation.eulerAngles.y, this.tObjectProxy.rotation.eulerAngles.y, ref this.objectRotationVelocity.y, this.smoothTime),
+                    Mathf.SmoothDampAngle(transform.rotation.eulerAngles.z, this.tObjectProxy.rotation.eulerAngles.z, ref this.objectRotationVelocity.z, this.smoothTime)
+                );
+                //transform.localRotation = Quaternion.RotateTowards(transform.localRotation, this.tObjectProxy.localRotation, this.maxDegreesDelta * Time.deltaTime);
+                this.tCamera.position = Vector3.SmoothDamp(this.tCamera.position, this.tCameraProxy.position, ref this.cameraMovementVelocity, this.smoothTime);
+                this.tCamera.rotation = Quaternion.Euler(
+                    Mathf.SmoothDampAngle(this.tCamera.rotation.eulerAngles.x, this.tCameraProxy.rotation.eulerAngles.x, ref this.cameraRotationVelocity.x, this.smoothTime),
+                    Mathf.SmoothDampAngle(this.tCamera.rotation.eulerAngles.y, this.tCameraProxy.rotation.eulerAngles.y, ref this.cameraRotationVelocity.y, this.smoothTime),
+                    Mathf.SmoothDampAngle(this.tCamera.rotation.eulerAngles.z, this.tCameraProxy.rotation.eulerAngles.z, ref this.cameraRotationVelocity.z, this.smoothTime)
+                );
+                //this.tCamera.localRotation = Quaternion.RotateTowards(this.tCamera.localRotation, this.tCameraProxy.localRotation, this.maxDegreesDelta * Time.deltaTime);
+            }
         }
         private IEnumerator MovementMonitor() {
             Vector3 lastPosition, currentPosition;

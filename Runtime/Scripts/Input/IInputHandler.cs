@@ -15,6 +15,7 @@ namespace PolytopeSolutions.Toolset.Input {
         public void OnDestroyInputHandler() {
             this.InputReceiver?.UnregisterInputHandler((IInputHandler)this);
         }
+        public bool IsRelevantHandler(object data);
         public void OnInteractionStarted();
         public void OnInteractionPerformed(object data);
         public void OnInteractionEnded();

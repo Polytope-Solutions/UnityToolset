@@ -54,7 +54,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 InputManager.Instance.InputReceiverRestoreExclusive();
         }
         protected override object OnInteractionPerformed() {
-            if (this.IsPointerOverUI) return null;
+            //if (this.IsPointerOverUI) return null;
             // Raycast to where it should be placed.
             this.screenPointerPosition = Pointer.current.position.ReadValue();
             this.ray = Camera.main.ScreenPointToRay(this.screenPointerPosition);

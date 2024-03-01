@@ -34,6 +34,9 @@ namespace PolytopeSolutions.Toolset.Input {
         private float moveForwardBackwardValue;
         private float moveZoomInOutValue;
 
+        private Transform tTargetProxy;
+        private Vector3 targetMovementVelocity, targetRotateVeloccity;
+
         ///////////////////////////////////////////////////////////////////////
         #region UNITY_FUNCTIONS
         protected virtual void FixedUpdate() {
@@ -105,7 +108,7 @@ namespace PolytopeSolutions.Toolset.Input {
             this.moveForwardBackwardValue = context.ReadValue<float>() * this.moveSpeed;
             TriggerPerformInteraction();
         }
-        private void MoveForwardBackwardEnded(InputAction.CallbackContext context){
+        private void MoveForwardBackwardEnded(InputAction.CallbackContext context) {
             this.moveForwardBackwardValue = 0f;
             TriggerPerformInteraction();
         }
@@ -137,33 +140,47 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         #endregion
         ///////////////////////////////////////////////////////////////////////
+        protected override void ObjectSetup() {
+            base.ObjectSetup();
+            if (this.useProxies) {
+                if (!this.tTargetProxy) { 
+                    this.tTargetProxy = this.tObjectProxy.gameObject.TryFindOrAddByName("TargetProxy").transform;
+                    this.tTargetProxy.position = this.tTarget.position;
+                    this.tTargetProxy.rotation = this.tTarget.rotation;
+                    this.tTargetProxy.localScale = this.tTarget.localScale;
+                }
+            }
+            else {
+                this.tTargetProxy = this.tTarget;
+            }
+        }
         protected override object OnInteractionPerformed() {
-            transform.up = this.UpDirection;
-            Vector3 localForward = Vector3.Cross(this.UpDirection, this.tCamera.right);
+            this.tObjectProxy.up = this.UpDirection;
+            Vector3 localForward = Vector3.Cross(this.UpDirection, this.tCameraProxy.right);
             Vector3 directionHorizontal =
-                -this.tCamera.right * this.moveLeftRightValue +
+                -this.tCameraProxy.right * this.moveLeftRightValue +
                 -localForward.normalized * this.moveForwardBackwardValue;
-            Vector3 targetDirection = this.tCamera.position - this.tTarget.position;
+            Vector3 targetDirection = this.tCameraProxy.position - this.tTargetProxy.position;
             Vector3 directionInRig =
                 targetDirection.normalized * this.moveZoomInOutValue;
-            this.rigidbody.MovePosition(
-                transform.position + directionHorizontal * Time.fixedDeltaTime
+            this.objectRigidbody.MovePosition(
+                this.tObjectProxy.position + directionHorizontal * Time.fixedDeltaTime
             );
-            this.tCamera.RotateAround(
-                this.tTarget.position,
-                this.tCamera.right,
+            this.tCameraProxy.RotateAround(
+                this.tTargetProxy.position,
+                this.tCameraProxy.right,
                 this.rotateUpDownValue * Time.fixedDeltaTime
             );
-            this.tCamera.RotateAround(
-                this.tTarget.position,
+            this.tCameraProxy.RotateAround(
+                this.tTargetProxy.position,
                 this.UpDirection,
                 this.rotateLeftRightValue * Time.fixedDeltaTime
             );
-            this.tCamera.position += directionInRig * Time.fixedDeltaTime;
+            this.tCameraProxy.position += directionInRig * Time.fixedDeltaTime;
             return null;
         }
         private void ConstrainCameraToTraget() {
-            Vector3 lookDirection = this.tTarget.position - this.tCamera.position;
+            Vector3 lookDirection = this.tTargetProxy.position - this.tCameraProxy.position;
             float distance = lookDirection.magnitude;
             // Ensure camera within distance range
             distance = Mathf.Clamp(distance, this.distanceRange.x, this.distanceRange.y);
@@ -174,9 +191,21 @@ namespace PolytopeSolutions.Toolset.Input {
             verticalAngle = Mathf.Clamp(verticalAngle, this.verticalAngleRange.x, this.verticalAngleRange.y);
             lookDirection = Quaternion.AngleAxis(-verticalAngle, inPlaneNormal) * horizontalDirection.normalized;
             // Update the position and rotation of the camera
-            this.tCamera.position = this.tTarget.position - lookDirection * distance;
-            cameraLocalUp = Vector3.Cross(lookDirection, this.tCamera.right);
-            this.tCamera.LookAt(this.tTarget, cameraLocalUp);
+            this.tCameraProxy.position = this.tTargetProxy.position - lookDirection * distance;
+            cameraLocalUp = Vector3.Cross(lookDirection, this.tCameraProxy.right);
+            this.tCameraProxy.LookAt(this.tTargetProxy, cameraLocalUp);
         }
-    }
+        protected override void ApplyProxies() {
+            base.ApplyProxies();
+            if (this.useProxies) {
+                this.tTarget.position = Vector3.SmoothDamp(this.tTarget.position, this.tTargetProxy.position, ref this.targetMovementVelocity, this.smoothTime);
+                this.tTarget.rotation = Quaternion.Euler(
+                    Mathf.SmoothDampAngle(this.tTarget.rotation.eulerAngles.x, this.tTargetProxy.rotation.eulerAngles.x, ref this.targetRotateVeloccity.x, this.smoothTime),
+                    Mathf.SmoothDampAngle(this.tTarget.rotation.eulerAngles.y, this.tTargetProxy.rotation.eulerAngles.y, ref this.targetRotateVeloccity.y, this.smoothTime),
+                    Mathf.SmoothDampAngle(this.tTarget.rotation.eulerAngles.z, this.tTargetProxy.rotation.eulerAngles.z, ref this.targetRotateVeloccity.z, this.smoothTime)
+                );
+                //this.tTarget.localRotation = Quaternion.RotateTowards(this.tTarget.localRotation, this.tTargetProxy.localRotation, this.maxDegreesDelta*Time.deltaTime);
+            }
+        }
+    }        
 }

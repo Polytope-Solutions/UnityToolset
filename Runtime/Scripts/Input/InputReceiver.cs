@@ -127,8 +127,19 @@ namespace PolytopeSolutions.Toolset.Input {
         }
 
         protected virtual void UpdateActiveHandlers() {
-            this.activeHandlers = new List<IInputHandler>(this.currentHandlers);
+            this.activeHandlers.Clear();
+            RaycastHit? currentInteractionRayCast = CurrentInteractionRay();
+            if (currentInteractionRayCast.HasValue) {
+                foreach (IInputHandler handler in this.currentHandlers) {
+                    if (handler.IsRelevantHandler(currentInteractionRayCast.Value))
+                        this.activeHandlers.Add(handler);
+                }
+            }
+            if (this.activeHandlers.Count == 0) { 
+                this.isEndingInteraction = true;
+            }
         }
+        protected virtual RaycastHit? CurrentInteractionRay() { return null; }
         protected virtual void OnInteractionStart() { }
         protected virtual object OnInteractionPerformed() { return null; }
         protected virtual void OnInteractionEnded() { }

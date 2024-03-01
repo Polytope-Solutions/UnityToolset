@@ -2,7 +2,22 @@
 
 ---
 
+## 0.0.33
+
+2024-03-01
+
+-	Smooth out camera controllers by introducing proxies and smooth damping to them;
+-	Small Input fixes;
+-	Split interaction and placement rays;
+-	Set a generic way for Handlers to tell receiver if the interaction is relevant to cancel it if non are relevant;
+-	Assign default input action to move and rotate input receivers;
+-	Create a Copy Compontent tool in Unity Object Helpers;
+
+---
+
 ## 0.0.32
+
+2024-02-29
 
 -	Massive refactoring of input controls:
 	-	Clear distinction between input receiver and handler;

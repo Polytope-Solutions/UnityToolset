@@ -12,6 +12,8 @@ using UnityEngine.EventSystems;
 namespace PolytopeSolutions.Toolset.Input {
     public class UIToWorldInputHandler : ExposedActionInputHandler<UIToWorldInputReceiver>, IPointerEnterHandler, IPointerExitHandler {
         ///////////////////////////////////////////////////////////////////////
+        // In this case handler registers on hover so if interacting - it's relevant.
+        protected override bool IsRelevantHandler(RaycastHit hitInfo) => true;
         // Inform the input receiver that this handler is being hovered over
         public void OnPointerEnter(PointerEventData eventData) {
             #if DEBUG2

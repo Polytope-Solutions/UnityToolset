@@ -13,30 +13,32 @@ using UnityEngine.InputSystem;
 namespace PolytopeSolutions.Toolset.Input {
     public class ObjectRotationInputReceiver : InputReceiver {
         [Header("Events")]
-        [SerializeField] private InputActionReference moveInput;
-        [SerializeField] private float placementRaycastMaxDistance = 1000f;
+        [SerializeField] private InputActionReference rotateInput;
+        [SerializeField] private LayerMask interactionRaycastLayerMask;
+        [SerializeField] private float interactionRaycastMaxDistance = 1000f;
         [SerializeField] private LayerMask placementRaycastLayerMask;
+        [SerializeField] private float placementRaycastMaxDistance = 1000f;
 
         private Vector2 screenPointerPosition;
-        private Ray ray;
-        private RaycastHit hitInfo;
+        private Ray interactionRay, placementRay;
+        private RaycastHit interactionHitInfo, placementHitInfo;
 
         ///////////////////////////////////////////////////////////////////////
         #region INPUT_HANDLING
         protected override void EnableInputEvents() {
-            this.moveInput.action.started += MoveActionStarted;
-            this.moveInput.action.canceled += MoveActionCanceled;
-            this.moveInput.action.Enable();
+            this.rotateInput.action.started += RotateActionStarted;
+            this.rotateInput.action.canceled += RotateActionCanceled;
+            this.rotateInput.action.Enable();
         }
         protected override void DisableInputEvents() {
-            this.moveInput.action.Disable();
-            this.moveInput.action.started -= MoveActionStarted;
-            this.moveInput.action.canceled -= MoveActionCanceled;
+            this.rotateInput.action.Disable();
+            this.rotateInput.action.started -= RotateActionStarted;
+            this.rotateInput.action.canceled -= RotateActionCanceled;
         }
-        private void MoveActionStarted(InputAction.CallbackContext context) {
+        private void RotateActionStarted(InputAction.CallbackContext context) {
             TriggerStartInteraction();
         }
-        private void MoveActionCanceled(InputAction.CallbackContext context) {
+        private void RotateActionCanceled(InputAction.CallbackContext context) {
             TriggerEndInteraction();
         }
         #endregion
@@ -52,26 +54,21 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         protected override object OnInteractionPerformed() {
             this.screenPointerPosition = Pointer.current.position.ReadValue();
-            this.ray = Camera.main.ScreenPointToRay(this.screenPointerPosition);
-            if (Physics.Raycast(this.ray, out this.hitInfo, this.placementRaycastMaxDistance, this.placementRaycastLayerMask)) {
-                return this.hitInfo;
+            this.placementRay = Camera.main.ScreenPointToRay(this.screenPointerPosition);
+            if (Physics.Raycast(this.placementRay, out this.placementHitInfo, this.placementRaycastMaxDistance, this.placementRaycastLayerMask)) {
+                return this.placementHitInfo;
             }
             return null;
         }
-        protected override void UpdateActiveHandlers() {
-            this.activeHandlers.Clear();
+        protected override RaycastHit? CurrentInteractionRay() {
             if (!this.IsPointerOverUI) {
                 this.screenPointerPosition = Pointer.current.position.ReadValue();
-                this.ray = Camera.main.ScreenPointToRay(this.screenPointerPosition);
-                if (Physics.Raycast(this.ray, out this.hitInfo, this.placementRaycastMaxDistance)) {
-                    foreach (ObjectRotationInputHandler handler in this.currentHandlers) {
-                        if (handler.DidRayHitHandler(this.hitInfo)) {
-                            this.activeHandlers.Add(handler);
-                            break;
-                        }
-                    }
+                this.interactionRay = Camera.main.ScreenPointToRay(this.screenPointerPosition);
+                if (Physics.Raycast(this.interactionRay, out this.interactionHitInfo, this.interactionRaycastMaxDistance, this.interactionRaycastLayerMask)) {
+                    return this.interactionHitInfo;
                 }
             }
+            return null;
         }
     }
 }

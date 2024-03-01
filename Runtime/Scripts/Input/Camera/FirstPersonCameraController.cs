@@ -119,23 +119,23 @@ namespace PolytopeSolutions.Toolset.Input {
         #endregion
         ///////////////////////////////////////////////////////////////////////
         protected override object OnInteractionPerformed() {
-			transform.up = this.UpDirection;
-            this.tCamera.RotateAround(
-				this.tCamera.position,
+			this.tObjectProxy.up = this.UpDirection;
+            this.tCameraProxy.RotateAround(
+				this.tCameraProxy.position,
 				this.UpDirection, 
 				this.rotateLeftRightValue * Time.fixedDeltaTime
 			);
-			this.tCamera.RotateAround(
-				this.tCamera.position,
-				this.tCamera.right, 
+			this.tCameraProxy.RotateAround(
+				this.tCameraProxy.position,
+				this.tCameraProxy.right, 
 				this.rotateUpDownValue * Time.fixedDeltaTime
 			);
 			Vector3 direction =
-				- this.tCamera.right * this.moveLeftRightValue +
+				- this.tCameraProxy.right * this.moveLeftRightValue +
                 this.UpDirection * this.moveUpDownValue +
-				this.tCamera.forward * this.moveForwardBackwardValue;
-			this.rigidbody.MovePosition(
-				transform.position + direction * Time.fixedDeltaTime
+				this.tCameraProxy.forward * this.moveForwardBackwardValue;
+			this.objectRigidbody.MovePosition(
+				this.tObjectProxy.position + direction * Time.fixedDeltaTime
 			);
 			return null;
 		}

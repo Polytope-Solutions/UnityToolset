@@ -28,6 +28,9 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         ///////////////////////////////////////////////////////////////////////
         // Methods to be called by the input receiver,
+        bool IInputHandler.IsRelevantHandler(object data) {
+            return IsRelevantHandler((RaycastHit)data);
+        }
         // if at the moment of press, this handler is being hovered over
         void IInputHandler.OnInteractionStarted() { 
             #if DEBUG2
@@ -47,5 +50,6 @@ namespace PolytopeSolutions.Toolset.Input {
             #endif
             this.onInteractionEnded?.Invoke();
         }
+        protected abstract bool IsRelevantHandler(RaycastHit ray);
     }
 }

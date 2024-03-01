@@ -13,11 +13,12 @@ namespace PolytopeSolutions.Toolset.Input {
     public class ObjectInteractorInputReceiver : InputReceiver {
         [Header("Events")]
         [SerializeField] private InputActionReference pointerClickAction;
-        [SerializeField] private float raycastMaxDistance = 1000f;
+        [SerializeField] private LayerMask interactionRaycastLayerMask;
+        [SerializeField] private float interactionRaycastMaxDistance = 1000f;
 
         private Vector2 screenPointerPosition;
-        private Ray ray;
-        private RaycastHit hitInfo;
+        private Ray interactionRay;
+        private RaycastHit interactionHitInfo;
 
         ///////////////////////////////////////////////////////////////////////
         #region INPUT_HANDLING
@@ -52,20 +53,15 @@ namespace PolytopeSolutions.Toolset.Input {
             if (!this.IsSelfManaged)
                 InputManager.Instance.InputReceiverRestoreExclusive();
         }
-        protected override void UpdateActiveHandlers() {
-            this.activeHandlers.Clear();
+        protected override RaycastHit? CurrentInteractionRay() {
             if (!this.IsPointerOverUI) {
                 this.screenPointerPosition = Pointer.current.position.ReadValue();
-                this.ray = Camera.main.ScreenPointToRay(this.screenPointerPosition);
-                if (Physics.Raycast(this.ray, out this.hitInfo, this.raycastMaxDistance)) {
-                    foreach (ObjectInteractorInputHandler handler in this.currentHandlers) {
-                        if (handler.DidRayHitHandler(this.hitInfo)) {
-                            this.activeHandlers.Add(handler);
-                            break;
-                        }
-                    }
+                this.interactionRay = Camera.main.ScreenPointToRay(this.screenPointerPosition);
+                if (Physics.Raycast(this.interactionRay, out this.interactionHitInfo, this.interactionRaycastMaxDistance, this.interactionRaycastLayerMask)) {
+                    return this.interactionHitInfo;
                 }
             }
+            return null;
         }
     }
 }
