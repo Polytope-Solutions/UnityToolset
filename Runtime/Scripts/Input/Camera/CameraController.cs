@@ -28,8 +28,7 @@ namespace PolytopeSolutions.Toolset.Input {
 
         private Vector3 objectMovementVelocity, objectRotationVelocity;
         private Vector3 cameraMovementVelocity, cameraRotationVelocity;
-        [SerializeField] protected float smoothTime = 0.3f;
-        [SerializeField] protected float maxDegreesDelta = 10f;
+        [SerializeField] protected float smoothTime = 0.1f;
 
         protected override void OnEnable() { 
             base.OnEnable();

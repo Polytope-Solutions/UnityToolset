@@ -77,13 +77,16 @@ namespace PolytopeSolutions.Toolset.Input {
         protected void TriggerPerformInteraction() {
             this.isInteracting = true;
         }
-        protected void TriggerEndInteraction() {
+        public void TriggerEndInteraction() {
             this.isEndingInteraction = true;
         }
         private void HandleInputValues() {
             // Handle Start
             if (this.isStartingInteraction) {
                 UpdateActiveHandlers();
+                if (this.activeHandlers.Count == 0) {
+                    this.isEndingInteraction = true;
+                }
                 if ((!this.allowUIOnStart || this.IsPointerOverUI) 
                         && TryPassStartToActiveHandlers()) { 
                     #if DEBUG2
@@ -134,9 +137,6 @@ namespace PolytopeSolutions.Toolset.Input {
                     if (handler.IsRelevantHandler(currentInteractionRayCast.Value))
                         this.activeHandlers.Add(handler);
                 }
-            }
-            if (this.activeHandlers.Count == 0) { 
-                this.isEndingInteraction = true;
             }
         }
         protected virtual RaycastHit? CurrentInteractionRay() { return null; }

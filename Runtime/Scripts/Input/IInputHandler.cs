@@ -26,5 +26,8 @@ namespace PolytopeSolutions.Toolset.Input {
         public void UnregisterInputHandler() {
             this.InputReceiver?.UnregisterInputHandler((IInputHandler)this);
         }
+        public void RequestEndInteraction() {
+            this.InputReceiver.TriggerEndInteraction();
+        }
     }
 }

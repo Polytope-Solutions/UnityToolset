@@ -63,5 +63,8 @@ namespace PolytopeSolutions.Toolset.Input {
             }
             return null;
         }
+        protected override void UpdateActiveHandlers() {
+            this.activeHandlers = new List<IInputHandler>(this.currentHandlers);
+        }
     }
 }

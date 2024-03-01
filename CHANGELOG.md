@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.33-1
+
+2024-03-01
+
+-	Fix UI to world interactor;
+-	Allow interactors to request end of interaction;
+
+---
+
 ## 0.0.33
 
 2024-03-01
