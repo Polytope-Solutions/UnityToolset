@@ -2,6 +2,19 @@
 
 ---
 
+## 0.0.32
+
+-	Massive refactoring of input controls:
+	-	Clear distinction between input receiver and handler;
+	-	Clean and refactor all input receivers and handlers;
+	-	Introduce 3D object Manipuation and Rotation input receivers and handlers;
+	-	Don't allow placement from UI if over UI;
+	-	Introduce Layermasks for input receivers;
+-	Transfer TMP LinkOpener;
+
+
+---
+
 ## 0.0.31
 
 2024-02-25

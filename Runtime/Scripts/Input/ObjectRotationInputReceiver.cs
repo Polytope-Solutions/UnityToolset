@@ -3,6 +3,7 @@
 // #define DEBUG2
 #undef DEBUG2
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,9 +11,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace PolytopeSolutions.Toolset.Input {
-    public class UIToWorldInputReceiver : InputReceiver {
+    public class ObjectRotationInputReceiver : InputReceiver {
         [Header("Events")]
-        [SerializeField] private InputActionReference pointerClickAction;
+        [SerializeField] private InputActionReference moveInput;
         [SerializeField] private float placementRaycastMaxDistance = 1000f;
         [SerializeField] private LayerMask placementRaycastLayerMask;
 
@@ -23,23 +24,19 @@ namespace PolytopeSolutions.Toolset.Input {
         ///////////////////////////////////////////////////////////////////////
         #region INPUT_HANDLING
         protected override void EnableInputEvents() {
-            this.pointerClickAction.action.started += ClickActionStarted;
-            this.pointerClickAction.action.canceled += ClickActionCanceled;
-
-            this.pointerClickAction.action.Enable();
+            this.moveInput.action.started += MoveActionStarted;
+            this.moveInput.action.canceled += MoveActionCanceled;
+            this.moveInput.action.Enable();
         }
-
         protected override void DisableInputEvents() {
-            this.pointerClickAction.action.Disable();
-
-            this.pointerClickAction.action.started -= ClickActionStarted;
-            this.pointerClickAction.action.canceled -= ClickActionCanceled;
+            this.moveInput.action.Disable();
+            this.moveInput.action.started -= MoveActionStarted;
+            this.moveInput.action.canceled -= MoveActionCanceled;
         }
-
-        private void ClickActionStarted(InputAction.CallbackContext context) {
+        private void MoveActionStarted(InputAction.CallbackContext context) {
             TriggerStartInteraction();
         }
-        private void ClickActionCanceled(InputAction.CallbackContext context) {
+        private void MoveActionCanceled(InputAction.CallbackContext context) {
             TriggerEndInteraction();
         }
         #endregion
@@ -54,14 +51,27 @@ namespace PolytopeSolutions.Toolset.Input {
                 InputManager.Instance.InputReceiverRestoreExclusive();
         }
         protected override object OnInteractionPerformed() {
-            if (this.IsPointerOverUI) return null;
-            // Raycast to where it should be placed.
             this.screenPointerPosition = Pointer.current.position.ReadValue();
             this.ray = Camera.main.ScreenPointToRay(this.screenPointerPosition);
             if (Physics.Raycast(this.ray, out this.hitInfo, this.placementRaycastMaxDistance, this.placementRaycastLayerMask)) {
                 return this.hitInfo;
             }
             return null;
+        }
+        protected override void UpdateActiveHandlers() {
+            this.activeHandlers.Clear();
+            if (!this.IsPointerOverUI) {
+                this.screenPointerPosition = Pointer.current.position.ReadValue();
+                this.ray = Camera.main.ScreenPointToRay(this.screenPointerPosition);
+                if (Physics.Raycast(this.ray, out this.hitInfo, this.placementRaycastMaxDistance)) {
+                    foreach (ObjectRotationInputHandler handler in this.currentHandlers) {
+                        if (handler.DidRayHitHandler(this.hitInfo)) {
+                            this.activeHandlers.Add(handler);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 }

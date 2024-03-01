@@ -37,7 +37,6 @@ namespace PolytopeSolutions.Toolset.Input {
         ///////////////////////////////////////////////////////////////////////
         #region UNITY_FUNCTIONS
         protected virtual void FixedUpdate() {
-            HandleInputValues();
             ConstrainCameraToTraget();
         }
         protected virtual void OnDrawGizmos() {
@@ -95,27 +94,34 @@ namespace PolytopeSolutions.Toolset.Input {
         private void MoveLeftRightPerformed(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
             this.moveLeftRightValue = context.ReadValue<float>() * this.moveSpeed;
+            TriggerPerformInteraction();
         }
         private void MoveLeftRightEnded(InputAction.CallbackContext context) {
             this.moveLeftRightValue = 0f;
+            TriggerPerformInteraction();
         }
         private void MoveForwardBackwardPerformed(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
             this.moveForwardBackwardValue = context.ReadValue<float>() * this.moveSpeed;
+            TriggerPerformInteraction();
         }
         private void MoveForwardBackwardEnded(InputAction.CallbackContext context){
             this.moveForwardBackwardValue = 0f;
+            TriggerPerformInteraction();
         }
         private void MoveZoomInOutPerformed(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
             this.moveZoomInOutValue = context.ReadValue<float>() * this.zoomSpeed;
+            TriggerPerformInteraction();
         }
         private void MoveZoomInOutEnded(InputAction.CallbackContext context) {
             this.moveZoomInOutValue = 0f;
+            TriggerPerformInteraction();
         }
         private void RotateLeftRightPerformed(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
             this.rotateLeftRightValue = context.ReadValue<float>() * this.rotateSpeed;
+            TriggerPerformInteraction();
         }
         private void RotateLeftRightEnded(InputAction.CallbackContext context) {
             this.rotateLeftRightValue = 0f;
@@ -123,13 +129,15 @@ namespace PolytopeSolutions.Toolset.Input {
         private void RotateUpDownPerformed(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
             this.rotateUpDownValue = context.ReadValue<float>() * this.rotateSpeed;
+            TriggerPerformInteraction();
         }
         private void RotateUpDownEnded(InputAction.CallbackContext context) {
             this.rotateUpDownValue = 0f;
+            TriggerPerformInteraction();
         }
         #endregion
         ///////////////////////////////////////////////////////////////////////
-        private void HandleInputValues() {
+        protected override object OnInteractionPerformed() {
             transform.up = this.UpDirection;
             Vector3 localForward = Vector3.Cross(this.UpDirection, this.tCamera.right);
             Vector3 directionHorizontal =
@@ -152,6 +160,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 this.rotateLeftRightValue * Time.fixedDeltaTime
             );
             this.tCamera.position += directionInRig * Time.fixedDeltaTime;
+            return null;
         }
         private void ConstrainCameraToTraget() {
             Vector3 lookDirection = this.tTarget.position - this.tCamera.position;

@@ -9,6 +9,7 @@ namespace PolytopeSolutions.Toolset.Input {
     [RequireComponent(typeof(Rigidbody))]
     public abstract class CameraController : InputReceiver {
         // NB! If overriding OnEnable call the base version in derived classes
+        // ignore input handlers as this object itself is both receiver and handler.
 
         [Header("General")]
         [SerializeField] protected Transform tCamera;

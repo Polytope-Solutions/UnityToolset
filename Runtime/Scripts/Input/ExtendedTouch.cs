@@ -81,6 +81,9 @@ namespace PolytopeSolutions.Toolset.Input {
 
         public static ExtendedTouch current { get; internal set; }
 
+        private static float allignmentUpThreshold = 0.35f,
+            allignmentDownThreshold = 0f;
+
         public override void MakeCurrent() {
             base.MakeCurrent();
             current = this;
@@ -212,7 +215,7 @@ namespace PolytopeSolutions.Toolset.Input {
                     Vector2 primaryDelta = this._primaryFingerDelta;
                     Vector2 secondaryDelta = this._secondaryFingerDelta;
                     float allignmentFactor = Vector2.Dot(primaryDelta.normalized, secondaryDelta.normalized);
-                    if (allignmentFactor > 0.35f) { 
+                    if (allignmentFactor > ExtendedTouch.allignmentUpThreshold) { 
                         // alligned movement
                         if (primaryDelta.x < 0) {
                             this.twoFingerLeft.WriteValueIntoEvent(-primaryDelta.x, eventPtr);
@@ -230,7 +233,7 @@ namespace PolytopeSolutions.Toolset.Input {
                             this.twoFingerUp.WriteValueIntoEvent(primaryDelta.y, eventPtr);
                             this.twoFingerUp.ApplyParameterChanges();
                         }
-                    } else if (allignmentFactor < 0f) {
+                    } else if (allignmentFactor < ExtendedTouch.allignmentDownThreshold) {
                         float previousDistance = Vector2.Distance(this._primaryFingerPosition-this._primaryFingerDelta, this._secondaryFingerPosition-this._secondaryFingerDelta);
                         float currentDistance = Vector2.Distance(this._primaryFingerPosition, this._secondaryFingerPosition);
                         if (currentDistance > previousDistance) { 
