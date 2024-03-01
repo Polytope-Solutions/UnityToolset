@@ -63,11 +63,23 @@ namespace PolytopeSolutions.Toolset.Input {
                 }
 
                 Rigidbody currentRigidbody = GetComponent<Rigidbody>();
-                Collider currentCollider = GetComponent<Collider>();
-                this.objectRigidbody = this.tObjectProxy.gameObject.CopyComponent<Rigidbody>(currentRigidbody);
-                Collider objectCollider = this.tObjectProxy.gameObject.CopyComponent<Collider>(currentCollider);
+                this.objectRigidbody = this.tObjectProxy.gameObject.AddComponent<Rigidbody>();
+                this.objectRigidbody.mass = currentRigidbody.mass;
+                this.objectRigidbody.drag = currentRigidbody.drag;
+                this.objectRigidbody.angularDrag = currentRigidbody.angularDrag;
+                this.objectRigidbody.useGravity = currentRigidbody.useGravity;
+                this.objectRigidbody.constraints = currentRigidbody.constraints;
+                this.objectRigidbody.interpolation = currentRigidbody.interpolation;
+                this.objectRigidbody.collisionDetectionMode = currentRigidbody.collisionDetectionMode;
+                this.objectRigidbody.isKinematic = currentRigidbody.isKinematic;
+                this.objectRigidbody.automaticCenterOfMass = currentRigidbody.automaticCenterOfMass;
+                this.objectRigidbody.automaticInertiaTensor = currentRigidbody.automaticInertiaTensor;
                 currentRigidbody.isKinematic = true;
-                currentCollider.enabled = false;
+                Collider currentCollider = GetComponent<Collider>();
+                if (currentCollider) { 
+                    Collider objectCollider = this.tObjectProxy.gameObject.CopyComponent<Collider>(currentCollider);
+                    currentCollider.enabled = false;
+                }
             }
             else {
                 this.tObjectProxy = transform;

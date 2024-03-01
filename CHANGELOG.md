@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.33-2
+
+2024-03-01
+
+-	Manually copy rigidbody in camera controller as automatic one fails to copy some properties;
+-	Make Collider optional for camera controllers;
+
+---
+
 ## 0.0.33-1
 
 2024-03-01
