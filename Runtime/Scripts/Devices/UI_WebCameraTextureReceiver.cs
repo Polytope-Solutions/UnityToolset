@@ -61,13 +61,19 @@ namespace PolytopeSolutions.Toolset.Devices {
                 this.cameraSelectorDropdown.ClearOptions();
                 this.cameraSelectorDropdown.AddOptions(WebCameraAccessor.Instance.CameraNames);
                 this.cameraSelectorDropdown.value = this.SelectedCameraIndex;
+                if (this.startStremButton)
+                    this.startStremButton.interactable = true;
+                if (this.pauseStreamButton)
+                    this.pauseStreamButton.interactable = false;
+                if (this.stopStreamButton)
+                    this.stopStreamButton.interactable = false;
+            } else if (!this.startStremButton){
+                StartStream();
+                if (this.pauseStreamButton)
+                    this.pauseStreamButton.interactable = true;
+                if (this.stopStreamButton)
+                    this.stopStreamButton.interactable = true;
             }
-            if (this.startStremButton) 
-                this.startStremButton.interactable = true;
-            if (this.pauseStreamButton)
-                this.pauseStreamButton.interactable = false;
-            if (this.stopStreamButton)
-                this.stopStreamButton.interactable = false;
         }
 
         public override void StartStream() {
@@ -94,14 +100,18 @@ namespace PolytopeSolutions.Toolset.Devices {
             base.StopStream();
             if (this.rawImage)
                 this.rawImage.texture = null;
-            if (this.cameraSelectorDropdown)
+            if (this.cameraSelectorDropdown) {
                 this.cameraSelectorDropdown.interactable = true;
-            if (this.startStremButton)
-                this.startStremButton.interactable = true;
-            if (this.pauseStreamButton)
-                this.pauseStreamButton.interactable = false;
-            if (this.stopStreamButton)
-                this.stopStreamButton.interactable = false;
+                if (this.startStremButton)
+                    this.startStremButton.interactable = true;
+                if (this.pauseStreamButton)
+                    this.pauseStreamButton.interactable = false;
+                if (this.stopStreamButton)
+                    this.stopStreamButton.interactable = false;
+            }
+            else if (!this.startStremButton && this.requestCameraAccess) { 
+                this.requestCameraAccess.interactable = true;
+            }
         }
         protected override void OnTextureInitialized() { 
             UpdateRawImage();

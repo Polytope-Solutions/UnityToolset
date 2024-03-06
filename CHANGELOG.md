@@ -2,6 +2,17 @@
 
 ---
 
+## 0.0.34
+
+2024-03-05
+
+-	In webcamera UI if no dropdown is set - trigger start stream on camera connection;
+-	Add a generic UI Manager, Controller and State system;
+-	Add an animator utility to trigger a change of state;
+-	Add UI utility to simplify working with a choice options;
+
+---
+
 ## 0.0.33-2
 
 2024-03-01
