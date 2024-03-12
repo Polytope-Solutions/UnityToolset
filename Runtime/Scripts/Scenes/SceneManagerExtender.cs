@@ -16,7 +16,7 @@ using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.Scenes {
     public class SceneManagerExtender : TManager<SceneManagerExtender> {
-        [SerializeField] private string loaderSceneName;
+        [SerializeField] private string loaderSceneName = "DefaultLoadingScene";
         [SerializeField] private float smoothTransitionTime = 0.5f;
         [SerializeField] private float minWaitTime = 2f;
         private Coroutine currentLoadingProcess, addingSceneProcess;

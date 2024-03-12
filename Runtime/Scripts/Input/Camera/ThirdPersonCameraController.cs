@@ -21,12 +21,20 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] private Vector2 verticalAngleRange;
         //[SerializeField] private Vector2 horizontalAngleRange;
 
-        [SerializeField] private float rotateSpeed = 25f;
-        [SerializeField] private float moveSpeed = 2f;
+        [SerializeField] private float rotateSpeed = 50f;
+        [SerializeField] private Vector2 moveSpeedRange = new Vector2(100f, 100f);
         [SerializeField] private float zoomSpeed = 25f;
+        private float moveSpeed => Mathf.Lerp(this.moveSpeedRange.x, this.moveSpeedRange.y, this.Proximity);
 
         protected virtual Vector3 UpDirection => Vector3.up;
         private Vector3 cameraLocalUp = Vector3.up;
+
+        public float Proximity {
+            get { 
+                float distance = Vector3.Distance(this.tCamera.position, this.tTarget.position);
+                return Mathf.InverseLerp(this.distanceRange.x, this.distanceRange.y, distance);
+            }
+        }
 
         private float rotateLeftRightValue;
         private float rotateUpDownValue;

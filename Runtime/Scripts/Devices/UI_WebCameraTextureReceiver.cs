@@ -2,116 +2,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using System;
 using UnityEngine.UI;
-using TMPro;
-
-using PolytopeSolutions.Toolset.GlobalTools.Generic;
 
 namespace PolytopeSolutions.Toolset.Devices {
     // TODO: make it react to screen resizing
     public class UI_WebCameraTextureReceiver : WebCameraTextureReceiver {
-        [SerializeField] private Button requestCameraAccess;
-
         [SerializeField] private RawImage rawImage;
         [SerializeField] private bool maintainAspect = true;
         [SerializeField] private bool fitInScreen = true;
         private RectTransform rawImageRectTransform;
         private Vector2 originalSize;
+        [SerializeField] private bool autoRequestCameraAccess;
+        [SerializeField] private bool autoStart;
 
-        [SerializeField] private TMP_Dropdown cameraSelectorDropdown;
+        protected virtual bool IsAutoRequest => this.autoRequestCameraAccess;
+        protected virtual bool IsAutoStart => this.autoStart;
 
-        [SerializeField] private Button startStremButton;
-        [SerializeField] private Button pauseStreamButton;
-        [SerializeField] private Button stopStreamButton;
-
-        protected void Awake() {
-            if (this.requestCameraAccess)
-                this.requestCameraAccess.onClick.AddListener(WebCameraAccessor.Instance.RequestAccess);
-
+        protected virtual void Awake() {
             if (this.rawImage) { 
                 this.rawImageRectTransform = this.rawImage.GetComponent<RectTransform>();
                 this.originalSize = new Vector2(this.rawImageRectTransform.rect.width, this.rawImageRectTransform.rect.height);
             }
-            if (this.cameraSelectorDropdown) { 
-                this.cameraSelectorDropdown.interactable = false;
-                this.cameraSelectorDropdown.ClearOptions();
-                this.cameraSelectorDropdown.onValueChanged.AddListener(SelectCamera);
-            }
-            if (this.startStremButton) {
-                this.startStremButton.interactable = false;
-                this.startStremButton.onClick.AddListener(StartStream);
-            }
-            if (this.pauseStreamButton) {
-                this.pauseStreamButton.interactable = false;
-                this.pauseStreamButton.onClick.AddListener(PauseStream);
-            }
-            if (this.stopStreamButton) {
-                this.stopStreamButton.interactable = false;
-                this.stopStreamButton.onClick.AddListener(StopStream);
-            }
+            if (this.IsAutoRequest)
+                WebCameraAccessor.Instance.RequestAccess();
         }
-
-        protected override void OnCamerasConnected() { 
+        protected override void OnCamerasConnected() {
             base.OnCamerasConnected();
-            if (this.requestCameraAccess)
-                this.requestCameraAccess.interactable = false;
-            if (this.cameraSelectorDropdown) {
-                this.cameraSelectorDropdown.interactable = true;
-                this.cameraSelectorDropdown.ClearOptions();
-                this.cameraSelectorDropdown.AddOptions(WebCameraAccessor.Instance.CameraNames);
-                this.cameraSelectorDropdown.value = this.SelectedCameraIndex;
-                if (this.startStremButton)
-                    this.startStremButton.interactable = true;
-                if (this.pauseStreamButton)
-                    this.pauseStreamButton.interactable = false;
-                if (this.stopStreamButton)
-                    this.stopStreamButton.interactable = false;
-            } else if (!this.startStremButton){
+            if (this.IsAutoStart)
                 StartStream();
-                if (this.pauseStreamButton)
-                    this.pauseStreamButton.interactable = true;
-                if (this.stopStreamButton)
-                    this.stopStreamButton.interactable = true;
-            }
         }
-
-        public override void StartStream() {
-            base.StartStream();
-            if (this.cameraSelectorDropdown)
-                this.cameraSelectorDropdown.interactable = false;
-            if (this.startStremButton)
-                this.startStremButton.interactable = false;
-            if (this.pauseStreamButton)
-                this.pauseStreamButton.interactable = true;
-            if (this.stopStreamButton)
-                this.stopStreamButton.interactable = true;
-        }
-        public override void PauseStream() {
-            base.PauseStream();
-            if (this.startStremButton)
-                this.startStremButton.interactable = true;
-            if (this.pauseStreamButton)
-                this.pauseStreamButton.interactable = false;
-            if (this.stopStreamButton)
-                this.stopStreamButton.interactable = true;
+        public override void SelectCamera(int index) {
+            if (index < 0) return;
+            base.SelectCamera(index);
+            if (this.IsAutoStart)
+                StartStream();
         }
         public override void StopStream() {
             base.StopStream();
             if (this.rawImage)
                 this.rawImage.texture = null;
-            if (this.cameraSelectorDropdown) {
-                this.cameraSelectorDropdown.interactable = true;
-                if (this.startStremButton)
-                    this.startStremButton.interactable = true;
-                if (this.pauseStreamButton)
-                    this.pauseStreamButton.interactable = false;
-                if (this.stopStreamButton)
-                    this.stopStreamButton.interactable = false;
-            }
-            else if (!this.startStremButton && this.requestCameraAccess) { 
-                this.requestCameraAccess.interactable = true;
-            }
         }
         protected override void OnTextureInitialized() { 
             UpdateRawImage();

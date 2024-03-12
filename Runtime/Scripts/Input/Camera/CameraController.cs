@@ -15,7 +15,7 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] protected Transform tCamera;
         [SerializeField] protected bool useProxies;
 
-        protected new Rigidbody objectRigidbody;
+        protected Rigidbody objectRigidbody;
         protected Camera cCamera;
 
         private readonly float epsilon = 0.0001f;

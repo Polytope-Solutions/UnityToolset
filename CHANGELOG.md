@@ -2,6 +2,22 @@
 
 ---
 
+## 0.0.35
+
+2024-03-12
+
+-	Allow option generator to have overridable option creation;
+-	Simplify and generalize WebCam controller;
+-	Allow web camera texture receiver to autostart if was set up previously;
+-	Split web camera texture receiver raw image logic from the controller;
+-	Add protection to copy component to copy fields and properties by options;
+-	Allow scene loader to work without an extender;
+-	Auto set default loading scene by default in scene manager extender;
+-	Add exposed proximity percentage in third person camera controller;
+-	Allow move speed to be varied based on proximity for the third person camera controller;
+
+---
+
 ## 0.0.34
 
 2024-03-05

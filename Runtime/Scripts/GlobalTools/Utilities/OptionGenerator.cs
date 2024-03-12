@@ -2,11 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using System;
 using System.Linq;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
     public abstract class OptionGenerator<TKey, TValue> : MonoBehaviour {
         [SerializeField] protected GameObject goOptionPrefab;
+        [SerializeField] protected List<OptionOverrideInfo> overrideOptions;
+
+        [System.Serializable]
+        public class OptionOverrideInfo {
+            public TKey key;
+            public GameObject goOverride;
+        }
 
         protected abstract bool AreDependenciesReady { get; }
         protected abstract TValue GetValue(GameObject goItem);
@@ -43,7 +51,10 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
                 return;
             }
             int i = this.options.ToList().IndexOf(key);
-            GameObject goItem = Instantiate(this.goOptionPrefab, transform);
+            GameObject goPrefab = (this.overrideOptions.Any(item => Equals(item.key, key))) 
+                ? this.overrideOptions.First(item => Equals(item.key, key)).goOverride 
+                : this.goOptionPrefab;
+            GameObject goItem = Instantiate(goPrefab, transform);
             TValue value = GetValue(goItem);
             this.optionObjects.Add(key, value);
             InitializeOption(i, key, value);

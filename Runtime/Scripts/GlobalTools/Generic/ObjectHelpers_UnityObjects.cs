@@ -61,17 +61,21 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             }
             return tFound;
         }
-        public static T CopyComponent<T>(this GameObject goTarget, T source) where T: Component {
+        public static T CopyComponent<T>(this GameObject goTarget, T source, bool copyFields=true, bool copyProperties=false) where T: Component {
             Type type = source.GetType();
             Component copy = goTarget.AddComponent(type);
-            FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
-            foreach (FieldInfo field in fields) {
-                field.SetValue(copy, field.GetValue(source));
+            if (copyFields) { 
+                FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+                foreach (FieldInfo field in fields) {
+                    field.SetValue(copy, field.GetValue(source));
+                }
             }
-            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
-            foreach (PropertyInfo property in properties) {
-                if (property.CanWrite) {
-                    property.SetValue(copy, property.GetValue(source, null), null);
+            if (copyProperties) { 
+                PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+                foreach (PropertyInfo property in properties) {
+                    if (property.CanWrite) {
+                        property.SetValue(copy, property.GetValue(source, null), null);
+                    }
                 }
             }
             return (T)copy;

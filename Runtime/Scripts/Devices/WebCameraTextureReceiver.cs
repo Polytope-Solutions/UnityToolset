@@ -19,6 +19,8 @@ namespace PolytopeSolutions.Toolset.Devices {
                 return;
             }
             EventManager.Instance.RegisterEvenetCallback(WebCameraAccessor.WEBCAMERAS_CONNECTED_EVENTKEY, OnCamerasConnected);
+            if (WebCameraAccessor.Instance.Count > 0)
+                OnCamerasConnected();
         }
         protected virtual void OnDestroy() {
             EventManager.Instance?.UnregisterEvenetCallback(WebCameraAccessor.WEBCAMERAS_CONNECTED_EVENTKEY, OnCamerasConnected);
@@ -46,6 +48,7 @@ namespace PolytopeSolutions.Toolset.Devices {
         public virtual void StopStream() {
             if (this.activatedCameraIndex < 0) return;
             WebCameraAccessor.Instance.StopCameraTexture(this.activatedCameraIndex);
+            this.activatedCameraIndex = -1;
         }
         protected WebCamTexture ActiveTexture => WebCameraAccessor.Instance[this.activatedCameraIndex];
         protected bool IsHorizontallyFlipped => WebCameraAccessor.Instance.IsFrontFacing(this.activatedCameraIndex);
