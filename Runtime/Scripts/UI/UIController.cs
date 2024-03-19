@@ -5,40 +5,49 @@ using UnityEngine;
 using PolytopeSolutions.Toolset.Events;
 
 namespace PolytopeSolutions.Toolset.UI {
-    public abstract class UIController<T> : MonoBehaviour where T : UIState{
+    public abstract class UIController<T> : MonoBehaviour where T : UIState {
+        [SerializeField] private string controllerName;
         [SerializeField] private string controllerID;
-        [SerializeField] private T initialState;
-        [SerializeField] private List<T> sequentialStates;
+        [SerializeField] private List<T> states;
+        [SerializeField] private bool autoSetFirstStateOnStart = true;
 
-        private int currentStateIndex = 0;
+        private int currentStateIndex = -1;
 
         private T this[int index] {
             get { 
-                index = Mathf.Clamp(index, 0, this.Count);
-                if (index == 0)
-                    return this.initialState;
-                else
-                    return this.sequentialStates[index - 1];
+                index = Mathf.Clamp(index, 0, this.Count-1);
+                return this.states[index];
             }
         }
-        public int Count => this.sequentialStates.Count + 1;
+        public T GetStateByID(string stateID) {
+            int index = GetStateIndexByID(stateID);
+            if (index >= 0 && index < this.Count)
+                return this.states[index];
+            return null;
+        }
+        protected int GetStateIndexByID(string stateID) { 
+            return this.states.FindIndex(item => item.StateID == stateID);
+        }
+        public int Count => this.states.Count;
         public T CurrentState => this[this.currentStateIndex];
+        public string CurrentStateID => this[this.currentStateIndex].StateID;
 
-        protected void Awake() {
+        protected virtual void Awake() {
             if (string.IsNullOrEmpty(this.controllerID))
                 this.controllerID = this.name;
-            if (UIManager.Instance.RegisterController(this.controllerID, SetStateFromManager))
-                SetInitialState();
         }
 
         protected virtual void Start() {
+            if (UIManager.Instance.RegisterController(this.controllerID, SetState)
+                && this.autoSetFirstStateOnStart)
+                SetInitialState();
             if (EventManager.Instance != null) { 
-                EventManager.Instance.RegisterEvenetCallback("NextState", Next);
+                EventManager.Instance.RegisterEvenetCallback(UIManager.NEXT_STATE_EVENTKEY, Next);
             }
         }
         protected virtual void OnDestroy() {
             if (EventManager.Instance != null) {
-                EventManager.Instance.UnregisterEvenetCallback("NextState", Next);
+                EventManager.Instance.UnregisterEvenetCallback(UIManager.NEXT_STATE_EVENTKEY, Next);
             }
         }
 
@@ -49,24 +58,34 @@ namespace PolytopeSolutions.Toolset.UI {
             int previousIndex = this.currentStateIndex;
             this.currentStateIndex = Mathf.Clamp(this.currentStateIndex + modifier, 0, this.Count);
             if (previousIndex != this.currentStateIndex) {
-                this[previousIndex].Deactivate();
-                this[this.currentStateIndex].Activate();
-                UIManager.Instance.LogSwitchUIState(this.controllerID, this.currentStateIndex);
+                this[previousIndex].Deactivate(this[this.currentStateIndex]);
+                this[this.currentStateIndex].Activate(this[previousIndex]);
+                UIManager.Instance.LogSwitchUIState(this.controllerID, this.CurrentStateID);
             }
         }
-        private void SetInitialState() {
-            this.initialState.Activate();
-            for (int i = 0; i < this.sequentialStates.Count; i++) {
-                this.sequentialStates[i].Deactivate(immediate: true);
+        private void SetInitialState() 
+            => SetInitialState(0);
+        protected void SetInitialState(int index) {
+                for (int i = 0; i < this.states.Count; i++) {
+                if (i != index)
+                    this.states[i].Deactivate(this[index], immediate: true);
+                else
+                    this[index].Activate();
             }
-            UIManager.Instance.LogSwitchUIState(this.controllerID, this.currentStateIndex);
+            this.currentStateIndex = index;
+            UIManager.Instance.LogSwitchUIState(this.controllerID, this.CurrentStateID);
         }
-        public void SetStateFromManager(int index) {
+        private void SetState(string stateID)
+            => SetState(stateID, false);
+        public void SetState(string stateID, bool logSwitch=true) {
             int previousIndex = this.currentStateIndex;
+            int index = GetStateIndexByID(stateID);
             this.currentStateIndex = Mathf.Clamp(index, 0, this.Count);
             if (previousIndex != this.currentStateIndex) {
-                this[previousIndex].Deactivate();
-                this[this.currentStateIndex].Activate();
+                this[previousIndex].Deactivate(this[this.currentStateIndex]);
+                this[this.currentStateIndex].Activate(this[previousIndex]);
+                if (logSwitch)
+                    UIManager.Instance.LogSwitchUIState(this.controllerID, this.CurrentStateID);
             }
         }
     }

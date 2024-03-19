@@ -1,3 +1,8 @@
+#define DEBUG
+// #undef DEBUG
+#define DEBUG2
+// #undef DEBUG2
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,105 +17,109 @@ using PolytopeSolutions.Toolset.GlobalTools.Generic;
 
 namespace PolytopeSolutions.Toolset.UI {
     public class UIManager : TManager<UIManager> {
-        [SerializeField] private int bufferSize = 50;
+        [SerializeField] private int historyBufferSize = 50;
 
-        [System.Serializable]
-        public class UISceneSatete {
-            [SerializeField] protected string sceneName;
-            [SerializeField] protected string controllerID;
-            [SerializeField] protected int stateID;
+        public static string PREVIOUS_STATE_EVENTKEY = "PreviousState";
+        public static string NEXT_STATE_EVENTKEY = "NextState";
+        public static string UISTATECHANGE_EVENTKEY = "UIStateChange";
 
-            public string SceneName => this.sceneName;
-            public string ControllerID => this.controllerID;
-            public int StateID => this.stateID;
-
-            public UISceneSatete(string _sceneName, string _controllerID, int _stateID) {
-                this.sceneName = _sceneName;
-                this.controllerID = _controllerID;
-                this.stateID = _stateID;
-            }
-        }
-        private UISceneSatete[] uiSceneSatetes;
-        private int currentUISceneSateteIndex = -1;
-        private int firstUISceneStateIndex = 0, lastUISceneStateIndex = 0;
-
-        private Dictionary<string, Action<int>> controllers = new Dictionary<string, Action<int>>();
-
-        private bool IsValidCurrentUISceneState =>
-            this.currentUISceneSateteIndex >= 0 && this.currentUISceneSateteIndex < this.bufferSize
-            && this.uiSceneSatetes[this.currentUISceneSateteIndex] != null;
-        private UISceneSatete CurrentUISceneState => this.uiSceneSatetes[this.currentUISceneSateteIndex];
-
-
+        #region UNITY_FUNCTIONS
         protected override void Awake() {
             base.Awake();
             ResetHistory();
         }
         protected virtual void Start() {
-            SceneManagerExtender.Instance.RegisterSingletonOnBeforeSceneUnloadedEvent("*", "UIManager", UIManager_BeforeSceneChange);
-            EventManager.Instance.RegisterEvenetCallback("PreviousState", this.Undo);
+            SceneManagerExtender.Instance.RegisterSingletonOnAfterSceneActivatedEvent("*", "UIManager", UIManager_OnAfterSceneActivated);
+            EventManager.Instance.RegisterEvenetCallback(UIManager.PREVIOUS_STATE_EVENTKEY, this.Undo);
         }
         protected virtual void OnDestroy() {
             if (SceneManagerExtender.Instance)
-                SceneManagerExtender.Instance.UnregisterSingletonOnBeforeSceneUnloadedEvent("*", "UIManager");
+                SceneManagerExtender.Instance.UnregisterSingletonOnAfterSceneActivatedEvent("*", "UIManager");
             if (EventManager.Instance)
-                EventManager.Instance.UnregisterEvenetCallback("PreviousState", this.Undo);
+                EventManager.Instance.UnregisterEvenetCallback(UIManager.PREVIOUS_STATE_EVENTKEY, this.Undo);
         }
-
-        private void UIManager_BeforeSceneChange() {
-            this.controllers.Clear();
-            this.Log("Clearing controller references");
+        #endregion
+        #region UI_CONTROLLERS
+        private Dictionary<string, Action<string>> controllers = new Dictionary<string, Action<string>>();
+        private void UIManager_OnAfterSceneActivated(string sceneName) {
+            #if DEBUG
+            this.Log($"Entering scene: {sceneName}. Refreshing controller references");
+            #endif
+            List<string> removeList = new List<string>();
+            foreach (KeyValuePair<string, Action<string>> controllerHolder in this.controllers) {
+                if (!controllerHolder.Key.Contains(sceneName + "|"))
+                    removeList.Add(controllerHolder.Key);
+            }
+            for (int i = removeList.Count - 1; i >= 0; i--) {
+                #if DEBUG2
+                this.Log($"Removing controller reference: {removeList[i]}");
+                #endif
+                this.controllers.Remove(removeList[i]);
+            }
         }
-        public bool RegisterController(string controllerID, Action<int> ActivateSpecific) {
+        public bool RegisterController(string controllerID, Action<string> ActivateSpecific) {
             string sceneName = SceneManagerExtender.Instance.CurrentSceneName;
             string controllerKey = sceneName + "|" + controllerID;
             this.controllers.Add(controllerKey, ActivateSpecific);
+            #if DEBUG
             this.Log($"Adding a controller reference [{controllerKey}]");
-
-            if (this.IsValidCurrentUISceneState
-                    && this.CurrentUISceneState.SceneName == SceneManagerExtender.Instance.CurrentSceneName 
-                    && this.CurrentUISceneState.ControllerID == controllerID) {
-                // Come to a scene that is the current in the history - activate corresponding UI
-                ActivateCurrentState();
-                return false;
-            }
+            #endif
+            // TODO: handle with scene initialization
+            // Come to a scene that is the current in the history - activate corresponding UI
+            //if (this.IsValidCurrentUISceneState
+            //        && this.CurrentUISceneState.SceneName == SceneManagerExtender.Instance.CurrentSceneName 
+            //        && this.CurrentUISceneState.ControllerID == controllerID) {
+            //    ActivateCurrentState();
+            //    return false;
+            //}
             // Normal case - tell to activate the default one.
             return true;
         }
-
-
+        #endregion
+        #region UI_HISTORY
+        private UISceneSatete[] uiSceneSatetes;
+        private int currentUISceneSateteIndex = -1;
+        private int firstUISceneStateIndex = 0, lastUISceneStateIndex = 0;
+        private bool IsValidCurrentUISceneState =>
+            this.currentUISceneSateteIndex >= 0 && this.currentUISceneSateteIndex < this.historyBufferSize
+            && this.uiSceneSatetes[this.currentUISceneSateteIndex] != null;
+        private UISceneSatete CurrentUISceneState => this.uiSceneSatetes[this.currentUISceneSateteIndex];
+        public bool HistoryPresent => this.currentUISceneSateteIndex != this.firstUISceneStateIndex;
+        public void LogSwitchUIState(string controllerID, string stateID) {
+            string sceneName = SceneManagerExtender.Instance.CurrentSceneName;
+            bool firstBufferloop = this.currentUISceneSateteIndex == -1;
+            this.currentUISceneSateteIndex = (this.currentUISceneSateteIndex + 1) % this.historyBufferSize;
+            if (!firstBufferloop && this.firstUISceneStateIndex == this.currentUISceneSateteIndex)
+                this.firstUISceneStateIndex = (this.firstUISceneStateIndex + 1) % this.historyBufferSize;
+            this.lastUISceneStateIndex = this.currentUISceneSateteIndex;
+            this.uiSceneSatetes[this.currentUISceneSateteIndex] = new UISceneSatete(sceneName, controllerID, stateID);
+            EventManager.Instance.InvokeEvent(UIManager.UISTATECHANGE_EVENTKEY);
+        }
         public void ResetHistory() {
-            this.uiSceneSatetes = new UISceneSatete[this.bufferSize];
+            this.uiSceneSatetes = new UISceneSatete[this.historyBufferSize];
             this.currentUISceneSateteIndex = -1;
             this.firstUISceneStateIndex = 0;
             this.lastUISceneStateIndex = 0;
-        }
-
-        public void LogSwitchUIState(string controllerID, int UIID) {
-            string sceneName = SceneManagerExtender.Instance.CurrentSceneName;
-            bool firstBufferloop = this.currentUISceneSateteIndex == -1;
-            this.currentUISceneSateteIndex = (this.currentUISceneSateteIndex + 1) % this.bufferSize;
-            if (!firstBufferloop && this.firstUISceneStateIndex == this.currentUISceneSateteIndex)
-                this.firstUISceneStateIndex = (this.firstUISceneStateIndex + 1) % this.bufferSize;
-            this.lastUISceneStateIndex = this.currentUISceneSateteIndex;
-            this.uiSceneSatetes[this.currentUISceneSateteIndex] = new UISceneSatete(sceneName, controllerID, UIID);
+            EventManager.Instance.InvokeEvent(UIManager.UISTATECHANGE_EVENTKEY);
         }
         public void Undo() {
             if (this.currentUISceneSateteIndex == this.firstUISceneStateIndex)
                 return;
-            this.currentUISceneSateteIndex = (this.currentUISceneSateteIndex - 1 + this.bufferSize) % this.bufferSize;
+            this.currentUISceneSateteIndex = (this.currentUISceneSateteIndex - 1 + this.historyBufferSize) % this.historyBufferSize;
             ActivateCurrentState();
+            EventManager.Instance.InvokeEvent(UIManager.UISTATECHANGE_EVENTKEY);
         }
-
         public void Redo() {
             if (this.currentUISceneSateteIndex == this.lastUISceneStateIndex)
                 return;
-            this.currentUISceneSateteIndex = (this.currentUISceneSateteIndex + 1) % this.bufferSize;
+            this.currentUISceneSateteIndex = (this.currentUISceneSateteIndex + 1) % this.historyBufferSize;
             ActivateCurrentState();
+            EventManager.Instance.InvokeEvent(UIManager.UISTATECHANGE_EVENTKEY);
         }
-
+        #endregion
+        #region MISC
         protected void ActivateCurrentState() {
-            if (!this.IsValidCurrentUISceneState) { 
+            if (!this.IsValidCurrentUISceneState) {
                 this.LogError($"Current UI state is null");
                 return;
             }
@@ -121,5 +130,6 @@ namespace PolytopeSolutions.Toolset.UI {
             string controllerKey = this.CurrentUISceneState.SceneName + "|" + this.CurrentUISceneState.ControllerID;
             this.controllers[controllerKey](this.CurrentUISceneState.StateID);
         }
+        #endregion
     }
 }

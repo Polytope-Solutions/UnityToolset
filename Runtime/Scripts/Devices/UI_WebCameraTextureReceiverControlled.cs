@@ -137,7 +137,10 @@ namespace PolytopeSolutions.Toolset.Devices {
             base.OnCamerasConnected();
             if (this.streamControl.IsValid) { 
                 this.streamControl.ResetOptions(WebCameraAccessor.Instance.CameraNames);
-                this.streamControl.SetState(true, true, false, false);
+                if (this.IsAutoStart)
+                    this.streamControl.SetState(true, false, true, true);
+                else
+                    this.streamControl.SetState(true, true, false, false);
             }
         }
 

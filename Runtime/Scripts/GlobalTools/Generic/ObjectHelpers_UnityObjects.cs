@@ -93,6 +93,17 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             callback(value);
         }
 
+        public static IEnumerator AwaitForAnimationState(Animator animator, string animationStateName, Action onStateReached) {
+            AnimatorStateInfo state;
+            do {
+                yield return null;
+                if (!animator)
+                    break;
+                state = animator.GetCurrentAnimatorStateInfo(0);
+            } while (!state.IsName(animationStateName));
+            onStateReached?.Invoke();
+        }
+
         [HideInCallstack]
         public static void Log(Type source, string messageContent,
                 [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {

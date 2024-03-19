@@ -2,6 +2,28 @@
 
 ---
 
+## 0.0.36
+
+2024-03-19
+
+-	Organize UI Management:
+	-	Switch UI states to be addressed by IDs (for now strings);
+	-	Allow UIStates to Toggle;
+	-	Expose Next or Previous UI state to not disable enable common canvases;
+	-	Expose Event on UI state change;
+	-	Refactor the manager into regions;
+	-	Handle edge cases in controller;
+	-	Allow non-linear controller flow and manual initial activativation;
+-	Allow Object toggle to auto-set state on start;
+-	Add helper to wait for animation state to be reached;
+-	WebCam fixes:
+	-	Add web cam state callback;
+	-	Add web cam state accessors;
+	-	Fix state not being set correctly in UI controlled texture receiver;
+-	Add Animations and Prefab for smooth canvas Animator;
+
+---
+
 ## 0.0.35
 
 2024-03-12

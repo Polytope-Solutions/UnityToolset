@@ -35,6 +35,23 @@ namespace PolytopeSolutions.Toolset.Devices {
         }
         public bool IsFrontFacing(int index) => this.HasCameras ? this.cameras[index].isFrontFacing : false;
 
+        private Dictionary<int, Action> webCameraStatusChangeCallbacks = new Dictionary<int, Action>();
+        public void AddCallback(int cameraIndex, Action callback) {
+            if (this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
+                this.webCameraStatusChangeCallbacks[cameraIndex] += callback;
+            else
+                this.webCameraStatusChangeCallbacks.Add(cameraIndex, callback);
+        }
+        public void RemoveCallback(int cameraIndex, Action callback) {
+            if (this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
+                this.webCameraStatusChangeCallbacks[cameraIndex] -= callback;
+        }
+
+        public bool IsPlaying(int index) 
+            => this.IsPresent(index) && this.webCamTextures[index].isPlaying;
+        public bool IsPresent(int index)
+            => this.HasCameras ? this.webCamTextures.ContainsKey(index) : false;
+
         #region UNITY_FUNCTIONS
         protected void Start() {
             if (this.autoRequestOnStart)
@@ -64,6 +81,9 @@ namespace PolytopeSolutions.Toolset.Devices {
                             ? $", resolutions: [{string.Join(",",this.cameras[cameraIndex].availableResolutions.Select(item => $"{item.width.ToString()}:{item.height.ToString()}"))}]" : string.Empty)
                     );
                 #endif
+                for (int cameraIndex = 0; cameraIndex < this.cameras.Length; cameraIndex++) 
+                    if (!this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
+                        this.webCameraStatusChangeCallbacks.Add(cameraIndex, null);
             }
             else
                 this.LogError("No webcams found");
@@ -110,6 +130,8 @@ namespace PolytopeSolutions.Toolset.Devices {
             this.Log($"Camera is initialized: [{this.webCamTextures[cameraIndex].width}, {this.webCamTextures[cameraIndex].height}]");
             #endif
             OnTextureReady?.Invoke();
+            if (this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
+                this.webCameraStatusChangeCallbacks[cameraIndex]?.Invoke();
         }
         public void StopCameraTexture(int cameraIndex) {
             if (!this.HasCameras) {
@@ -118,6 +140,8 @@ namespace PolytopeSolutions.Toolset.Devices {
             }
             if (this.webCamTextures.ContainsKey(cameraIndex))
                 this.webCamTextures[cameraIndex].Stop();
+            if (this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
+                this.webCameraStatusChangeCallbacks[cameraIndex]?.Invoke();
         }
         public void PauseCameraTexture(int cameraIndex) {
             if (!this.HasCameras) {
@@ -126,6 +150,8 @@ namespace PolytopeSolutions.Toolset.Devices {
             }
             if (this.webCamTextures.ContainsKey(cameraIndex))
                 this.webCamTextures[cameraIndex].Pause();
+            if (this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
+                this.webCameraStatusChangeCallbacks[cameraIndex]?.Invoke();
         }
 
         [ContextMenu("DEFAULT>Start Default Camera")]
