@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.37
+
+2024-04-05
+
+-	Add an event subscriber with exposed callback;
+-	Add simple utility to sync transform with another transform;
+
+---
+
 ## 0.0.36
 
 2024-03-19
