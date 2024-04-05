@@ -41,6 +41,14 @@ namespace PolytopeSolutions.Toolset.UI {
                 this.isActive = false;
             }
         }
+        public virtual void SetState(bool targetState) {
+            if (targetState && !this.isActive) {
+                this.Activate();
+            }
+            else if (!targetState && this.isActive) {
+                this.Deactivate();
+            }
+        }
         public virtual void Toggle() {
             if (this.isActive) {
                 this.Deactivate();

@@ -2,6 +2,16 @@
 
 ---
 
+## 0.0.38
+
+2024-04-05
+
+-	Allow UI state to request a  target state;
+-	Allow controller to pass more actions and add a request state mechanism;
+-	Update UI Manager to handle multiple actions by controller and add a request state mechanism;
+
+---
+
 ## 0.0.37
 
 2024-04-05

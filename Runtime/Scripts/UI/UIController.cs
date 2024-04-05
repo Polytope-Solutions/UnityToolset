@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using PolytopeSolutions.Toolset.Events;
+using PolytopeSolutions.Toolset.GlobalTools.Generic;
 
 namespace PolytopeSolutions.Toolset.UI {
     public abstract class UIController<T> : MonoBehaviour where T : UIState {
@@ -32,13 +33,18 @@ namespace PolytopeSolutions.Toolset.UI {
         public T CurrentState => this[this.currentStateIndex];
         public string CurrentStateID => this[this.currentStateIndex].StateID;
 
+        private UIManager.UIControllerInteractions interactions => new UIManager.UIControllerInteractions() {
+            Activation = this.SetState,
+            RequestState = this.RequestState
+        };
+
         protected virtual void Awake() {
             if (string.IsNullOrEmpty(this.controllerID))
                 this.controllerID = this.name;
         }
 
         protected virtual void Start() {
-            if (UIManager.Instance.RegisterController(this.controllerID, SetState)
+            if (UIManager.Instance.RegisterController(this.controllerID, this.interactions)
                 && this.autoSetFirstStateOnStart)
                 SetInitialState();
             if (EventManager.Instance != null) { 
@@ -87,6 +93,15 @@ namespace PolytopeSolutions.Toolset.UI {
                 if (logSwitch)
                     UIManager.Instance.LogSwitchUIState(this.controllerID, this.CurrentStateID);
             }
+        }
+
+        private void RequestState(string stateID, bool targetState) {
+            UIState state = GetStateByID(stateID);
+            if (state == null) {
+                this.LogError($"State {stateID} not found in {this.controllerID}");
+                return;
+            }
+            state.SetState(targetState);
         }
     }
 }

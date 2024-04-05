@@ -40,13 +40,17 @@ namespace PolytopeSolutions.Toolset.UI {
         }
         #endregion
         #region UI_CONTROLLERS
-        private Dictionary<string, Action<string>> controllers = new Dictionary<string, Action<string>>();
+        public struct UIControllerInteractions {
+            public Action<string> Activation;
+            public Action<string, bool> RequestState;
+        }
+        private Dictionary<string, UIControllerInteractions> controllers = new Dictionary<string, UIControllerInteractions>();
         private void UIManager_OnAfterSceneActivated(string sceneName) {
             #if DEBUG
             this.Log($"Entering scene: {sceneName}. Refreshing controller references");
             #endif
             List<string> removeList = new List<string>();
-            foreach (KeyValuePair<string, Action<string>> controllerHolder in this.controllers) {
+            foreach (KeyValuePair<string, UIControllerInteractions> controllerHolder in this.controllers) {
                 if (!controllerHolder.Key.Contains(sceneName + "|"))
                     removeList.Add(controllerHolder.Key);
             }
@@ -57,10 +61,10 @@ namespace PolytopeSolutions.Toolset.UI {
                 this.controllers.Remove(removeList[i]);
             }
         }
-        public bool RegisterController(string controllerID, Action<string> ActivateSpecific) {
+        public bool RegisterController(string controllerID, UIControllerInteractions interactions) {
             string sceneName = SceneManagerExtender.Instance.CurrentSceneName;
             string controllerKey = sceneName + "|" + controllerID;
-            this.controllers.Add(controllerKey, ActivateSpecific);
+            this.controllers.Add(controllerKey, interactions);
             #if DEBUG
             this.Log($"Adding a controller reference [{controllerKey}]");
             #endif
@@ -128,7 +132,16 @@ namespace PolytopeSolutions.Toolset.UI {
                 return;
             }
             string controllerKey = this.CurrentUISceneState.SceneName + "|" + this.CurrentUISceneState.ControllerID;
-            this.controllers[controllerKey](this.CurrentUISceneState.StateID);
+            this.controllers[controllerKey].Activation(this.CurrentUISceneState.StateID);
+        }
+        public void RequestState(string controllerID, string stateID, bool targetState) {
+            string sceneName = SceneManagerExtender.Instance.CurrentSceneName;
+            string controllerKey = sceneName + "|" + controllerID;
+            if (!this.controllers.ContainsKey(controllerKey)) {
+                this.LogError($"Controller {controllerKey} is not registered");
+                return;
+            }
+            this.controllers[controllerKey].RequestState(stateID, targetState);
         }
         #endregion
     }
