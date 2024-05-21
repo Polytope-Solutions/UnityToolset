@@ -2,6 +2,18 @@
 
 ---
 
+## 0.0.39
+
+2024-05-21
+
+-	Add curve extrusion extension for MeshTools;
+	-	Allow curve capping, handle simple convex case and more generic case with inner curves (automatically handling winding, uvs, normals);
+	-	Add a way to evaluate curve winding;
+-	Add a way to merge and resize MeshData;
+-	Automatically compute MeshData center;
+
+---
+
 ## 0.0.38
 
 2024-04-05
