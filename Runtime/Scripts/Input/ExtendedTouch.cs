@@ -79,6 +79,9 @@ namespace PolytopeSolutions.Toolset.Input {
         private bool _primaryFingerCurrentContact;
         private bool _secondaryFingerCurrentContact;
 
+        private float primaryTouchStartTime;
+        private float singleTouchTimeout = 5 / 60f;
+
         public static ExtendedTouch current { get; internal set; }
 
         private static float allignmentUpThreshold = 0.35f,
@@ -128,6 +131,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 InputAction primaryContactAction = new InputAction(binding: "<Touchscreen>/touch0/press");//"<Mouse>/leftButton");//
                 primaryContactAction.started += _ => {
                     this._primaryFingerCurrentContact = true;
+                    this.primaryTouchStartTime = Time.time;
                 };
                 primaryContactAction.canceled += _ => {
                     this._primaryFingerCurrentContact = false;
@@ -210,6 +214,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 this.twoFingerZoom.WriteValueIntoEvent(0f, eventPtr);
                 this.twoFingerZoom.ApplyParameterChanges();
 
+                float timeSincePrimaryTouch = Time.time - this.primaryTouchStartTime;
                 if (this._primaryFingerCurrentContact && this._secondaryFingerCurrentContact) {
                     // Two finger touch
                     Vector2 primaryDelta = this._primaryFingerDelta;
@@ -245,7 +250,7 @@ namespace PolytopeSolutions.Toolset.Input {
                             this.twoFingerPinch.ApplyParameterChanges();
                         }
                     }
-                } else if (this._primaryFingerCurrentContact) { 
+                } else if (this._primaryFingerCurrentContact && timeSincePrimaryTouch > this.singleTouchTimeout) { 
                     // Single finger touch
                     Vector2 primaryDelta = this._primaryFingerDelta;
                     //this.Log($"SingleTouch: {delta.ToString("F6")}");

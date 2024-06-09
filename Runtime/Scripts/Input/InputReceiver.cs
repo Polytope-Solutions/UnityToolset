@@ -61,6 +61,12 @@ namespace PolytopeSolutions.Toolset.Input {
             if (this.IsSelfManaged)
                 SetActiveInputs(false);
         }
+        protected void OnDestroy() {
+            DisableInputEvents();
+
+            if (!this.IsSelfManaged)
+                InputManager.Instance.UnregisterInputReceiver(this.inputReceiverKeyName);
+        }
 
         ///////////////////////////////////////////////////////////////////////
         public void RegisterInputHandler(IInputHandler handler) {

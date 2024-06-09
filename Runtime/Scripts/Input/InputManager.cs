@@ -47,12 +47,16 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         #endregion
         ///////////////////////////////////////////////////////////////////////
-        public void RegisterInputReceiver(string key, InputReceiver receiver) { 
+        public void RegisterInputReceiver(string key, InputReceiver receiver) {
             if (!this.inputReceivers.ContainsKey(key))
                 this.inputReceivers.Add(key, receiver);
             else
                 this.inputReceivers[key] = receiver;
             receiver.SetActiveInputs(receiver.IsActiveByDefault);
+        }
+        public void UnregisterInputReceiver(string key) {
+            if (this.inputReceivers.ContainsKey(key))
+                this.inputReceivers.Remove(key);
         }
         private void ActivateReceivers() {
             if (this.inputReceivers.Count > 0)

@@ -2,6 +2,16 @@
 
 ---
 
+## 0.0.40
+
+2024-06-09
+
+- Try to adjust extended touch sensitivity;
+- Add timeout for single touch gestures in case second is a bit delayed;
+- Add ability to unregister input receivers and autounregister OnDestroy;
+
+---
+
 ## 0.0.39
 
 2024-05-21

@@ -75,17 +75,6 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "negative",
-                    "id": "94cd8957-e37c-42b3-8a91-c5e4d0e0f42b",
-                    "path": "<ExtendedTouch>/twoFingerLeft",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "cameraRotateLeftRight",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
                     "name": "positive",
                     "id": "6ebec0fb-1cf3-410e-8ca3-458c9d2d50a7",
                     "path": "<Keyboard>/rightArrow",
@@ -97,8 +86,30 @@
                     "isPartOfComposite": true
                 },
                 {
+                    "name": "1D Axis",
+                    "id": "f55bdfb0-77f4-429e-beee-fcc75b4efb3b",
+                    "path": "1DAxis(minValue=-10,maxValue=10)",
+                    "interactions": "",
+                    "processors": "AxisDeadzone(max=9.25)",
+                    "groups": "",
+                    "action": "cameraRotateLeftRight",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "525a7bfc-b40b-4bf8-ae40-0dd79acde577",
+                    "path": "<ExtendedTouch>/twoFingerLeft",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "cameraRotateLeftRight",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "positive",
-                    "id": "117a58c7-8a10-474f-b2c7-c18e62cb297f",
+                    "id": "8130cd61-634c-463e-9a99-3730d8d54da1",
                     "path": "<ExtendedTouch>/twoFingerRight",
                     "interactions": "",
                     "processors": "",
@@ -130,17 +141,6 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "negative",
-                    "id": "632e3df9-24e6-4549-8709-fb162f9551dc",
-                    "path": "<ExtendedTouch>/singleFingerDown",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "cameraMoveForwardBackward",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
                     "name": "positive",
                     "id": "ed190066-87b3-4eab-a307-09c479bc3837",
                     "path": "<Keyboard>/w",
@@ -152,8 +152,30 @@
                     "isPartOfComposite": true
                 },
                 {
+                    "name": "1D Axis",
+                    "id": "9a267453-8d8e-4535-a3bb-a5497269c38b",
+                    "path": "1DAxis(minValue=-10,maxValue=10)",
+                    "interactions": "",
+                    "processors": "AxisDeadzone(max=9.25)",
+                    "groups": "",
+                    "action": "cameraMoveForwardBackward",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "d953ecf0-ea93-49f3-8cff-7300ea35cfa7",
+                    "path": "<ExtendedTouch>/singleFingerDown",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "cameraMoveForwardBackward",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "positive",
-                    "id": "c2345d67-2811-4cb2-b2f1-deee7c2c6b9d",
+                    "id": "5f3b82ca-aba8-4772-a303-e1579d975726",
                     "path": "<ExtendedTouch>/singleFingerUp",
                     "interactions": "",
                     "processors": "",
@@ -185,17 +207,6 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "negative",
-                    "id": "9c7316f9-393c-4b4f-9648-70629ccb4e82",
-                    "path": "<ExtendedTouch>/twoFingerUp",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "cameraRotateUpDown",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
                     "name": "positive",
                     "id": "6e79d611-7a41-4d5f-9f60-2d6bcc2b00ad",
                     "path": "<Keyboard>/downArrow",
@@ -207,8 +218,30 @@
                     "isPartOfComposite": true
                 },
                 {
+                    "name": "1D Axis",
+                    "id": "845bea4f-83d9-4898-bc5c-b7747b9f6647",
+                    "path": "1DAxis(minValue=-10,maxValue=10)",
+                    "interactions": "",
+                    "processors": "AxisDeadzone(max=9.25)",
+                    "groups": "",
+                    "action": "cameraRotateUpDown",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "609df561-fcaa-49f2-98ed-affe4223a4ed",
+                    "path": "<ExtendedTouch>/twoFingerUp",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "cameraRotateUpDown",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "positive",
-                    "id": "0292aa8f-ce39-43bb-9fd3-2e54d960f973",
+                    "id": "5bd2e2ff-5e29-4d81-a68e-4ab721dd5ba7",
                     "path": "<ExtendedTouch>/twoFingerDown",
                     "interactions": "",
                     "processors": "",
@@ -240,17 +273,6 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "negative",
-                    "id": "9a5bc81e-6e83-4d5d-9c5c-84404ca02373",
-                    "path": "<ExtendedTouch>/singleFingerRight",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "cameraMoveLeftRight",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
                     "name": "positive",
                     "id": "4560f684-dfe8-4d39-af2d-6a52cc608c04",
                     "path": "<Keyboard>/a",
@@ -262,8 +284,30 @@
                     "isPartOfComposite": true
                 },
                 {
+                    "name": "1D Axis",
+                    "id": "f79553ce-9ad1-4432-badd-5e9dd674b6b0",
+                    "path": "1DAxis(minValue=-10,maxValue=10)",
+                    "interactions": "",
+                    "processors": "AxisDeadzone(max=9.25)",
+                    "groups": "",
+                    "action": "cameraMoveLeftRight",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "20cc8c34-6580-40a1-ae74-f2f81387fce8",
+                    "path": "<ExtendedTouch>/singleFingerRight",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "cameraMoveLeftRight",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "positive",
-                    "id": "b4241a9b-3af5-4fb9-a2af-1340dbbdfac4",
+                    "id": "d4f45d04-923d-4d74-acf9-f0f7c88317e7",
                     "path": "<ExtendedTouch>/singleFingerLeft",
                     "interactions": "",
                     "processors": "",
@@ -295,17 +339,6 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "negative",
-                    "id": "487dba6a-d5c6-4952-a63c-ab6bc40ad671",
-                    "path": "<ExtendedTouch>/twoFingerZoom",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "cameraMoveUpDown",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
                     "name": "positive",
                     "id": "65f6fe71-8dc0-41ad-b64c-051b2ff0f5a7",
                     "path": "<Keyboard>/e",
@@ -317,8 +350,30 @@
                     "isPartOfComposite": true
                 },
                 {
+                    "name": "1D Axis",
+                    "id": "15cf7e8f-7b02-443e-b77e-ebd5ef2cba7e",
+                    "path": "1DAxis(minValue=-10,maxValue=10)",
+                    "interactions": "",
+                    "processors": "AxisDeadzone(max=9.25)",
+                    "groups": "",
+                    "action": "cameraMoveUpDown",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "4680dda3-0ed6-4bdd-9fbb-450bcad4f705",
+                    "path": "<ExtendedTouch>/twoFingerZoom",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "cameraMoveUpDown",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "positive",
-                    "id": "d54b5fb0-9e1c-4782-bce6-359ee9931e76",
+                    "id": "f522b88b-527c-4831-9d51-719f6ef67cb7",
                     "path": "<ExtendedTouch>/twoFingerPinch",
                     "interactions": "",
                     "processors": "",
