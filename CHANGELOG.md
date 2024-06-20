@@ -2,13 +2,22 @@
 
 ---
 
+## 0.0.41
+
+2024-06-20
+
+-	Add Addressable manager and tools;
+-	Clean assembly definitions;
+
+---
+
 ## 0.0.40
 
 2024-06-09
 
-- Try to adjust extended touch sensitivity;
-- Add timeout for single touch gestures in case second is a bit delayed;
-- Add ability to unregister input receivers and autounregister OnDestroy;
+-	Try to adjust extended touch sensitivity;
+-	Add timeout for single touch gestures in case second is a bit delayed;
+-	Add ability to unregister input receivers and autounregister OnDestroy;
 
 ---
 

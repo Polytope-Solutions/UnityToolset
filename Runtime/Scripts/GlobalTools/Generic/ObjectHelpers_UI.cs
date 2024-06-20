@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-#if UI_TMPRO
+#if USE_UI_TMPRO
 using TMPro;
 #endif
 
@@ -19,7 +19,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                 if (textHolder != null)
                     textHolder.text = text;
             }
-            #if UI_TMPRO
+            #if USE_UI_TMPRO
             {
                 TextMeshPro textHolder = goItem.GetComponent<TextMeshPro>();
                 if (textHolder != null)
