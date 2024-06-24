@@ -14,6 +14,8 @@ namespace PolytopeSolutions.Toolset.Input {
         [Header("General")]
         [SerializeField] protected Transform tCamera;
         [SerializeField] protected bool useProxies;
+        [SerializeField] protected bool useMovementMonitor = true;
+        [SerializeField] protected float minMovementMonitorDelay = 0.05f;
 
         protected Rigidbody objectRigidbody;
         protected Camera cCamera;
@@ -30,7 +32,7 @@ namespace PolytopeSolutions.Toolset.Input {
         private Vector3 cameraMovementVelocity, cameraRotationVelocity;
         [SerializeField] protected float smoothTime = 0.1f;
 
-        protected override void OnEnable() { 
+        protected override void OnEnable() {
             base.OnEnable();
             ObjectSetup();
         }
@@ -39,13 +41,13 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         protected virtual void ObjectSetup() {
             this.cCamera = this.tCamera?.GetComponent<Camera>();
-            if (this.tCamera == null){
+            if (this.tCamera == null) {
                 this.cCamera = Camera.main;
                 this.tCamera = this.cCamera?.transform;
             }
 
             if (this.useProxies) {
-                if (!this.tObjectProxy) { 
+                if (!this.tObjectProxy) {
                     this.tObjectProxy = TryFindOrAddByName("ObjectProxy").transform;
                     if (transform.parent)
                         this.tObjectProxy.SetParent(transform.parent);
@@ -55,7 +57,7 @@ namespace PolytopeSolutions.Toolset.Input {
                     this.tObjectProxy.rotation = transform.rotation;
                     this.tObjectProxy.localScale = transform.localScale;
                 }
-                if (!this.tCameraProxy) { 
+                if (!this.tCameraProxy) {
                     this.tCameraProxy = this.tObjectProxy.gameObject.TryFindOrAddByName("CameraProxy").transform;
                     this.tCameraProxy.position = this.tCamera.position;
                     this.tCameraProxy.rotation = this.tCamera.rotation;
@@ -76,7 +78,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 this.objectRigidbody.automaticInertiaTensor = currentRigidbody.automaticInertiaTensor;
                 currentRigidbody.isKinematic = true;
                 Collider currentCollider = GetComponent<Collider>();
-                if (currentCollider) { 
+                if (currentCollider) {
                     Collider objectCollider = this.tObjectProxy.gameObject.CopyComponent<Collider>(currentCollider);
                     currentCollider.enabled = false;
                 }
@@ -94,7 +96,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 Mathf.Pow(frustumWidth / 2, 2)
             );
 
-            if (this.movementMonitor == null)
+            if (this.movementMonitor == null && this.useMovementMonitor)
                 this.movementMonitor = StartCoroutine(MovementMonitor());
         }
         protected virtual void ApplyProxies() {
@@ -120,6 +122,11 @@ namespace PolytopeSolutions.Toolset.Input {
             Quaternion lastRotation, currentRotation;
             lastPosition = this.tCamera.position;
             lastRotation = this.tCamera.rotation;
+            YieldInstruction awaiter;
+            if (this.minMovementMonitorDelay <= 0)
+                awaiter = new WaitForEndOfFrame();
+            else
+                awaiter = new WaitForSeconds(this.minMovementMonitorDelay);
             while (true) {
                 currentPosition = this.tCamera.position;
                 currentRotation = this.tCamera.rotation;
@@ -130,24 +137,25 @@ namespace PolytopeSolutions.Toolset.Input {
                     this.onCameraViewChanged?.Invoke();
                 lastPosition = currentPosition;
                 lastRotation = currentRotation;
-                yield return new WaitForEndOfFrame();
+                yield return awaiter;
             }
         }
         ///////////////////////////////////////////////////////////////////////
-        public List<Vector3> FieldOfViewBoundaries(Plane plane) { 
+        public List<Vector3> FieldOfViewBoundaries(Plane plane) {
             List<Vector3> boundaryPoints = new List<Vector3>();
-            foreach (Vector3 corner in 
-                new List<Vector3> { 
-                    Vector3.zero, 
-                    new Vector3(0, 1, 0), 
-                    new Vector3(1, 1, 0), 
-                    new Vector3(1, 0, 0) 
+            foreach (Vector3 corner in
+                new List<Vector3> {
+                    Vector3.zero,
+                    new Vector3(0, 1, 0),
+                    new Vector3(1, 1, 0),
+                    new Vector3(1, 0, 0)
                 }) {
                 Ray temp = this.cCamera.ViewportPointToRay(corner);
-                if (plane.Raycast(temp, out float distance)){
+                if (plane.Raycast(temp, out float distance)) {
                     distance = Mathf.Clamp(distance, 0, this.farCornerDistanceCache);
                     boundaryPoints.Add(temp.origin + temp.direction * distance);
-                } else {
+                }
+                else {
                     // Ray does not intersect with plane - snap the corner to the relevant plane
                     boundaryPoints.Add(
                         plane.ClosestPointOnPlane(temp.origin + temp.direction * this.farCornerDistanceCache)

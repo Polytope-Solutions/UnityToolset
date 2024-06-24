@@ -2,6 +2,18 @@
 
 ---
 
+## 0.0.42
+
+2024-06-24
+
+-	Allow spherical meshest to be reoriented;
+-	Allow Spherical coordinates to be reoriented;
+-	Try limit camea movement monitor;
+-	Add basic tree data structure;
+-	Add mini-helper function to set target framerate in app;
+
+---
+
 ## 0.0.41
 
 2024-06-20

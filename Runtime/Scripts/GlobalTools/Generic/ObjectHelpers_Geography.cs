@@ -53,11 +53,17 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             geoCoordinate.Geo2GeoTile(zoomLevel, ref result);
             result.GeoTile2FlatGame(zoomLevel, baseGeoTile, gameTileSize, ref result);
         }
-        public static void Geo2SphericalGame(this Vector3Double geoCoordinate, Vector3Double center, double radius, ref Vector3Double result) {
-            result = center + new Vector3Double(Quaternion.AngleAxis(-geoCoordinate.xf, Vector3.up) *
-                    (Quaternion.AngleAxis(geoCoordinate.zf, Vector3.right)
-                        * -Vector3.forward))
-                    * radius;
+        public static void Geo2SphericalGame(this Vector3Double geoCoordinate, Vector3Double center, double radius, Matrix4x4 correction, ref Vector3Double result) {
+            result = center
+                + new Vector3Double(
+                    correction.MultiplyVector(
+                        Quaternion.AngleAxis(-geoCoordinate.xf, Vector3.up) *
+                        (
+                            Quaternion.AngleAxis(geoCoordinate.zf, Vector3.right)
+                            * -Vector3.forward
+                        )
+                    )
+                ) * radius;
         }
         public static void Geo2GameTile(this Vector3Double geoCoordinate, int zoomLevel, Vector3Double baseGeoTile, ref Vector3Double result) {
             geoCoordinate.Geo2GeoTile(zoomLevel, ref result);
@@ -118,9 +124,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             result.x = (-baseGeoTile.x + geoTile.x) * zoomGameTileSize;
             result.z = (baseGeoTile.z - geoTile.z) * zoomGameTileSize;
         }
-        public static void GeoTile2SphericalGame(this Vector3Double geoTile, int zoomLevel, Vector3Double center, double radius, ref Vector3Double result) {
+        public static void GeoTile2SphericalGame(this Vector3Double geoTile, int zoomLevel, Vector3Double center, double radius, Matrix4x4 correction, ref Vector3Double result) {
             geoTile.GeoTile2Geo(zoomLevel, ref result);
-            result.Geo2SphericalGame(center, radius, ref result);
+            result.Geo2SphericalGame(center, radius, correction, ref result);
         }
         public static void GeoTile2GameTile(this Vector3Double geoTile, Vector3Double baseGeoTile, ref Vector3Double result) {
             result.x = -Math.Floor(baseGeoTile.x) + geoTile.x;
@@ -135,20 +141,20 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             result.z = Mathf.FloorToInt(geoTile.zf);
         }
         public static void GeoTileIndex2Geo(this Vector3Int geoTileIndex, int zoomLevel, ref Vector3Double result) {
-            (new Vector3Double(geoTileIndex + Vector3.right*0.5f + Vector3.forward*0.5f)).GeoTile2Geo(zoomLevel, ref result);
+            (new Vector3Double(geoTileIndex + Vector3.right * 0.5f + Vector3.forward * 0.5f)).GeoTile2Geo(zoomLevel, ref result);
         }
         public static void GeoTileIndex2FlatGame(this Vector3Int geoTileIndex, int zoomLevel, Vector3Double baseGeoTile, GameTileSize gameTileSize, ref Vector3Double result) {
             (new Vector3Double(geoTileIndex + Vector3.right * 0.5f + Vector3.forward * 0.5f)).GeoTile2FlatGame(zoomLevel, baseGeoTile, gameTileSize, ref result);
         }
-        public static void GeoTileIndex2SphericalGame(this Vector3Int geoTileIndex, int zoomLevel, Vector3Double center, double radius, ref Vector3Double result) {
+        public static void GeoTileIndex2SphericalGame(this Vector3Int geoTileIndex, int zoomLevel, Vector3Double center, double radius, Matrix4x4 correction, ref Vector3Double result) {
             geoTileIndex.GeoTileIndex2Geo(zoomLevel, ref result);
-            result.Geo2SphericalGame(center, radius, ref result);
+            result.Geo2SphericalGame(center, radius, correction, ref result);
         }
         public static void GeoTileIndex2GameTileIndex(this Vector3Int geoTileIndex, Vector3Double baseGeoTile, ref Vector3Int result) {
             result.x = Mathf.FloorToInt(-Mathf.FloorToInt(baseGeoTile.xf) + geoTileIndex.x + 0.5f);
             result.z = Mathf.FloorToInt(Mathf.FloorToInt(baseGeoTile.zf) - geoTileIndex.z + 0.5f);
         }
-        
+
         // Flat game coordinate converters
         public static void FlatGame2GameTile(this Vector3Double flatGameCoordinate, int zoomLevel, Vector3Double baseGeoTile, GameTileSize gameTileSize, ref Vector3Double result) {
             // Calculate game tile index accounting for the in-game offset of base tile.
@@ -170,21 +176,21 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             flatGameCoordinate.FlatGame2GameTile(zoomLevel, baseGeoTile, gameTileSize, ref result);
             result.GameTile2GameUV(ref result);
         }
-        
+
         // Spherical game coordinate converters
-        public static void SphericalGame2GameTile(this Vector3Double sphericalGameCoordinate, Vector3Double center, int zoomLevel, Vector3Double baseGeoTile, ref Vector3Double result) {
-            sphericalGameCoordinate.SphericalGame2Geo(center, ref result);
+        public static void SphericalGame2GameTile(this Vector3Double sphericalGameCoordinate, Vector3Double center, int zoomLevel, Vector3Double baseGeoTile, Matrix4x4 inverseCorrection, ref Vector3Double result) {
+            sphericalGameCoordinate.SphericalGame2Geo(center, inverseCorrection, ref result);
             result.Geo2GameTile(zoomLevel, baseGeoTile, ref result);
         }
-        public static void SphericalGame2GeoTile(this Vector3Double sphericalGameCoordinate, Vector3Double center, int zoomLevel, ref Vector3Double result) {
-            sphericalGameCoordinate.SphericalGame2Geo(center, ref result);
+        public static void SphericalGame2GeoTile(this Vector3Double sphericalGameCoordinate, Vector3Double center, int zoomLevel, Matrix4x4 inverseCorrection, ref Vector3Double result) {
+            sphericalGameCoordinate.SphericalGame2Geo(center, inverseCorrection, ref result);
             result.Geo2GeoTile(zoomLevel, ref result);
         }
-        public static void SphericalGame2Geo(this Vector3Double sphericalGameCoordinate, Vector3Double center, ref Vector3Double result) {
+        public static void SphericalGame2Geo(this Vector3Double sphericalGameCoordinate, Vector3Double center, Matrix4x4 inverseCorrection, ref Vector3Double result) {
             // Check if axis is vertical - then just give (0, 90) or (0, -90).
-            Vector3 offsetNormalized = (sphericalGameCoordinate - center).normalized.ToVector3();
+            Vector3 offsetNormalized = inverseCorrection.MultiplyVector((sphericalGameCoordinate - center).normalized.ToVector3());
             float verticalAllignment = Vector3.Dot(offsetNormalized, Vector3.up);
-            if (Mathf.Abs(Mathf.Abs(verticalAllignment) - 1f) < float.Epsilon) { 
+            if (Mathf.Abs(Mathf.Abs(verticalAllignment) - 1f) < float.Epsilon) {
                 result = Vector3Double.up * Mathf.Sign(verticalAllignment) * 90f;
                 return;
             }
@@ -199,8 +205,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             result.x = angleYaw;
             result.z = anglePitch;
         }
-        public static void SphericalGame2GameUV(this Vector3Double sphericalGameCoordinate, Vector3Double center, int zoomLevel, ref Vector3Double result) {
-            sphericalGameCoordinate.SphericalGame2Geo(center, ref result);
+        public static void SphericalGame2GameUV(this Vector3Double sphericalGameCoordinate, Vector3Double center, int zoomLevel, Matrix4x4 inverseCorrection, ref Vector3Double result) {
+            sphericalGameCoordinate.SphericalGame2Geo(center, inverseCorrection, ref result);
             result.Geo2GameUV(zoomLevel, ref result);
         }
 
@@ -210,7 +216,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             result.GeoTile2Geo(zoomLevel, ref result);
         }
         public static void GameTile2GeoTile(this Vector3Double gameTile, Vector3Double baseGeoTile, ref Vector3Double result) {
-            result.x = Math.Floor(baseGeoTile.x) + gameTile.x; 
+            result.x = Math.Floor(baseGeoTile.x) + gameTile.x;
             result.z = Math.Floor(baseGeoTile.z) - gameTile.z + 1;
         }
         public static void GameTile2FlatGame(this Vector3Double gameTile, int zoomLevel, Vector3Double baseGeoTile, GameTileSize gameTileSize, ref Vector3Double result) {
@@ -218,9 +224,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             result.x = (-baseGeoTile.x.Fraction() + gameTile.x) * zoomGameTileSize;
             result.z = (baseGeoTile.z.Fraction() - 1 + gameTile.z) * zoomGameTileSize;
         }
-        public static void GameTile2SphericalGame(this Vector3Double gameTile, Vector3Double center, int zoomLevel, Vector3Double baseGeoTile, double radius, ref Vector3Double result) {
+        public static void GameTile2SphericalGame(this Vector3Double gameTile, Vector3Double center, int zoomLevel, Vector3Double baseGeoTile, double radius, Matrix4x4 correction, ref Vector3Double result) {
             gameTile.GameTile2Geo(zoomLevel, baseGeoTile, ref result);
-            result.Geo2SphericalGame(center, radius, ref result);
+            result.Geo2SphericalGame(center, radius, correction, ref result);
         }
         public static void GameTile2GameUV(this Vector3Double gameTile, ref Vector3Double result) {
             result.x = gameTile.x.Fraction();
@@ -245,9 +251,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             (new Vector3Double(gameTileIndex + Vector3.right * 0.5f + Vector3.forward * 0.5f))
                 .GameTile2FlatGame(zoomLevel, baseGeoTile, gameTileSize, ref result);
         }
-        public static void GameTileIndex2SphericalGame(this Vector3Int gameTileIndex, int zoomLevel, Vector3Double baseGeoTile, Vector3Double center, float radius, ref Vector3Double result) {
+        public static void GameTileIndex2SphericalGame(this Vector3Int gameTileIndex, int zoomLevel, Vector3Double baseGeoTile, Vector3Double center, float radius, Matrix4x4 correction, ref Vector3Double result) {
             gameTileIndex.GameTileIndex2Geo(zoomLevel, baseGeoTile, ref result);
-            result.Geo2SphericalGame(center, radius, ref result);
+            result.Geo2SphericalGame(center, radius, correction, ref result);
         }
     }
 }

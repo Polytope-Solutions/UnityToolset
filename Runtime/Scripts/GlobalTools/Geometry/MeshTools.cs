@@ -7,22 +7,22 @@ using System.Linq;
 using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
-	public static class MeshTools {
-		public static Mesh JoinMeshes(Transform[] origins, Mesh[] sources) {
-			Mesh mesh = new Mesh();
+    public static class MeshTools {
+        public static Mesh JoinMeshes(Transform[] origins, Mesh[] sources) {
+            Mesh mesh = new Mesh();
 
-			List<Vector3> vertices = new List<Vector3>(), currentVertices = new List<Vector3>(),
+            List<Vector3> vertices = new List<Vector3>(), currentVertices = new List<Vector3>(),
                 normals = new List<Vector3>(), currentNormals = new List<Vector3>();
             List<Vector2> uvs = new List<Vector2>(), currentUVs = new List<Vector2>();
             List<int> indices = new List<int>(), currentIndices = new List<int>(); ;
 
-			int currentOffset = 0;
-			for (int i = 0; i < sources.Length; i++) {
+            int currentOffset = 0;
+            for (int i = 0; i < sources.Length; i++) {
                 currentVertices.Clear();
-				sources[i].GetVertices(currentVertices);
+                sources[i].GetVertices(currentVertices);
                 currentVertices.ForEach(vertex => vertices.Add(origins[i].TransformPoint(vertex)));
 
-				currentNormals.Clear();
+                currentNormals.Clear();
                 sources[i].GetNormals(currentNormals);
                 currentNormals.ForEach(normal => normals.Add(origins[i].TransformDirection(normal)));
 
@@ -32,27 +32,27 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 {
                     currentUVs.Clear();
                     sources[i].GetUVs(c, currentUVs);
-					if (currentUVs.Count == 0)
-						currentUVs = (new Vector2[sources[i].vertexCount]).ToList();
-					uvs.AddRange(currentUVs);
-				}
+                    if (currentUVs.Count == 0)
+                        currentUVs = (new Vector2[sources[i].vertexCount]).ToList();
+                    uvs.AddRange(currentUVs);
+                }
 
                 for (int sm = 0; sm < sources[i].subMeshCount; sm++) {
-					currentIndices.Clear();
-					sources[i].GetTriangles(currentIndices, sm);
+                    currentIndices.Clear();
+                    sources[i].GetTriangles(currentIndices, sm);
                     currentIndices.ForEach(index => indices.Add(index + currentOffset));
-				}
+                }
 
-				currentOffset += sources[i].vertexCount;
-			}
+                currentOffset += sources[i].vertexCount;
+            }
 
-			if (vertices.Count >= 65536)
-				mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            if (vertices.Count >= 65536)
+                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
-			mesh.SetVertices(vertices);
+            mesh.SetVertices(vertices);
             mesh.SetTriangles(indices, 0);
-			if (normals.Count == 0)
-				mesh.RecalculateNormals();
+            if (normals.Count == 0)
+                mesh.RecalculateNormals();
             else
                 mesh.SetNormals(normals);
             //for (int c = 0; c < 8; c++)
@@ -60,8 +60,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             mesh.SetUVs(0, uvs);
             mesh.RecalculateBounds();
 
-			return mesh;
-		}
+            return mesh;
+        }
 
         public struct MeshData {
             private Vector3[] vertices;
@@ -78,7 +78,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             public UnityEngine.Rendering.IndexFormat IndexFormat => (this.VertexCount > 65535) ?
                 UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
 
-            public MeshData(int vertexCount, int indexCount, 
+            public MeshData(int vertexCount, int indexCount,
                 bool allocateUVs = false, bool allocateNormals = false) {
                 this.vertices = new Vector3[vertexCount];
                 this.total = Vector3.zero;
@@ -107,7 +107,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                     this.normals = null;
             }
 
-            public void Resize(int vertexCount, int indexCount) { 
+            public void Resize(int vertexCount, int indexCount) {
                 if (this.vertices == null)
                     this.vertices = new Vector3[vertexCount];
                 else
@@ -137,17 +137,17 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 if (i < 0 || i >= VertexCount) throw new Exception($"InvalidIndex {i}");
                 return this.vertices[i];
             }
-            public void SetTriangle(int i, int a, int b, int c) { 
-                if (i < 0 || i+2 >= this.IndexCount) return;
-                this.indices[i+0] = a;
-                this.indices[i+1] = b;
-                this.indices[i+2] = c;
+            public void SetTriangle(int i, int a, int b, int c) {
+                if (i < 0 || i + 2 >= this.IndexCount) return;
+                this.indices[i + 0] = a;
+                this.indices[i + 1] = b;
+                this.indices[i + 2] = c;
             }
             public override string ToString() {
                 return "triangles: " + string.Join(",", this.indices);
             }
 
-            public void PassData2Mesh(ref Mesh mesh, 
+            public void PassData2Mesh(ref Mesh mesh,
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
                 mesh.indexFormat = this.IndexFormat;
                 mesh.SetVertices(this.vertices);
@@ -155,13 +155,13 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 mesh.SetTriangles(this.indices, 0);
                 if (this.normals != null && computeNormals)
                     mesh.SetNormals(this.normals);
-                else if (this.normals == null && computeNormals) 
+                else if (this.normals == null && computeNormals)
                     mesh.RecalculateNormals();
                 if (computeBounds) mesh.RecalculateBounds();
                 mesh.MarkModified();
                 mesh.UploadMeshData(isMeshFinal);
             }
-            public void Merge(MeshData other) { 
+            public void Merge(MeshData other) {
                 // TODO: add option to weld vertices
                 int currentVertexCount = this.VertexCount, currentIndexCount = this.IndexCount;
                 // Handle Vertices
@@ -176,20 +176,24 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 if (this.uvs != null && other.uvs != null) {
                     Array.Resize(ref this.uvs, currentVertexCount + other.VertexCount);
                     Array.Copy(other.uvs, 0, this.uvs, currentVertexCount, other.VertexCount);
-                } else if (this.uvs == null && other.uvs != null) {
+                }
+                else if (this.uvs == null && other.uvs != null) {
                     this.uvs = new Vector2[currentVertexCount + other.VertexCount];
                     Array.Copy(other.uvs, 0, this.uvs, currentVertexCount, other.VertexCount);
-                } else if (this.uvs != null && other.uvs == null) {
+                }
+                else if (this.uvs != null && other.uvs == null) {
                     Array.Resize(ref this.uvs, currentVertexCount + other.VertexCount);
                 }
                 // handle Normals
                 if (this.normals != null && other.normals != null) {
                     Array.Resize(ref this.normals, currentVertexCount + other.VertexCount);
                     Array.Copy(other.normals, 0, this.normals, currentVertexCount, other.VertexCount);
-                } else if (this.normals == null && other.normals != null) {
+                }
+                else if (this.normals == null && other.normals != null) {
                     this.normals = new Vector3[currentVertexCount + other.VertexCount];
                     Array.Copy(other.normals, 0, this.normals, currentVertexCount, other.VertexCount);
-                } else if (this.normals != null && other.normals == null) {
+                }
+                else if (this.normals != null && other.normals == null) {
                     Array.Resize(ref this.normals, currentVertexCount + other.VertexCount);
                 }
             }
@@ -207,7 +211,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         }
         // Generates a regular grid mesh with the specified resolution and size.
         // By default in XY plane, centered at origin, but has Matrix parameter if needs to be modified.
-        public static (MeshData meshData, Mesh mesh) FlatGridMesh(int resolutionX, int resolutionY, float sizeX, float sizeY, 
+        public static (MeshData meshData, Mesh mesh) FlatGridMesh(int resolutionX, int resolutionY, float sizeX, float sizeY,
             Matrix4x4 modifier = default(Matrix4x4),
             bool orientUpwards = true, bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             Mesh mesh = new Mesh();
@@ -219,12 +223,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         public static MeshData FlatGridMeshData(int resolutionX, int resolutionY, float sizeX, float sizeY,
             Matrix4x4 modifier = default(Matrix4x4),
             bool orientUpwards = true, bool computeUVs = true, bool computeNormals = true) {
-            
+
             if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
-        
+
             int vertexCount = (resolutionX + 1) * (resolutionY + 1);
             int triangleCount = resolutionX * resolutionY * 2;
-            MeshData meshData = new MeshData(vertexCount, triangleCount*3, computeUVs);
+            MeshData meshData = new MeshData(vertexCount, triangleCount * 3, computeUVs);
 
             Vector3 bottomLeft = new Vector3(-sizeX / 2, 0, -sizeY / 2);
             for (int y = 0; y <= resolutionY; y++) {
@@ -252,29 +256,30 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         // Spherical Mesh Segment
         public static (MeshData meshData, Mesh mesh) SphericalSquareGridMesh(int resolution,
             Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
-            Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
+            Vector3 center = default(Vector3), Matrix4x4 directionModifier = default(Matrix4x4), Matrix4x4 modifier = default(Matrix4x4),
             bool orientOutwards = true, bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
-            return SphericalGridMesh(resolution, resolution, 
+            return SphericalGridMesh(resolution, resolution,
                 angleYawRange, anglePitchRange, radius,
-                center, modifier, orientOutwards, computeUVs, computeNormals, computeBounds, isMeshFinal);
+                center, directionModifier, modifier, orientOutwards, computeUVs, computeNormals, computeBounds, isMeshFinal);
         }
         public static (MeshData meshData, Mesh mesh) SphericalGridMesh(int resolutionX, int resolutionY,
             Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
-            Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4), 
+            Vector3 center = default(Vector3), Matrix4x4 directionModifier = default(Matrix4x4), Matrix4x4 modifier = default(Matrix4x4),
             bool orientOutwards = true, bool computeUVs = true, bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             Mesh mesh = new Mesh();
-            MeshData meshData = SphericalGridMeshData(resolutionX, resolutionY, 
+            MeshData meshData = SphericalGridMeshData(resolutionX, resolutionY,
                 angleYawRange, anglePitchRange, radius,
-                center, modifier, orientOutwards, computeUVs, computeNormals);
+                center, directionModifier, modifier, orientOutwards, computeUVs, computeNormals);
             meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
             return (meshData, mesh);
         }
         public static MeshData SphericalGridMeshData(int resolutionX, int resolutionY,
             Vector2 angleYawRange, Vector2 anglePitchRange, float radius,
-            Vector3 center=default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
+            Vector3 center = default(Vector3), Matrix4x4 directionModifier = default(Matrix4x4), Matrix4x4 modifier = default(Matrix4x4),
             bool orientOutwards = true, bool computeUVs = true, bool computeNormals = true) {
 
             if (center == default(Vector3)) center = Vector3.zero;
+            if (directionModifier == default(Matrix4x4)) directionModifier = Matrix4x4.identity;
             if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
 
             int vertexCount = (resolutionX + 1) * (resolutionY + 1);
@@ -288,12 +293,17 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 for (int x = 0; x <= resolutionX; x++) {
                     int i = x + y * (resolutionX + 1);
                     Vector2 uv = new Vector2(x / (float)resolutionX, y / (float)resolutionY);
-                    Vector2 angleYawPitch = bottomLeft 
+                    Vector2 angleYawPitch = bottomLeft
                         + Vector2.right * range.x * uv.x
                         + Vector2.up * range.y * uv.y;
-                    Vector3 vertex = center + Quaternion.AngleAxis(-angleYawPitch.x, Vector3.up) *
-                        (Quaternion.AngleAxis(angleYawPitch.y, Vector3.right)
-                        * -Vector3.forward * radius);
+                    Vector3 vertex = center +
+                        directionModifier.MultiplyVector(
+                            Quaternion.AngleAxis(-angleYawPitch.x, Vector3.up) *
+                            (
+                                Quaternion.AngleAxis(angleYawPitch.y, Vector3.right)
+                                * -Vector3.forward
+                            )
+                        ) * radius;
                     meshData.SetVertex(i, modifier.MultiplyPoint3x4(vertex), (computeUVs) ? uv : null);
                 }
             }
@@ -331,8 +341,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 modifier,
                 computeNormals, computeBounds, isMeshFinal);
         }
-        public static void SetFlatGridMeshHeights(this Mesh mesh, 
-                int meshResolutionX, int meshResolutionY, Texture2D heightMap, 
+        public static void SetFlatGridMeshHeights(this Mesh mesh,
+                int meshResolutionX, int meshResolutionY, Texture2D heightMap,
                 Vector2 heightRange,
                 Matrix4x4 modifier = default(Matrix4x4),
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
@@ -344,7 +354,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
             MeshData meshData = new MeshData(mesh, allocateNormals: computeNormals);
             meshData.SetFlatGridMeshDataHeights(heights, modifier);
-            meshData.PassData2Mesh(ref mesh, computeNormals,computeBounds,isMeshFinal);
+            meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
         }
         public static void SetFlatSquareGridMeshDataHeights(this MeshData meshData,
                 int meshResolution, Texture2D heightMap,
@@ -368,7 +378,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
 
             if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
 
-            for (int i = 0; i < meshData.VertexCount; i++) 
+            for (int i = 0; i < meshData.VertexCount; i++)
                 meshData.SetVertex(i, modifier.MultiplyPoint3x4(meshData.GetVertex(i).XZ().ToXZ(heights[i])));
         }
 
@@ -377,52 +387,57 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         public static void SetSphericalSquareGridMeshHeights(this Mesh mesh,
                 int meshResolution, Texture2D heightMap,
                 Vector2 heightRange, float radius,
-                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
+                Vector3 center = default(Vector3), Matrix4x4 directionModifier = default(Matrix4x4), Matrix4x4 modifier = default(Matrix4x4),
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
             mesh.SetSphericalGridMeshHeights(meshResolution, meshResolution, heightMap, heightRange, radius,
-                center, modifier, computeNormals, computeBounds, isMeshFinal);
+                center, directionModifier, modifier, computeNormals, computeBounds, isMeshFinal);
         }
         public static void SetSphericalGridMeshHeights(this Mesh mesh,
                 int meshResolutionX, int meshResolutionY, Texture2D heightMap,
                 Vector2 heightRange, float radius,
-                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
+                Vector3 center = default(Vector3), Matrix4x4 directionModifier = default(Matrix4x4), Matrix4x4 modifier = default(Matrix4x4),
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
             float[] heights = heightMap.SampleGrayscaleHeightMap(meshResolutionX, meshResolutionY, heightRange);
             mesh.SetSphericalGridMeshHeights(heights, radius,
-                center, modifier, computeNormals, computeBounds, isMeshFinal);
+                center, directionModifier, modifier, computeNormals, computeBounds, isMeshFinal);
         }
         public static void SetSphericalGridMeshHeights(this Mesh mesh, float[] heights, float radius,
-                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4),
+                Vector3 center = default(Vector3), Matrix4x4 directionModifier = default(Matrix4x4), Matrix4x4 modifier = default(Matrix4x4),
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = true) {
             MeshData meshData = new MeshData(mesh, allocateNormals: computeNormals);
-            meshData.SetSphericalGridMeshDataHeights(heights, radius, center, modifier);
+            meshData.SetSphericalGridMeshDataHeights(heights, radius, center, directionModifier, modifier);
             meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
         }
         public static void SetSphericalSquareGridMeshDataHeights(this MeshData meshData,
                 int meshResolution, Texture2D heightMap,
                 Vector2 heightRange, float radius,
-                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4)) {
-            meshData.SetSphericalGridMeshDataHeights(meshResolution, meshResolution, heightMap, heightRange, radius, center, modifier);
+                Vector3 center = default(Vector3), Matrix4x4 directionModifier = default(Matrix4x4), Matrix4x4 modifier = default(Matrix4x4)) {
+            meshData.SetSphericalGridMeshDataHeights(meshResolution, meshResolution, heightMap, heightRange, radius, center, directionModifier, modifier);
         }
         public static void SetSphericalGridMeshDataHeights(this MeshData meshData,
                 int meshResolutionX, int meshResolutionY, Texture2D heightMap,
                 Vector2 heightRange, float radius,
-                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4)) {
+                Vector3 center = default(Vector3), Matrix4x4 directionModifier = default(Matrix4x4), Matrix4x4 modifier = default(Matrix4x4)) {
             float[] heights = heightMap.SampleGrayscaleHeightMap(meshResolutionX, meshResolutionY, heightRange);
-            meshData.SetSphericalGridMeshDataHeights(heights, radius, center, modifier);
+            meshData.SetSphericalGridMeshDataHeights(heights, radius, center, directionModifier, modifier);
         }
         public static void SetSphericalGridMeshDataHeights(this MeshData meshData, float[] heights, float radius,
-                Vector3 center = default(Vector3), Matrix4x4 modifier = default(Matrix4x4)) {
+                Vector3 center = default(Vector3), Matrix4x4 directionModifier = default(Matrix4x4), Matrix4x4 modifier = default(Matrix4x4)) {
             if (meshData.VertexCount == 0)
                 throw new Exception("Mesh topology is invalid.");
             if (meshData.VertexCount != heights.Length)
                 throw new Exception("Mesh and heights must have the same number of vertices.");
 
+            if (directionModifier == default(Matrix4x4)) directionModifier = Matrix4x4.identity;
             if (modifier == default(Matrix4x4)) modifier = Matrix4x4.identity;
 
             for (int i = 0; i < meshData.VertexCount; i++)
                 meshData.SetVertex(i, modifier.MultiplyPoint3x4(
-                    center + (meshData.GetVertex(i) - center).normalized * (radius + heights[i])));
+                    center +
+                    directionModifier.MultiplyVector(
+                        (meshData.GetVertex(i) - center).normalized
+                    ) * (radius + heights[i])
+                ));
         }
 
         public static (MeshData meshData, Mesh mesh) ExtrudeCurve(List<Vector3> points,
@@ -447,8 +462,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         // Applies uv in equal distance per side over v (in bottom half if capping top) with a gap between sides
         // Applies normals out from centers or in to centers for internal curves.
         // TODO: add unweld sides option to have more realistic normals and lighting.
-        public static MeshData ExtrudeCurve(List<Vector3> outerCurve, 
-                float height, Vector3 upDirection, 
+        public static MeshData ExtrudeCurve(List<Vector3> outerCurve,
+                float height, Vector3 upDirection,
                 bool capTop,
                 List<List<Vector3>> innerCurves = null) {
             bool hasInnerCurves = (innerCurves != null && innerCurves.Count > 0);
@@ -475,21 +490,21 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                     innerCurveCenter /= innerCurve.Count;
                     innerCurveCenters.Add(innerCurveCenter);
                 }
-            MeshData meshData = new MeshData(vertexCount, triangleCount*3, true, true);
-            
+            MeshData meshData = new MeshData(vertexCount, triangleCount * 3, true, true);
+
 
             // Add outer curve vertices, accounting for clockwise or counter-clockwise winding.
             {
                 bool clockwise = EvaluateCurveWindingInPlane(outerCurve, upDirection);
-                for (int j = 0; j < outerCurve.Count+1; j++) {
-                    Vector3 vertex = outerCurve[(clockwise ? j : 2*outerCurve.Count - 1 - j) % outerCurve.Count],
+                for (int j = 0; j < outerCurve.Count + 1; j++) {
+                    Vector3 vertex = outerCurve[(clockwise ? j : 2 * outerCurve.Count - 1 - j) % outerCurve.Count],
                         topVertex = vertex + upDirection * height,
                         normal = (vertex - outerCurveCenter).normalized;
                     meshData.SetVertex(j, vertex,
                         new Vector2(j / ((float)vertexCount / 2), 0),
                         normal);
                     meshData.SetVertex(j + outerCurve.Count + 1, topVertex,
-                        new Vector2(j / ((float)vertexCount / 2), (!capTop)?1 : 0.5f),
+                        new Vector2(j / ((float)vertexCount / 2), (!capTop) ? 1 : 0.5f),
                         normal);
                     if (j < outerCurve.Count)
                         topCurve.Add(topVertex);
@@ -503,14 +518,14 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                         topInnerCurve = new List<Vector3>();
                     bool clockwise = EvaluateCurveWindingInPlane(innerCurve, upDirection);
                     for (int j = 0; j < innerCurve.Count + 1; j++) {
-                        Vector3 vertex = innerCurve[(clockwise ? j : (2*innerCurve.Count - 1 - j)) % innerCurve.Count],
+                        Vector3 vertex = innerCurve[(clockwise ? j : (2 * innerCurve.Count - 1 - j)) % innerCurve.Count],
                             topVertex = vertex + upDirection * height,
                             normal = -(vertex - innerCurveCenters[i]).normalized;
                         meshData.SetVertex(startIndex + j, vertex,
-                            new Vector2((startIndex/2 + j) / ((float)vertexCount / 2), 0),
+                            new Vector2((startIndex / 2 + j) / ((float)vertexCount / 2), 0),
                             normal);
                         meshData.SetVertex(startIndex + j + innerCurve.Count + 1, topVertex,
-                            new Vector2((startIndex/2 + j) / ((float)vertexCount / 2), (!capTop) ? 1 : 0.5f), 
+                            new Vector2((startIndex / 2 + j) / ((float)vertexCount / 2), (!capTop) ? 1 : 0.5f),
                             normal);
                         if (j < innerCurve.Count)
                             topInnerCurve.Add(topVertex);
@@ -525,13 +540,13 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 int ti = i * 6;
                 int a = i, b = i + 1,
                     c = i + outerCurve.Count + 1, d = i + 1 + outerCurve.Count + 1;
-                    meshData.SetTriangle(ti,
-                        a, b, c);
-                    meshData.SetTriangle(ti + 3,
-                        b, d, c);
+                meshData.SetTriangle(ti,
+                    a, b, c);
+                meshData.SetTriangle(ti + 3,
+                    b, d, c);
             }
             // Add triangles for inner walls (in counterClockwise manner as indices are in clockwise but triangles shoud face inwards).
-            if (hasInnerCurves) { 
+            if (hasInnerCurves) {
                 int startIndex = (outerCurve.Count + 1) * 2, triangleStartIndex = outerCurve.Count * 6;
                 foreach (List<Vector3> innerCurve in innerCurves) {
                     for (int i = 0; i < innerCurve.Count; i++) {
@@ -556,9 +571,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             }
             return meshData;
         }
-        public static MeshData CapTopSimple(List<Vector3> outerCurve, 
+        public static MeshData CapTopSimple(List<Vector3> outerCurve,
                 Vector3 upDirection) {
-            MeshData meshData = new MeshData(outerCurve.Count, (outerCurve.Count-2) * 3, true, true);
+            MeshData meshData = new MeshData(outerCurve.Count, (outerCurve.Count - 2) * 3, true, true);
             //List<int> indices = Enumerable.Range(2, points.Count).ToList();
 
             for (int i = 0; i < outerCurve.Count; i++) {
@@ -585,7 +600,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 // Compute in plane normal to check if on the correct side.
                 inplaneCurrentSideNormal = //(clockwise) ?
                     Vector3.Cross(upDirection, currentSide).normalized;
-                    //: Vector3.Cross(currentSide, upDirection).normalized;
+                //: Vector3.Cross(currentSide, upDirection).normalized;
                 // Compute how alligned are the two next possible sides with the normal.
                 dotC = Vector3.Dot(inplaneCurrentSideNormal, sideC);
                 dotD = Vector3.Dot(inplaneCurrentSideNormal, sideD);
@@ -593,14 +608,14 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 if (dotC > dotD) {
                     meshData.SetTriangle(startIndex,
                         a + outerCurve.Count, b + outerCurve.Count, c + outerCurve.Count);
-                        //((clockwise) ? b : c) + outerCurve.Count, ((clockwise) ? c : b) + outerCurve.Count);
+                    //((clockwise) ? b : c) + outerCurve.Count, ((clockwise) ? c : b) + outerCurve.Count);
                     b = c;
                     startIndex += 3;
                 }
                 else {
                     meshData.SetTriangle(startIndex,
                         a + outerCurve.Count, b + outerCurve.Count, d + outerCurve.Count);
-                        //((clockwise) ? b : d) + outerCurve.Count, ((clockwise) ? d : b) + outerCurve.Count);
+                    //((clockwise) ? b : d) + outerCurve.Count, ((clockwise) ? d : b) + outerCurve.Count);
                     a = d;
                     startIndex += 3;
                 }
@@ -612,9 +627,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         // NB! Expects curves organized in clockwise order to face correctly in the up direction.
         // Applies flat prorjection to plane defined by normal in top half of UV.
         // Applies normal along up direction.
-        public static MeshData CapTop(List<Vector3> outerCurve, 
-                Vector3 upDirection, 
-                List<List<Vector3>> innerCurves=null) {
+        public static MeshData CapTop(List<Vector3> outerCurve,
+                Vector3 upDirection,
+                List<List<Vector3>> innerCurves = null) {
             List<Vector3> totalPoints = new List<Vector3>();
             Matrix4x4 reorient = Matrix4x4.TRS(Vector3.zero, Quaternion.FromToRotation(upDirection, Vector3.up), Vector3.one);
             Vector2 minMaxU = new Vector2(float.MaxValue, float.MinValue),
@@ -683,7 +698,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
 
                 // select next and previous
                 int c = a, d = b;
-                Vector3 nextSide=Vector3.zero, previousSide=Vector3.zero;
+                Vector3 nextSide = Vector3.zero, previousSide = Vector3.zero;
                 float allignmentNext = float.MinValue, allignmentPrevious = float.MinValue;
                 List<int> previousLoopIndices = new List<int>();
                 List<int> nextLoopIndices = new List<int>();
@@ -691,13 +706,13 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 nextLoopIndices.Add(currentOuterCurveIndices[b]);
                 Vector3 nextNextSide, previousNextSide;
                 do {
-                    if (c == a || allignmentPrevious < 0) { 
+                    if (c == a || allignmentPrevious < 0) {
                         c = (c - 1 + currentOuterCurveIndices.Count) % currentOuterCurveIndices.Count;
                         previousLoopIndices.Add(currentOuterCurveIndices[c]);
                         previousSide = totalPoints[currentOuterCurveIndices[a]] - totalPoints[currentOuterCurveIndices[c]];
                         allignmentPrevious = -Vector3.Dot(previousSide, sideInPlaneNormal);
                     }
-                    if (d == b || allignmentNext < 0) { 
+                    if (d == b || allignmentNext < 0) {
                         d = d + 1;
                         nextLoopIndices.Add(currentOuterCurveIndices[d]);
                         nextSide = totalPoints[currentOuterCurveIndices[d]] - totalPoints[currentOuterCurveIndices[b]];
@@ -721,12 +736,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                         Vector3.Dot(nextNormal, innerPointB) > 0
                         && Vector3.Dot(nextNextNormalInPlane, innerPointA) > 0;
                     found = insideNext;
-                    if (!found) { 
+                    if (!found) {
                         Vector3 previousNormal = Vector3.Cross(upDirection, previousSide);
                         bool insidePrevious = Vector3.Dot(previousNormal, innerPointA) > 0
                             && Vector3.Dot(previousNextNormalInPlane, innerPointB) > 0;
                         found = insidePrevious;
-                    } 
+                    }
                 }
 
                 // if adding merging inner point
@@ -786,12 +801,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                             currentOuterCurveIndices.RemoveAt(a);
                     }
                 }
-                if (currentOuterCurveIndices.Count == 2) 
+                if (currentOuterCurveIndices.Count == 2)
                     availableOuterCurves.RemoveAt(0);
             }
             MeshData meshData = new MeshData(totalPoints.Count, triangles.Count, true, true);
 
-            for (int i = 0; i < totalPoints.Count; i++) { 
+            for (int i = 0; i < totalPoints.Count; i++) {
                 Vector3 reorientedPoint = reorient.MultiplyPoint3x4(totalPoints[i]);
                 Vector2 uv = new Vector2(
                     Mathf.InverseLerp(minMaxU.x, minMaxU.y, reorientedPoint.x),
@@ -800,8 +815,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 meshData.SetVertex(i, totalPoints[i],
                     uv, upDirection);
             }
-            for (int i = 0; i < triangles.Count / 3; i++) { 
-                meshData.SetTriangle(i*3, 
+            for (int i = 0; i < triangles.Count / 3; i++) {
+                meshData.SetTriangle(i * 3,
                     triangles[i * 3], triangles[i * 3 + 1], triangles[i * 3 + 2]
                 );
             }
