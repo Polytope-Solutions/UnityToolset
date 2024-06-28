@@ -76,6 +76,8 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public bool FlagSolutionFinished => (this.solution != null && this.solution.FlagSolutionSuccess);
         // - exposed solution descriptor
         public string SolutionLog => this.solution?.SolutionLog;
+        // - accessor for checking if the solver is busy
+        public bool IsBusy => this.solution.FlagSolutionUpdated;
 
         ///////////////////////////////////////////////////////////////////////
         #region UNITY_FUNCTIONS
@@ -257,6 +259,14 @@ namespace PolytopeSolutions.Toolset.Solvers {
         private void FinishClear() {
             if (this.OnCleared != null)
                 this.OnCleared.Invoke();
+        }
+        private void Solve() {
+            if (this.flagLiveUpdate) {
+                this.selectSolutionCoroutine = StartCoroutine(ContinuousSolve());
+            }
+            else {
+                OneTimeSolve();
+            }
         }
         #endregion
 

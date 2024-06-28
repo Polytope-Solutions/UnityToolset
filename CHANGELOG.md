@@ -2,6 +2,16 @@
 
 ---
 
+## 0.0.43
+
+2024-06-28
+
+-	small corrections to Solver base class;
+-	add mesh object composite object;
+-	add mesh manager to await mesh generation asynchronously;
+
+---
+
 ## 0.0.42
 
 2024-06-24
