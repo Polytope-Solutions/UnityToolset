@@ -1,7 +1,7 @@
-#define DEBUG
-// #undef DEBUG
-#define DEBUG2
-// #undef DEBUG2
+//#define DEBUG
+#undef DEBUG
+//#define DEBUG2
+#undef DEBUG2
 
 using System.Collections;
 using System.Collections.Generic;
@@ -19,6 +19,7 @@ namespace PolytopeSolutions.Toolset.Scenes {
         [SerializeField] private string loaderSceneName = "DefaultLoadingScene";
         [SerializeField] private float smoothTransitionTime = 0.5f;
         [SerializeField] private float minWaitTime = 2f;
+        [SerializeField] private bool unloadAssets;
         private Coroutine currentLoadingProcess, addingSceneProcess;
         private float smoothLoadingAnimateInProgress;
         public float SmoothLoadingAnimateInProgress => this.smoothLoadingAnimateInProgress;
@@ -168,9 +169,11 @@ namespace PolytopeSolutions.Toolset.Scenes {
             this.addedSceneNames.ForEach(addedSceneName => {
                 if (currentSceneNames.Contains(addedSceneName)) currentSceneNames.Remove(addedSceneName);
             });
-            int extraOperations = (this.OnSceneSetup.ContainsKey(sceneName)) ?
+            int unloadOperations = (this.unloadAssets) ? 1 : 0,
+                extraOperations = (this.OnSceneSetup.ContainsKey(sceneName)) ?
                 this.OnSceneSetup[sceneName].Count : 0;
-            int operationCount = 2              // Load New, Unload Current Assets
+            int operationCount = 1              // Load New
+                + unloadOperations              // Unload Old Assets
                 + currentSceneNames.Count()     // Unload Current
                 + extraOperations               // Setup Operations if any
                 + ((skipLoadingScene) ? 0 : 2); // Load Loader, Unload Loader
@@ -200,16 +203,18 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 this.Log($"Scenes Unloaded.");
                 #endif
                 
-                // - In case of async unloading assets don't get released automatically. 
-                #if DEBUG2
-                this.Log($"Unloading assets.");
-                #endif
-                AsyncOperation assetUnload = Resources.UnloadUnusedAssets();
-                yield return AwaitSceneAsyncOperation(assetUnload, currentOperationIndex, operationCount);
-                currentOperationIndex++;
-                #if DEBUG2
-                this.Log($"Unloaded assets.");
-                #endif
+                if (this.unloadAssets) { 
+                    // - In case of async unloading assets don't get released automatically. 
+                    #if DEBUG2
+                    this.Log($"Unloading assets.");
+                    #endif
+                    AsyncOperation assetUnload = Resources.UnloadUnusedAssets();
+                    yield return AwaitSceneAsyncOperation(assetUnload, currentOperationIndex, operationCount);
+                    currentOperationIndex++;
+                    #if DEBUG2
+                    this.Log($"Unloaded assets.");
+                    #endif
+                }
             }
             // 3. Load the new scene
             // - Launch new scene loading and pause it's activation until complete.
@@ -260,16 +265,18 @@ namespace PolytopeSolutions.Toolset.Scenes {
                 this.Log($"Scenes Unloaded.");
                 #endif
                 
-                // - In case of async unloading assets don't get released automatically. 
-                #if DEBUG2
-                this.Log($"Unloading assets.");
-                #endif
-                AsyncOperation assetUnload = Resources.UnloadUnusedAssets();
-                yield return AwaitSceneAsyncOperation(assetUnload, currentOperationIndex, operationCount);
-                currentOperationIndex++;
-                #if DEBUG2
-                this.Log($"Unloaded assets.");
-                #endif
+                if (this.unloadAssets) { 
+                    // - In case of async unloading assets don't get released automatically. 
+                    #if DEBUG2
+                    this.Log($"Unloading assets.");
+                    #endif
+                    AsyncOperation assetUnload = Resources.UnloadUnusedAssets();
+                    yield return AwaitSceneAsyncOperation(assetUnload, currentOperationIndex, operationCount);
+                    currentOperationIndex++;
+                    #if DEBUG2
+                    this.Log($"Unloaded assets.");
+                    #endif
+                }
             }
             // - Trigger OnScene Activated events
             yield return null;

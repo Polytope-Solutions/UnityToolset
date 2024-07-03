@@ -4,7 +4,9 @@ using UnityEngine;
 
 using System;
 using System.Linq;
+#if USE_DEBUG_TRACING
 using System.Runtime.CompilerServices;
+#endif
 using System.Reflection;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
@@ -103,56 +105,149 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             } while (!state.IsName(animationStateName));
             onStateReached?.Invoke();
         }
-
+        
+        #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
+        #endif
         public static void Log(Type source, string messageContent,
-                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+                #if USE_DEBUG_TRACING && !DONT_LOG
+                [CallerMemberName] string methodName = null,
+                #else
+                string methodName = null,
+                #endif
+                bool includeTimeStamp = false) {
+            #if DONT_LOG
+            #else
             Debug.Log(ConditionMessage("STATIC", source.Name, methodName, messageContent, includeTimeStamp));
+            #endif
         }
+        #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
+        #endif
         public static void LogWarning(Type source, string messageContent,
-                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+                #if USE_DEBUG_TRACING && !DONT_LOG
+                [CallerMemberName] string methodName = null,
+                #else
+                string methodName = null,
+                #endif
+                bool includeTimeStamp = false) {
+            #if DONT_LOG
+            #else
             Debug.LogWarning(ConditionMessage("STATIC", source.Name, methodName, messageContent, includeTimeStamp));
+            #endif
         }
+        #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
+        #endif
         public static void LogError(Type source, string messageContent,
-                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+                #if USE_DEBUG_TRACING && !DONT_LOG
+                [CallerMemberName] string methodName = null,
+                #else
+                string methodName = null,
+                #endif
+                bool includeTimeStamp = false) {
+            #if DONT_LOG
+            #else
             Debug.LogError(ConditionMessage("STATIC", source.Name, methodName, messageContent, includeTimeStamp));
+            #endif
         }
-
+        
+        #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
+        #endif
         public static void Log(this object source, string messageContent,
-                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+                #if USE_DEBUG_TRACING && !DONT_LOG
+                [CallerMemberName] string methodName = null,
+                #else
+                string methodName = null,
+                #endif
+                bool includeTimeStamp = false) {
+            #if DONT_LOG
+            #else
             string objectName = (source is MonoBehaviour) ? ((MonoBehaviour)source).gameObject.name : "GENERIC";
             Debug.Log(ConditionMessage(objectName, source.GetType().Name, methodName, messageContent, includeTimeStamp));
+            #endif
         }
+        #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
+        #endif
         public static void LogWarning(this object source, string messageContent,
-                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+                #if USE_DEBUG_TRACING && !DONT_LOG
+                [CallerMemberName] string methodName = null,
+                #else
+                string methodName = null,
+                #endif
+                bool includeTimeStamp = false) {
+            #if DONT_LOG
+            #else
             string objectName = (source is MonoBehaviour) ? ((MonoBehaviour)source).gameObject.name : "GENERIC";
             Debug.LogWarning(ConditionMessage(objectName, source.GetType().Name, methodName, messageContent, includeTimeStamp));
+            #endif
         }
+        #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
+        #endif
         public static void LogError(this object source, string messageContent,
-                [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+                #if USE_DEBUG_TRACING && !DONT_LOG
+                [CallerMemberName] string methodName = null,
+                #else
+                string methodName = null,
+                #endif
+                bool includeTimeStamp = false) {
+            #if DONT_LOG
+            #else
             string objectName = (source is MonoBehaviour) ? ((MonoBehaviour)source).gameObject.name : "GENERIC";
             Debug.LogError(ConditionMessage(objectName, source.GetType().Name, methodName, messageContent, includeTimeStamp));
+            #endif
         }
-
+        #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
+        #endif
         public static void Log(this GameObject goItem, string messageContent,
-                Type type = null, [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+                Type type = null, 
+                #if USE_DEBUG_TRACING && !DONT_LOG
+                [CallerMemberName] string methodName = null,
+                #else
+                string methodName = null,
+                #endif
+                bool includeTimeStamp = false) {
+            #if DONT_LOG
+            #else
             Debug.Log(ConditionMessage(goItem.name, type.Name, methodName, messageContent, includeTimeStamp));
+            #endif
         }
+        #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
+        #endif
         public static void LogWarning(this GameObject goItem, string messageContent,
-                Type type = null, [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+                Type type = null, 
+                #if USE_DEBUG_TRACING && !DONT_LOG
+                [CallerMemberName] string methodName = null,
+                #else
+                string methodName = null,
+                #endif
+                 bool includeTimeStamp = false) {
+            #if DONT_LOG
+            #else
             Debug.LogWarning(ConditionMessage(goItem.name, type.Name, methodName, messageContent, includeTimeStamp));
+            #endif
         }
+        
+        #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
+        #endif
         public static void LogError(this GameObject goItem, string messageContent,
-                Type type = null, [CallerMemberName] string methodName = null, bool includeTimeStamp = false) {
+                Type type = null, 
+                #if USE_DEBUG_TRACING && !DONT_LOG
+                [CallerMemberName] string methodName = null,
+                #else
+                string methodName = null,
+                #endif
+                bool includeTimeStamp = false) {
+            #if DONT_LOG
+            #else
             Debug.LogError(ConditionMessage(goItem.name, type.Name, methodName, messageContent, includeTimeStamp));
+            #endif
         }
 
         private static string ConditionMessage(string sourceObjectName, string typeName, string methodName, 

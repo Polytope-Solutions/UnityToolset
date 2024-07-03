@@ -23,7 +23,7 @@ namespace PolytopeSolutions.Toolset.Input {
         private readonly float epsilon = 0.0001f;
         private Coroutine movementMonitor;
         private float farCornerDistanceCache;
-        public event Action onCameraViewChanged = null;
+        public event Action onCameraViewChanged = () => { };
 
         protected Transform tObjectProxy;
         protected Transform tCameraProxy;
@@ -122,12 +122,8 @@ namespace PolytopeSolutions.Toolset.Input {
             Quaternion lastRotation, currentRotation;
             lastPosition = this.tCamera.position;
             lastRotation = this.tCamera.rotation;
-            YieldInstruction awaiter;
-            if (this.minMovementMonitorDelay <= 0)
-                awaiter = new WaitForEndOfFrame();
-            else
-                awaiter = new WaitForSeconds(this.minMovementMonitorDelay);
             while (true) {
+                yield return (this.minMovementMonitorDelay <= 0) ? new WaitForEndOfFrame() : new WaitForSeconds(this.minMovementMonitorDelay);
                 currentPosition = this.tCamera.position;
                 currentRotation = this.tCamera.rotation;
 
@@ -137,7 +133,6 @@ namespace PolytopeSolutions.Toolset.Input {
                     this.onCameraViewChanged?.Invoke();
                 lastPosition = currentPosition;
                 lastRotation = currentRotation;
-                yield return awaiter;
             }
         }
         ///////////////////////////////////////////////////////////////////////

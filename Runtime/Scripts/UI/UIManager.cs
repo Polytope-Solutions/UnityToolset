@@ -1,7 +1,7 @@
-#define DEBUG
-// #undef DEBUG
-#define DEBUG2
-// #undef DEBUG2
+//#define DEBUG
+#undef DEBUG
+//#define DEBUG2
+#undef DEBUG2
 
 using System.Collections;
 using System.Collections.Generic;
@@ -54,11 +54,15 @@ namespace PolytopeSolutions.Toolset.UI {
                 if (!controllerHolder.Key.Contains(sceneName + "|"))
                     removeList.Add(controllerHolder.Key);
             }
-            for (int i = removeList.Count - 1; i >= 0; i--) {
-                #if DEBUG2
-                this.Log($"Removing controller reference: {removeList[i]}");
-                #endif
-                this.controllers.Remove(removeList[i]);
+            try {
+                for (int i = removeList.Count - 1; i >= 0; i--) {
+                    #if DEBUG2
+                    this.Log($"Removing controller reference: {removeList[i]}");
+                    #endif
+                    this.controllers.Remove(removeList[i]);
+                }
+            }
+            catch { 
             }
         }
         public bool RegisterController(string controllerID, UIControllerInteractions interactions) {

@@ -12,29 +12,34 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         public MeshRenderer mrDefaultMesh { get; private set; }
         public MeshCollider mcMesh { get; private set; }
         private Material material;
-        public Material Material { 
+        public Material Material {
             get => this.material;
             set {
                 this.material = value;
-                this.mrDefaultMesh.sharedMaterial = this.material;            
+                this.mrDefaultMesh.sharedMaterial = this.material;
             }
         }
-        public Texture2D mainTexture {
-            set { 
-                this.material.mainTexture = value;
+        private Texture2D mainTexture;
+        public Texture2D MainTexture {
+            set {
+                this.mainTexture = value;
+                this.material.mainTexture = this.mainTexture;
+            }
+            get {
+                return this.mainTexture;
             }
         }
 
         private bool shareCollisionMesh;
         private Mesh mainMesh;
-        public Mesh MainMesh { 
-            get => this.mainMesh; 
+        public Mesh MainMesh {
+            get => this.mainMesh;
             set {
                 this.mainMesh = value;
                 this.mfDefaultMesh.sharedMesh = value;
                 if (this.shareCollisionMesh)
                     this.CollisionMesh = value;
-            } 
+            }
         }
         private Mesh collisionMesh;
         public Mesh CollisionMesh {
@@ -50,8 +55,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             }
         }
 
-        public MeshGameObject(GameObject goParent, string name, GameObject goPrefab, Material _material=null, 
-                int? layer = null, bool instantiateMaterial=false, bool useColliders = false, bool shareCollisionMesh=false) {
+        public MeshGameObject(GameObject goParent, string name, GameObject goPrefab, Material _material = null,
+                int? layer = null, bool instantiateMaterial = false, bool useColliders = false, bool shareCollisionMesh = false) {
             goParent.SetActive(false);
             this.goItem = goParent.TryFindOrAddByName(name, goPrefab);
             if (layer != null)
@@ -68,7 +73,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             this.mrDefaultMesh = this.goItem.GetComponent<MeshRenderer>();
             if (!this.mrDefaultMesh)
                 this.mrDefaultMesh = this.goItem.AddComponent<MeshRenderer>();
-            if (useColliders) { 
+            if (useColliders) {
                 this.mcMesh = this.goItem.GetComponent<MeshCollider>();
                 if (!this.mcMesh)
                     this.mcMesh = this.goItem.AddComponent<MeshCollider>();
@@ -81,11 +86,36 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             else
                 this.Material = _material;
 
-            this.MainMesh = new Mesh();
-            if (useColliders && !this.shareCollisionMesh)
-                this.CollisionMesh = new Mesh();
-            
+            //this.MainMesh = new Mesh();
+            //if (useColliders && !this.shareCollisionMesh)
+            //    this.CollisionMesh = new Mesh();
+
             goParent.SetActive(true);
+        }
+        public void Destroy() {
+#if UNITY_EDITOR
+            if (this.mainMesh)
+                Mesh.DestroyImmediate(this.mainMesh, true);
+            if (this.collisionMesh)
+                Mesh.DestroyImmediate(this.collisionMesh, true);
+            if (this.mainTexture)
+                Texture2D.DestroyImmediate(this.mainTexture, true);
+            if (this.material)
+                Material.DestroyImmediate(this.material, true);
+            if (this.goItem)
+                GameObject.DestroyImmediate(this.goItem, true);
+#else
+            if (this.mainMesh)
+                Mesh.Destroy(this.mainMesh);
+            if (this.collisionMesh)
+                Mesh.Destroy(this.collisionMesh);
+            if (this.mainTexture)
+                Texture2D.Destroy(this.mainTexture);
+            if (this.material)
+                Material.Destroy(this.material);
+            if (this.goItem)
+                GameObject.Destroy(this.goItem);
+#endif
         }
         public void UploadMeshDataToGPU() {
             //this.MainMesh.UploadMeshData(true);

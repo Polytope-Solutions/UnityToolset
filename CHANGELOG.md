@@ -2,6 +2,19 @@
 
 ---
 
+## 0.0.44
+
+2024-07-03
+
+-	Allow to automatically disable stcktracing or disable logs completely in the logger;
+-	Allow mesh Objects to be destroyed and disable auto asignation of meshes;
+-	Make MEsh manager abstract and generic;
+-	Allow diabling of unloading resources on scene loading;
+-	Reduce logs in Scene management Extender and UI MAnager;
+-	Safeguard Camera controller and UI manager for rare issues;
+
+---
+
 ## 0.0.43
 
 2024-06-28
