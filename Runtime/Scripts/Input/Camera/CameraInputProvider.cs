@@ -27,14 +27,14 @@ namespace PolytopeSolutions.Toolset.Input {
         protected void Start() {
             OnInteractionPerformed();
         }
-        protected override void OnInteractionStarted() {
-            if (!this.IsSelfManaged)
-                InputManager.Instance.InputReceiverSetActiveExclusive(this.inputReceiverKeyName, true);
-        }
-        protected override void OnInteractionEnded() {
-            if (!this.IsSelfManaged)
-                InputManager.Instance.InputReceiverRestoreExclusive();
-        }
+        //protected override void OnInteractionStarted() {
+        //    if (!this.IsSelfManaged)
+        //        InputManager.Instance.InputReceiverSetActiveExclusive(this.inputReceiverKeyName, true);
+        //}
+        //protected override void OnInteractionEnded() {
+        //    if (!this.IsSelfManaged)
+        //        InputManager.Instance.InputReceiverRestoreExclusive();
+        //}
 
         #region SPATIAL_ORIENTATION
         // Some ways to update camera rig positioning and orientation.

@@ -11,20 +11,18 @@ namespace PolytopeSolutions.Toolset.Input {
     public class InputManager : TManager<InputManager> {
         #region UI_HOVER_CHECK
         private GraphicRaycaster[] raycasters;
-        private Vector2 pointerPosition;
         private PointerEventData pointerEventData;
         private List<RaycastResult> rayCastUIResults = new List<RaycastResult>();
         public bool IsPointerOverUI {
             get {
                 this.raycasters = GameObject.FindObjectsOfType<GraphicRaycaster>();
-                this.pointerPosition = Pointer.current.position.ReadValue();
-                this.pointerEventData = new PointerEventData(EventSystem.current);
-                this.pointerEventData.position = this.pointerPosition;
                 this.rayCastUIResults.Clear();
+                this.pointerEventData = new PointerEventData(EventSystem.current);
+                this.pointerEventData.position = Pointer.current.position.value;
                 foreach (GraphicRaycaster raycaster in this.raycasters) {
                     raycaster.Raycast(this.pointerEventData, this.rayCastUIResults);
                     if (this.rayCastUIResults.Count > 0)
-                        break;
+                        return true;
                 }
                 return this.rayCastUIResults.Count > 0;
             }

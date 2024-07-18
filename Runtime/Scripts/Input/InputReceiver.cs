@@ -85,40 +85,57 @@ namespace PolytopeSolutions.Toolset.Input {
             this.isEndingInteraction = true;
         }
         private void HandleInputValues() {
-            // Handle Start
-            if (this.isStartingInteraction) {
-                UpdateActiveHandlers();
-                if (this.CanHaveHandlers && this.activeHandlers.Count == 0) {
-                    this.isEndingInteraction = true;
-                }
-                if ((!this.allowUIOnStart || this.IsPointerOverUI) 
-                        && TryPassStartToActiveHandlers()) { 
-                    #if DEBUG2
-                    this.Log($"Starting interaction. Active Handlers: [{this.activeHandlers.Count}]. Disabling other interactors.");
-                    #endif
-                    OnInteractionStarted();
-                }
-                this.isStartingInteraction = false;
-            }
-            // Handle Perform
-            if (this.isInteracting) {
-                TryPassPermormedToActiveHandlers(OnInteractionPerformed());
-            }
             // Handle End
             if (this.isEndingInteraction) {
-                if (this.isInteracting && this.activeHandlers.Count > 0) {
-                    this.activeHandlers.ForEach(handler => handler.OnInteractionEnded());
-                    this.activeHandlers.Clear();
+                if (this.isInteracting) {
+                    if (this.CanHaveHandlers && this.activeHandlers.Count > 0) { 
+                        this.activeHandlers.ForEach(handler => handler.OnInteractionEnded());
+                        this.activeHandlers.Clear();
+                        #if DEBUG2
+                        this.Log($"Ending interaction. Active Handlers: [{this.activeHandlers.Count}].");
+                        #endif
+                    }
                     #if DEBUG2
-                    this.Log($"Ending interaction. Active Handlers: [{this.activeHandlers.Count}]. Unblock other interactors.");
+                    this.Log($"Ending interaction.");
                     #endif
                     OnInteractionEnded();
                 }
                 this.isEndingInteraction = false;
                 this.isInteracting = false;
+                return;
+            }
+            // Handle Perform
+            if (this.isInteracting) {
+                TryPassPermormedToActiveHandlers(OnInteractionPerformed());
+                return;
+            }
+            // Handle Start
+            if (this.isStartingInteraction) {
+                if (this.CanHaveHandlers) { 
+                    UpdateActiveHandlers();
+                    if (this.activeHandlers.Count == 0) {
+                        this.isEndingInteraction = true;
+                    }
+                    #if DEBUG2
+                    this.Log($"Trying to start interaction. Active Handlers: [{this.activeHandlers.Count}].");
+                    #endif
+                }
+                if ((!this.allowUIOnStart || this.IsPointerOverUI) 
+                        && TryPassStartToActiveHandlers()) { 
+                    #if DEBUG2
+                    this.Log($"Starting interaction.");
+                    #endif
+                    this.isInteracting = true;
+                    OnInteractionStarted();
+                } else {
+                    //this.isEndingInteraction = true;
+                }
+                this.isStartingInteraction = false;
             }
         }
         private bool TryPassStartToActiveHandlers() {
+            if (!this.CanHaveHandlers)
+                return true;
             if (this.activeHandlers.Count > 0) {
                 this.activeHandlers.ForEach(handler => handler.OnInteractionStarted());
                 #if DEBUG2

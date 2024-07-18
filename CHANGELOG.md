@@ -2,6 +2,20 @@
 
 ---
 
+## 0.0.46
+
+2024-07-18
+
+-	Tweak Input system:
+	-	Allow only one Interaction event per update in receivers (end to start);
+	-	Autosstart interaction if start is triggered;
+	-	Handle more edgecases without handlers;
+	-	Disable exclusiveness of camera controllers;
+	-	Tweak touch camera controller's start condition;
+	-	Fix touch camera controller's input event not being unsubscribed;
+
+---
+
 ## 0.0.45
 
 2024-07-18

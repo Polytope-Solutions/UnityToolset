@@ -56,14 +56,17 @@ namespace PolytopeSolutions.Toolset.Input {
         protected override void DisableInputEvents() {
             this.touchAny.action.Disable();
             this.touchAny.action.started -= TouchStarted;
+            this.touchAny.action.canceled -= TouchCanceled;
         }
 
         private void TouchStarted(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
-            if (previousTouchCount <= 0) {
-                startTime = Time.time;
-                TriggerStartInteraction();
-                TriggerPerformInteraction();
+            if (CheckTouches()) {
+                if (!this.IsPointerOverUI) { 
+                    startTime = Time.time;
+                    TriggerStartInteraction();
+                    //TriggerPerformInteraction();
+                }
             }
         }
         private void TouchCanceled(InputAction.CallbackContext context) {

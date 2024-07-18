@@ -44,7 +44,7 @@ namespace PolytopeSolutions.Toolset.Input {
         #endregion
         ///////////////////////////////////////////////////////////////////////
         protected override void OnInteractionStarted() {
-            TriggerPerformInteraction();
+            //TriggerPerformInteraction();
             if (!this.IsSelfManaged)
                 InputManager.Instance.InputReceiverSetActiveExclusive(this.inputReceiverKeyName, true);
         }
