@@ -6,8 +6,7 @@ using UnityEngine.InputSystem;
 using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.Input {
-    public class ThirdPersonCameraController : CameraController {
-        [SerializeField] protected Transform tTarget;
+    public class ThirdPersonCameraController : CameraInputProvider {
 
         [Header("Events")]
         [SerializeField] private InputActionReference cameraRotateLeftRight;
@@ -17,24 +16,15 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] private InputActionReference cameraMoveZoomInOut;
 
         [Header("Movement")]
-        [SerializeField] private Vector2 distanceRange;
         [SerializeField] private Vector2 verticalAngleRange;
         //[SerializeField] private Vector2 horizontalAngleRange;
 
         [SerializeField] private float rotateSpeed = 50f;
         [SerializeField] private Vector2 moveSpeedRange = new Vector2(100f, 100f);
         [SerializeField] private float zoomSpeed = 25f;
-        private float moveSpeed => Mathf.Lerp(this.moveSpeedRange.x, this.moveSpeedRange.y, this.Proximity);
+        private float moveSpeed => Mathf.Lerp(this.moveSpeedRange.x, this.moveSpeedRange.y, this.TargetProximity);
 
         protected virtual Vector3 UpDirection => Vector3.up;
-        private Vector3 cameraLocalUp = Vector3.up;
-
-        public float Proximity {
-            get { 
-                float distance = Vector3.Distance(this.tCamera.position, this.tTarget.position);
-                return Mathf.InverseLerp(this.distanceRange.x, this.distanceRange.y, distance);
-            }
-        }
 
         private float rotateLeftRightValue;
         private float rotateUpDownValue;
@@ -42,20 +32,6 @@ namespace PolytopeSolutions.Toolset.Input {
         private float moveForwardBackwardValue;
         private float moveZoomInOutValue;
 
-        private Transform tTargetProxy;
-        private Vector3 targetMovementVelocity, targetRotateVeloccity;
-
-        ///////////////////////////////////////////////////////////////////////
-        #region UNITY_FUNCTIONS
-        protected virtual void FixedUpdate() {
-            ConstrainCameraToTraget();
-        }
-        protected virtual void OnDrawGizmos() {
-            if (this.tCamera == null || this.tTarget == null) return;
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(this.tCamera.position, this.tTarget.position);
-        }
-        #endregion
         ///////////////////////////////////////////////////////////////////////
         #region INPUT_HANDLING
         protected override void EnableInputEvents() {
@@ -148,72 +124,27 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         #endregion
         ///////////////////////////////////////////////////////////////////////
-        protected override void ObjectSetup() {
-            base.ObjectSetup();
-            if (this.useProxies) {
-                if (!this.tTargetProxy) { 
-                    this.tTargetProxy = this.tObjectProxy.gameObject.TryFindOrAddByName("TargetProxy").transform;
-                    this.tTargetProxy.position = this.tTarget.position;
-                    this.tTargetProxy.rotation = this.tTarget.rotation;
-                    this.tTargetProxy.localScale = this.tTarget.localScale;
-                }
-            }
-            else {
-                this.tTargetProxy = this.tTarget;
-            }
-        }
+        Vector3 localForward, directionHorizontal, targetDirection, directionInRig, objectPosition, cameraMoveDelta;
+        float angleUpDown, angleLeftRight;
         protected override object OnInteractionPerformed() {
-            this.tObjectProxy.up = this.UpDirection;
-            Vector3 localForward = Vector3.Cross(this.UpDirection, this.tCameraProxy.right);
-            Vector3 directionHorizontal =
-                -this.tCameraProxy.right * this.moveLeftRightValue +
+            localForward = Vector3.Cross(this.UpDirection, this.CameraProxyRight);
+            directionHorizontal =
+                -this.CameraProxyRight * this.moveLeftRightValue +
                 -localForward.normalized * this.moveForwardBackwardValue;
-            Vector3 targetDirection = this.tCameraProxy.position - this.tTargetProxy.position;
-            Vector3 directionInRig =
+            targetDirection = this.CameraProxyPosition - this.TargetProxyPosition;
+            directionInRig =
                 targetDirection.normalized * this.moveZoomInOutValue;
-            this.objectRigidbody.MovePosition(
-                this.tObjectProxy.position + directionHorizontal * Time.fixedDeltaTime
-            );
-            this.tCameraProxy.RotateAround(
-                this.tTargetProxy.position,
-                this.tCameraProxy.right,
-                this.rotateUpDownValue * Time.fixedDeltaTime
-            );
-            this.tCameraProxy.RotateAround(
-                this.tTargetProxy.position,
-                this.UpDirection,
-                this.rotateLeftRightValue * Time.fixedDeltaTime
-            );
-            this.tCameraProxy.position += directionInRig * Time.fixedDeltaTime;
+            objectPosition =
+                this.ObjectProxyPosition + directionHorizontal * Time.fixedDeltaTime;
+            angleUpDown =
+                this.rotateUpDownValue * Time.fixedDeltaTime;
+            angleLeftRight =
+                this.rotateLeftRightValue * Time.fixedDeltaTime;
+            cameraMoveDelta = directionInRig * Time.fixedDeltaTime;
+            ModifyRig(this.UpDirection, angleUpDown, angleLeftRight, cameraMoveDelta, objectPosition);
+            ConstrainCameraToTarget(this.verticalAngleRange);
+
             return null;
-        }
-        private void ConstrainCameraToTraget() {
-            Vector3 lookDirection = this.tTargetProxy.position - this.tCameraProxy.position;
-            float distance = lookDirection.magnitude;
-            // Ensure camera within distance range
-            distance = Mathf.Clamp(distance, this.distanceRange.x, this.distanceRange.y);
-            // Ensure camera is in correct angular position
-            Vector3 inPlaneNormal = Vector3.Cross(lookDirection, this.UpDirection);
-            Vector3 horizontalDirection = Vector3.ProjectOnPlane(lookDirection, this.UpDirection);
-            float verticalAngle = Vector3.Angle(horizontalDirection, lookDirection);
-            verticalAngle = Mathf.Clamp(verticalAngle, this.verticalAngleRange.x, this.verticalAngleRange.y);
-            lookDirection = Quaternion.AngleAxis(-verticalAngle, inPlaneNormal) * horizontalDirection.normalized;
-            // Update the position and rotation of the camera
-            this.tCameraProxy.position = this.tTargetProxy.position - lookDirection * distance;
-            cameraLocalUp = Vector3.Cross(lookDirection, this.tCameraProxy.right);
-            this.tCameraProxy.LookAt(this.tTargetProxy, cameraLocalUp);
-        }
-        protected override void ApplyProxies() {
-            base.ApplyProxies();
-            if (this.useProxies) {
-                this.tTarget.position = Vector3.SmoothDamp(this.tTarget.position, this.tTargetProxy.position, ref this.targetMovementVelocity, this.smoothTime);
-                this.tTarget.rotation = Quaternion.Euler(
-                    Mathf.SmoothDampAngle(this.tTarget.rotation.eulerAngles.x, this.tTargetProxy.rotation.eulerAngles.x, ref this.targetRotateVeloccity.x, this.smoothTime),
-                    Mathf.SmoothDampAngle(this.tTarget.rotation.eulerAngles.y, this.tTargetProxy.rotation.eulerAngles.y, ref this.targetRotateVeloccity.y, this.smoothTime),
-                    Mathf.SmoothDampAngle(this.tTarget.rotation.eulerAngles.z, this.tTargetProxy.rotation.eulerAngles.z, ref this.targetRotateVeloccity.z, this.smoothTime)
-                );
-                //this.tTarget.localRotation = Quaternion.RotateTowards(this.tTarget.localRotation, this.tTargetProxy.localRotation, this.maxDegreesDelta*Time.deltaTime);
-            }
         }
     }        
 }

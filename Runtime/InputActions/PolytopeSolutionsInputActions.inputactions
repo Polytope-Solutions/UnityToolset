@@ -49,6 +49,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "touchAny",
+                    "type": "Button",
+                    "id": "88d79813-33a4-4bd6-a30c-6dd2334095d4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -381,6 +390,116 @@
                     "action": "cameraMoveUpDown",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "5305609f-334b-40f4-a349-256048f1d870",
+                    "path": "<Touchscreen>/touch0/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f471f4a3-de55-4b99-baa4-28630dd08b32",
+                    "path": "<Touchscreen>/touch1/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0410bcd8-2585-4823-b612-390d05eaa177",
+                    "path": "<Touchscreen>/touch2/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a7196e3a-e8c7-4a57-86d7-16bc86cc69cb",
+                    "path": "<Touchscreen>/touch3/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "803609ea-f61d-442f-a47e-58fd1c5c7a29",
+                    "path": "<Touchscreen>/touch4/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "510607c1-ca14-405c-8f20-466b6f457fdf",
+                    "path": "<Touchscreen>/touch5/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "18f28596-2dde-44e3-97df-3f2119465403",
+                    "path": "<Touchscreen>/touch6/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fda79173-44bb-458f-88fc-99aa8e54d133",
+                    "path": "<Touchscreen>/touch7/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2ff3cb8d-280a-4349-8e59-203d7edac1e2",
+                    "path": "<Touchscreen>/touch8/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c626c042-1ffd-405f-963f-f95bf12f8827",
+                    "path": "<Touchscreen>/touch9/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "touchAny",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },

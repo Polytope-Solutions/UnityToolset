@@ -2,13 +2,28 @@
 
 ---
 
+## 0.0.45
+
+2024-07-18
+
+-	Camera controllers:
+	-	Split camera controller and input receiver;
+	-	Add touch exclusive input receiver for camera controller;
+	-	Try to minimize garbage generation by camera controllers;
+-	Input System:
+	-	Debug event racing with input controllers;
+	-	Allow for input receivers to not have handlers;
+	-	Minimize enabling/disabling actions byt input receivers;
+
+---
+
 ## 0.0.44
 
 2024-07-03
 
 -	Allow to automatically disable stcktracing or disable logs completely in the logger;
 -	Allow mesh Objects to be destroyed and disable auto asignation of meshes;
--	Make MEsh manager abstract and generic;
+-	Make Mesh manager abstract and generic;
 -	Allow diabling of unloading resources on scene loading;
 -	Reduce logs in Scene management Extender and UI MAnager;
 -	Safeguard Camera controller and UI manager for rare issues;

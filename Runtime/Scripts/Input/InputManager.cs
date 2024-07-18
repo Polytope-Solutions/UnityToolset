@@ -85,7 +85,7 @@ namespace PolytopeSolutions.Toolset.Input {
         public void InputReceiverRestoreExclusive() {
             if (this.inputReceivers.Count > 0)
                 foreach (KeyValuePair<string, InputReceiver> receiver in this.inputReceivers) {
-                    receiver.Value.RestoreFromTemporaryState();
+                    receiver.Value.SetTemporarilyActiveInputs(true);
                 }
         }
     }

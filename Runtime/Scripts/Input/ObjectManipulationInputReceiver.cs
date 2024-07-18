@@ -43,7 +43,7 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         #endregion
         ///////////////////////////////////////////////////////////////////////
-        protected override void OnInteractionStart() {
+        protected override void OnInteractionStarted() {
             TriggerPerformInteraction();
             if (!this.IsSelfManaged)
                 InputManager.Instance.InputReceiverSetActiveExclusive(this.inputReceiverKeyName, true);

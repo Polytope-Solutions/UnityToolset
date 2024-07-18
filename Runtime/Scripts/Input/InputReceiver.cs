@@ -10,11 +10,11 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] protected bool allowUIOnStart = false;
         protected bool isReceiverEnabled = false;
         protected bool isTemporaryDisabled = false;
-        private bool wasTemporaryDisabled = false;
         protected bool IsInputEnabled => this.isReceiverEnabled && !this.isTemporaryDisabled;
         public bool IsActiveByDefault => this.isActiveByDefault;
         protected bool IsSelfManaged => InputManager.Instance == null;
         protected bool IsPointerOverUI => InputManager.Instance.IsPointerOverUI;
+        protected virtual bool CanHaveHandlers => true;
 
         private bool isStartingInteraction;
         private bool isEndingInteraction;
@@ -27,6 +27,29 @@ namespace PolytopeSolutions.Toolset.Input {
         protected virtual void Update() {
             HandleInputValues();
         }
+        protected virtual void OnEnable() {
+            EnableInputEvents();
+            if (this.IsSelfManaged)
+                SetActiveInputs(this.IsActiveByDefault);
+        }
+        protected virtual void OnDisable() {
+            DisableInputEvents();
+            if (this.IsSelfManaged)
+                SetActiveInputs(false);
+        }
+
+        protected virtual void Awake() {
+            if (string.IsNullOrEmpty(this.inputReceiverKeyName))
+                this.inputReceiverKeyName = gameObject.name + "_InputReceiver";
+            if (!this.IsSelfManaged)
+                InputManager.Instance.RegisterInputReceiver(this.inputReceiverKeyName, this);
+        }
+        protected void OnDestroy() {
+            DisableInputEvents();
+
+            if (!this.IsSelfManaged)
+                InputManager.Instance.UnregisterInputReceiver(this.inputReceiverKeyName);
+        }
         #endregion
 
         protected abstract void EnableInputEvents();
@@ -34,38 +57,13 @@ namespace PolytopeSolutions.Toolset.Input {
         public virtual void SetActiveInputs(bool targetState) {
             if (this.isReceiverEnabled == targetState) return;
             this.isReceiverEnabled = targetState;
-            if (this.isReceiverEnabled)
-                EnableInputEvents();
-            else
-                DisableInputEvents();
+            //if (this.isReceiverEnabled)
+            //    EnableInputEvents();
+            //else
+            //    DisableInputEvents();
         }
-        public virtual void SetTemporarilyActiveInputs(bool targetState) { 
-            this.wasTemporaryDisabled = this.isTemporaryDisabled;
+        public virtual void SetTemporarilyActiveInputs(bool targetState) {
             this.isTemporaryDisabled = !targetState;
-        }
-        public virtual void RestoreFromTemporaryState() {
-            this.isTemporaryDisabled = this.wasTemporaryDisabled;
-        }
-
-        protected virtual void Awake() {
-            if (string.IsNullOrEmpty(this.inputReceiverKeyName))
-                this.inputReceiverKeyName = gameObject.name+"_InputReceiver";
-            if (!this.IsSelfManaged)
-                InputManager.Instance.RegisterInputReceiver(this.inputReceiverKeyName, this);
-        }
-        protected virtual void OnEnable() { 
-            if (this.IsSelfManaged)
-                SetActiveInputs(this.IsActiveByDefault);
-        }
-        protected virtual void OnDisable() { 
-            if (this.IsSelfManaged)
-                SetActiveInputs(false);
-        }
-        protected void OnDestroy() {
-            DisableInputEvents();
-
-            if (!this.IsSelfManaged)
-                InputManager.Instance.UnregisterInputReceiver(this.inputReceiverKeyName);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -90,7 +88,7 @@ namespace PolytopeSolutions.Toolset.Input {
             // Handle Start
             if (this.isStartingInteraction) {
                 UpdateActiveHandlers();
-                if (this.activeHandlers.Count == 0) {
+                if (this.CanHaveHandlers && this.activeHandlers.Count == 0) {
                     this.isEndingInteraction = true;
                 }
                 if ((!this.allowUIOnStart || this.IsPointerOverUI) 
@@ -98,7 +96,7 @@ namespace PolytopeSolutions.Toolset.Input {
                     #if DEBUG2
                     this.Log($"Starting interaction. Active Handlers: [{this.activeHandlers.Count}]. Disabling other interactors.");
                     #endif
-                    OnInteractionStart();
+                    OnInteractionStarted();
                 }
                 this.isStartingInteraction = false;
             }
@@ -146,7 +144,7 @@ namespace PolytopeSolutions.Toolset.Input {
             }
         }
         protected virtual RaycastHit? CurrentInteractionRay() { return null; }
-        protected virtual void OnInteractionStart() { }
+        protected virtual void OnInteractionStarted() { }
         protected virtual object OnInteractionPerformed() { return null; }
         protected virtual void OnInteractionEnded() { }
     }

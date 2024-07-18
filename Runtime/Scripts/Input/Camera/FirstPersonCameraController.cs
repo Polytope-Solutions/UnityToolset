@@ -5,13 +5,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace PolytopeSolutions.Toolset.Input {
-	public class FirstPersonCameraController : CameraController {
+	public class FirstPersonCameraController : CameraInputProvider {
 		[Header("Events")]
 		[SerializeField] private InputActionReference cameraRotateLeftRight;
 		[SerializeField] private InputActionReference cameraRotateUpDown;
 		[SerializeField] private InputActionReference cameraMoveLeftRight;
-		[SerializeField] private InputActionReference cameraMoveUpDown;
 		[SerializeField] private InputActionReference cameraMoveForwardBackward;
+		[SerializeField] private InputActionReference cameraMoveUpDown;
 
 		[Header("Movement")]
 		[SerializeField] private float rotateSpeed = 25f;
@@ -22,8 +22,8 @@ namespace PolytopeSolutions.Toolset.Input {
         private float rotateLeftRightValue;
 		private float rotateUpDownValue;
 		private float moveLeftRightValue;
-		private float moveUpDownValue;
 		private float moveForwardBackwardValue;
+		private float moveUpDownValue;
 
         ///////////////////////////////////////////////////////////////////////
         #region INPUT_HANDLING
@@ -118,25 +118,21 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         #endregion
         ///////////////////////////////////////////////////////////////////////
+        Vector3 direction, objectPosition;
+        float upDownAngle, leftRightAngle;
         protected override object OnInteractionPerformed() {
-			this.tObjectProxy.up = this.UpDirection;
-            this.tCameraProxy.RotateAround(
-				this.tCameraProxy.position,
-				this.UpDirection, 
-				this.rotateLeftRightValue * Time.fixedDeltaTime
-			);
-			this.tCameraProxy.RotateAround(
-				this.tCameraProxy.position,
-				this.tCameraProxy.right, 
-				this.rotateUpDownValue * Time.fixedDeltaTime
-			);
-			Vector3 direction =
-				- this.tCameraProxy.right * this.moveLeftRightValue +
+            upDownAngle =
+                this.rotateUpDownValue * Time.fixedDeltaTime;
+            leftRightAngle =
+                this.rotateLeftRightValue * Time.fixedDeltaTime;
+
+            direction =
+				- this.CameraProxyRight * this.moveLeftRightValue +
                 this.UpDirection * this.moveUpDownValue +
-				this.tCameraProxy.forward * this.moveForwardBackwardValue;
-			this.objectRigidbody.MovePosition(
-				this.tObjectProxy.position + direction * Time.fixedDeltaTime
-			);
+				this.CameraProxyForward * this.moveForwardBackwardValue;
+            objectPosition =
+                this.ObjectProxyPosition + direction * Time.fixedDeltaTime;
+            ModifyRig(this.UpDirection, upDownAngle, leftRightAngle, Vector3.zero, objectPosition);
 			return null;
 		}
 	}

@@ -7,15 +7,17 @@ using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.Input {
     [RequireComponent(typeof(Rigidbody))]
-    public abstract class CameraController : InputReceiver {
+    public class CameraController : MonoBehaviour {
         // NB! If overriding OnEnable call the base version in derived classes
         // ignore input handlers as this object itself is both receiver and handler.
 
         [Header("General")]
         [SerializeField] protected Transform tCamera;
+        [SerializeField] protected Transform tTarget;
         [SerializeField] protected bool useProxies;
         [SerializeField] protected bool useMovementMonitor = true;
         [SerializeField] protected float minMovementMonitorDelay = 0.05f;
+        [SerializeField] private Vector2 targetDistanceRange = new Vector2(0, 0);
 
         protected Rigidbody objectRigidbody;
         protected Camera cCamera;
@@ -27,23 +29,59 @@ namespace PolytopeSolutions.Toolset.Input {
 
         protected Transform tObjectProxy;
         protected Transform tCameraProxy;
+        protected Transform tTargetProxy;
+
+        public Camera Camera => this.cCamera;
+        public Transform ObjectProxy => this.tObjectProxy;
+        public Rigidbody ObjectRigidbody => this.objectRigidbody;
+        public Transform CameraProxy => this.tCameraProxy;
+        public Transform TargetProxy => this.tTargetProxy;
+
+        //Normalized value.
+        public float TargetProximity {
+            get {
+                // changed to proxies
+                float distance = Vector3.Distance(this.tCameraProxy.position, this.tTargetProxy.position);
+                return Mathf.InverseLerp(this.targetDistanceRange.x, this.targetDistanceRange.y, distance);
+            }
+        }
+        public Vector3 TargetPositionClamped { 
+            get {
+                Vector3 lookDirection = this.tTargetProxy.position - this.tCameraProxy.position;
+                float distance = lookDirection.magnitude;
+                // Ensure camera within distance range
+                distance = Mathf.Clamp(distance, this.targetDistanceRange.x, this.targetDistanceRange.y);
+                return lookDirection.normalized * distance;
+            }
+        }
 
         private Vector3 objectMovementVelocity, objectRotationVelocity;
         private Vector3 cameraMovementVelocity, cameraRotationVelocity;
+        private Vector3 targetMovementVelocity, targetRotateVelocity;
         [SerializeField] protected float smoothTime = 0.1f;
 
-        protected override void OnEnable() {
-            base.OnEnable();
+        protected void OnEnable() {
             ObjectSetup();
         }
         protected virtual void LateUpdate() {
             ApplyProxies();
+        }
+        protected virtual void OnDrawGizmos() {
+            if (this.tCamera == null || this.tTarget == null) return;
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(this.tCamera.position, this.tTarget.position);
         }
         protected virtual void ObjectSetup() {
             this.cCamera = this.tCamera?.GetComponent<Camera>();
             if (this.tCamera == null) {
                 this.cCamera = Camera.main;
                 this.tCamera = this.cCamera?.transform;
+            }
+            if (this.tTarget == null) {
+                GameObject target = new GameObject("CameraTarget");
+                target.transform.SetParent(this.tCamera);
+                target.transform.position = this.tCamera.position + this.tCamera.forward * this.targetDistanceRange.x;
+                this.tTarget = target.transform;
             }
 
             if (this.useProxies) {
@@ -62,6 +100,12 @@ namespace PolytopeSolutions.Toolset.Input {
                     this.tCameraProxy.position = this.tCamera.position;
                     this.tCameraProxy.rotation = this.tCamera.rotation;
                     this.tCameraProxy.localScale = this.tCamera.localScale;
+                }
+                if (!this.tTargetProxy) {
+                    this.tTargetProxy = this.tObjectProxy.gameObject.TryFindOrAddByName("TargetProxy").transform;
+                    this.tTargetProxy.position = this.tTarget.position;
+                    this.tTargetProxy.rotation = this.tTarget.rotation;
+                    this.tTargetProxy.localScale = this.tTarget.localScale;
                 }
 
                 Rigidbody currentRigidbody = GetComponent<Rigidbody>();
@@ -86,6 +130,7 @@ namespace PolytopeSolutions.Toolset.Input {
             else {
                 this.tObjectProxy = transform;
                 this.tCameraProxy = this.tCamera;
+                this.tTargetProxy = this.tTarget;
             }
 
             float frustumHeight = 2.0f * this.cCamera.farClipPlane * Mathf.Tan(this.cCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
@@ -115,6 +160,14 @@ namespace PolytopeSolutions.Toolset.Input {
                     Mathf.SmoothDampAngle(this.tCamera.rotation.eulerAngles.z, this.tCameraProxy.rotation.eulerAngles.z, ref this.cameraRotationVelocity.z, this.smoothTime)
                 );
                 //this.tCamera.localRotation = Quaternion.RotateTowards(this.tCamera.localRotation, this.tCameraProxy.localRotation, this.maxDegreesDelta * Time.deltaTime);
+
+                this.tTarget.position = Vector3.SmoothDamp(this.tTarget.position, this.tTargetProxy.position, ref this.targetMovementVelocity, this.smoothTime);
+                this.tTarget.rotation = Quaternion.Euler(
+                    Mathf.SmoothDampAngle(this.tTarget.rotation.eulerAngles.x, this.tTargetProxy.rotation.eulerAngles.x, ref this.targetRotateVelocity.x, this.smoothTime),
+                    Mathf.SmoothDampAngle(this.tTarget.rotation.eulerAngles.y, this.tTargetProxy.rotation.eulerAngles.y, ref this.targetRotateVelocity.y, this.smoothTime),
+                    Mathf.SmoothDampAngle(this.tTarget.rotation.eulerAngles.z, this.tTargetProxy.rotation.eulerAngles.z, ref this.targetRotateVelocity.z, this.smoothTime)
+                );
+                //this.tTarget.localRotation = Quaternion.RotateTowards(this.tTarget.localRotation, this.tTargetProxy.localRotation, this.maxDegreesDelta*Time.deltaTime);
             }
         }
         private IEnumerator MovementMonitor() {
@@ -136,28 +189,29 @@ namespace PolytopeSolutions.Toolset.Input {
             }
         }
         ///////////////////////////////////////////////////////////////////////
-        public List<Vector3> FieldOfViewBoundaries(Plane plane) {
-            List<Vector3> boundaryPoints = new List<Vector3>();
-            foreach (Vector3 corner in
-                new List<Vector3> {
-                    Vector3.zero,
-                    new Vector3(0, 1, 0),
-                    new Vector3(1, 1, 0),
-                    new Vector3(1, 0, 0)
-                }) {
-                Ray temp = this.cCamera.ViewportPointToRay(corner);
-                if (plane.Raycast(temp, out float distance)) {
-                    distance = Mathf.Clamp(distance, 0, this.farCornerDistanceCache);
-                    boundaryPoints.Add(temp.origin + temp.direction * distance);
+        Vector3[] corenerUVs = new Vector3[] {
+            Vector3.zero,
+            new Vector3(0, 1, 0),
+            new Vector3(1, 1, 0),
+            new Vector3(1, 0, 0)
+        };
+        Ray cornerRay;
+        float distance;
+        public void FieldOfViewBoundaries(List<Vector3> boundaryPoints, Plane plane) {
+            boundaryPoints.Clear();
+            foreach (Vector3 corner in this.corenerUVs) {
+                this.cornerRay = this.cCamera.ViewportPointToRay(corner);
+                if (plane.Raycast(this.cornerRay, out this.distance)) {
+                    this.distance = Mathf.Clamp(this.distance, 0, this.farCornerDistanceCache);
+                    boundaryPoints.Add(this.cornerRay.origin + this.cornerRay.direction * this.distance);
                 }
                 else {
                     // Ray does not intersect with plane - snap the corner to the relevant plane
                     boundaryPoints.Add(
-                        plane.ClosestPointOnPlane(temp.origin + temp.direction * this.farCornerDistanceCache)
+                        plane.ClosestPointOnPlane(cornerRay.origin + cornerRay.direction * this.farCornerDistanceCache)
                     );
                 }
             }
-            return boundaryPoints;
         }
     }
 }
