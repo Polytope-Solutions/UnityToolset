@@ -4,6 +4,17 @@
 
 ## 0.0.46
 
+2024-08-05
+
+-	Tweak input system:
+	-	Cache raycasters and pointer over UI results per frame;
+	-	Allow Vertical camera range for third person camera controllers to vary based on proximity to target;
+	-	Add two finger gesture in touch third person camera controller to tilt camera.
+
+---
+
+## 0.0.46
+
 2024-07-18
 
 -	Tweak Input system:

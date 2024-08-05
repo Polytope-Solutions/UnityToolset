@@ -16,7 +16,11 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] private InputActionReference cameraMoveZoomInOut;
 
         [Header("Movement")]
-        [SerializeField] private Vector2 verticalAngleRange;
+        [SerializeField] private Vector2 verticalAngleRangeMin = new Vector2(15, 45);
+        [SerializeField] private Vector2 verticalAngleRangeMax = new Vector2(85, 85);
+        private Vector2 VerticalAngleRange => new Vector2(
+            Mathf.Lerp(this.verticalAngleRangeMin.x, this.verticalAngleRangeMin.y, this.TargetProximity),
+            Mathf.Lerp(this.verticalAngleRangeMax.x, this.verticalAngleRangeMax.y, this.TargetProximity));
         //[SerializeField] private Vector2 horizontalAngleRange;
 
         [SerializeField] private float rotateSpeed = 50f;
@@ -142,9 +146,9 @@ namespace PolytopeSolutions.Toolset.Input {
                 this.rotateLeftRightValue * Time.fixedDeltaTime;
             cameraMoveDelta = directionInRig * Time.fixedDeltaTime;
             ModifyRig(this.UpDirection, angleUpDown, angleLeftRight, cameraMoveDelta, objectPosition);
-            ConstrainCameraToTarget(this.verticalAngleRange);
+            ConstrainCameraToTarget(this.VerticalAngleRange);
 
             return null;
         }
-    }        
+    }
 }

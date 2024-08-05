@@ -20,10 +20,19 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] private InputActionReference touchAny;
 
         [Header("Movement")]
-        [SerializeField] private Vector2 verticalAngleRange = new Vector2(15, 85);
         [SerializeField] private float maxRayDistance = 1000f;
         [SerializeField] private float discardTime = 1 / 60f;
+
+        [Header("Tilt")]
+        [SerializeField] private Vector2 verticalAngleRangeMin = new Vector2(15, 45);
+        [SerializeField] private Vector2 verticalAngleRangeMax = new Vector2(85, 85);
+        [SerializeField] private float tiltSpeed = 5f;
+        [SerializeField] private float moveThreshold = 1f;
+        [SerializeField] private float allignmentThreshold = 0.75f;
         protected virtual Vector3 UpDirection => Vector3.up;
+        private Vector2 VerticalAngleRange => new Vector2(
+            Mathf.Lerp(this.verticalAngleRangeMin.x, this.verticalAngleRangeMin.y, this.TargetProximity),
+            Mathf.Lerp(this.verticalAngleRangeMax.x, this.verticalAngleRangeMax.y, this.TargetProximity));
 
         private Vector2 primaryTouchPreviousPosition, primaryTouchCurrentPosition;
         private Vector2 secondaryTouchPreviousPosition, secondaryTouchCurrentPosition;
@@ -62,7 +71,7 @@ namespace PolytopeSolutions.Toolset.Input {
         private void TouchStarted(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
             if (CheckTouches()) {
-                if (!this.IsPointerOverUI) { 
+                if (!this.IsPointerOverUI) {
                     startTime = Time.time;
                     TriggerStartInteraction();
                     //TriggerPerformInteraction();
@@ -85,6 +94,8 @@ namespace PolytopeSolutions.Toolset.Input {
         int previousTouchCount = -1, currentTouchCount;
         int primaryTouchId = -1, secondaryTouchId = -1;
         float startTime = -1;
+        float angleUpDown;
+        bool hasStartedTilt = false;
 
         UnityEngine.InputSystem.EnhancedTouch.Touch[] currentTouches;
 
@@ -94,10 +105,12 @@ namespace PolytopeSolutions.Toolset.Input {
             }
             objectRotation = Quaternion.identity;
             scale = 1f;
+            angleUpDown = 0f;
 
-            if (!CheckTouches()) { 
+            if (!CheckTouches()) {
                 TriggerEndInteraction();
-            } else if (currentTouchCount > 0 && currentTouches[0].inProgress) {
+            }
+            else if (currentTouchCount > 0 && currentTouches[0].inProgress) {
                 // Check primary
                 if (this.resetPrimaryTouch && Time.time - startTime > this.discardTime)
                     ResetPrimaryTouch();
@@ -107,15 +120,15 @@ namespace PolytopeSolutions.Toolset.Input {
                         if (currentTouchCount > 1 && currentTouches[1].inProgress) {
                             if (this.resetSecondaryTouch)
                                 ResetSecondaryTouch();
-                            else 
+                            else
                                 UpdateSecondaryTouch();
                         }
                     }
                 }
             }
 
-            ModifyRigDirect(this.UpDirection, this.primaryTouchPreviousGamePosition, this.primaryTouchCurrentGamePosition, objectRotation, scale);
-            ConstrainCameraToTarget(this.verticalAngleRange);
+            ModifyRigDirect(this.UpDirection, this.primaryTouchPreviousGamePosition, this.primaryTouchCurrentGamePosition, objectRotation, scale, angleUpDown, hasStartedTilt);
+            ConstrainCameraToTarget(this.VerticalAngleRange);
             return null;
         }
 
@@ -123,9 +136,9 @@ namespace PolytopeSolutions.Toolset.Input {
         private bool CheckTouches() {
             currentTouches = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.ToArray();
             currentTouchCount = currentTouches.Length;
-            #if DEBUG2
+#if DEBUG2
             this.Log($"Active touches: {currentTouches.Length}");
-            #endif
+#endif
             if (previousTouchCount != currentTouchCount) {
                 this.resetPrimaryTouch = true;
                 this.primaryTouchId = -1;
@@ -141,6 +154,7 @@ namespace PolytopeSolutions.Toolset.Input {
             this.primaryTouchCurrentPosition = currentTouches[0].screenPosition;
             this.primaryTouchPreviousPosition = this.primaryTouchCurrentPosition;
             this.resetPrimaryTouch = false;
+            this.hasStartedTilt = false;
             this.primaryTouchId = currentTouches[0].touchId;
         }
         private bool UpdatePimaryTouch() {
@@ -170,9 +184,19 @@ namespace PolytopeSolutions.Toolset.Input {
             this.secondaryTouchPreviousPosition = this.secondaryTouchCurrentPosition;
             this.secondaryTouchId = currentTouches[1].touchId;
             this.resetSecondaryTouch = false;
+            this.hasStartedTilt = false;
         }
         private void UpdateSecondaryTouch() {
             secondaryTouchPreviousPosition = this.secondaryTouchCurrentPosition;
+            secondaryTouchCurrentPosition = currentTouches[1].screenPosition;
+            primaryTouchDeltaScreenSpace = primaryTouchCurrentPosition - primaryTouchPreviousPosition;
+            secondaryTouchDeltaScreenSpace = secondaryTouchCurrentPosition - secondaryTouchPreviousPosition;
+            if (this.hasStartedTilt || DualFingerTilt()) {
+                this.hasStartedTilt = true;
+                angleUpDown =
+                    -this.primaryTouchDeltaScreenSpace.y * this.tiltSpeed * Time.fixedDeltaTime;
+                return;
+            }
             //Shoot ray from from current touch position
             secondaryTouchRay = this.Camera.ScreenPointToRay(secondaryTouchPreviousPosition.ToXY());
             if (!EvaluateRay(secondaryTouchRay, out distance, true))
@@ -180,7 +204,6 @@ namespace PolytopeSolutions.Toolset.Input {
             secondaryTouchPreviousGamePosition = secondaryTouchRay.GetPoint(distance);
             differencePrevious = secondaryTouchPreviousGamePosition - primaryTouchPreviousGamePosition;
 
-            secondaryTouchCurrentPosition = currentTouches[1].screenPosition;
             //Shoot ray from from current touch position
             secondaryTouchRay = this.Camera.ScreenPointToRay(secondaryTouchCurrentPosition.ToXY());
             if (!EvaluateRay(secondaryTouchRay, out distance))
@@ -195,6 +218,12 @@ namespace PolytopeSolutions.Toolset.Input {
                 objectRotation = Quaternion.FromToRotation(differencePrevious, differenceCurrent);
                 scale = previousMagnitude / currentMagnitude;
             }
+        }
+        Vector3 primaryTouchDeltaScreenSpace, secondaryTouchDeltaScreenSpace;
+        private bool DualFingerTilt() {
+            return primaryTouchDeltaScreenSpace.magnitude > this.moveThreshold && secondaryTouchDeltaScreenSpace.magnitude > this.moveThreshold
+                && Mathf.Abs(primaryTouchDeltaScreenSpace.y) > Mathf.Abs(primaryTouchDeltaScreenSpace.x)
+                && Vector3.Dot(primaryTouchDeltaScreenSpace.normalized, secondaryTouchDeltaScreenSpace.normalized) > this.allignmentThreshold;
         }
         #endregion
 

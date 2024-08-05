@@ -2,23 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace PolytopeSolutions.Toolset.Input {
     [RequireComponent(typeof(CameraController))]
     public abstract class CameraInputProvider : InputReceiver {
         private CameraController cameraController;
 
-        protected Camera Camera                 => this.cameraController.Camera;
-        protected Vector3 ObjectProxyUp         => this.cameraController.ObjectProxy.up;
-        protected Vector3 ObjectProxyPosition   => this.cameraController.ObjectProxy.position;
-        protected Vector3 CameraProxyPosition   => this.cameraController.CameraProxy.position;
-        protected Vector3 CameraProxyRight      => this.cameraController.CameraProxy.right;
-        protected Vector3 CameraProxyForward    => this.cameraController.CameraProxy.forward;
-        protected Vector3 TargetProxyPosition   => this.cameraController.TargetProxy.position;
-        protected float TargetProximity         => this.cameraController.TargetProximity;
+        protected Camera Camera => this.cameraController.Camera;
+        protected Vector3 ObjectProxyUp => this.cameraController.ObjectProxy.up;
+        protected Vector3 ObjectProxyPosition => this.cameraController.ObjectProxy.position;
+        protected Vector3 CameraProxyPosition => this.cameraController.CameraProxy.position;
+        protected Vector3 CameraProxyRight => this.cameraController.CameraProxy.right;
+        protected Vector3 CameraProxyForward => this.cameraController.CameraProxy.forward;
+        protected Vector3 TargetProxyPosition => this.cameraController.TargetProxy.position;
+        protected float TargetProximity => this.cameraController.TargetProximity;
         protected Vector3 TargetPositionClamped => this.cameraController.TargetPositionClamped;
 
-        protected override bool CanHaveHandlers => false; 
+        protected override bool CanHaveHandlers => false;
 
         protected override void Awake() {
             base.Awake();
@@ -57,23 +56,37 @@ namespace PolytopeSolutions.Toolset.Input {
 
             this.cameraController.ObjectRigidbody.MovePosition(objectPosition);
         }
-        protected void ModifyRigDirect(Vector3 upDirection, Vector3 rotationOriginPrevious, Vector3 rotationOrigin, Quaternion rotation, float scale) {
+        protected void ModifyRigDirect(Vector3 upDirection, Vector3 rotationOriginPrevious, Vector3 rotationOrigin, Quaternion rotation, float scale, float angleUpDown, bool isTilting) {
             this.cameraController.ObjectProxy.up = upDirection;
 
-            Quaternion inverse = Quaternion.Inverse(rotation);
-            //Quaternion rotation = Quaternion.AngleAxis(-angle, upDirection);
-            //Vector3 delta = rotationOrigin - rotationOriginPrevious;
+            if (isTilting) {
+                this.cameraController.CameraProxy.RotateAround(
+                    this.cameraController.TargetProxy.position,
+                    this.cameraController.CameraProxy.right,
+                    angleUpDown
+                );
+
+                rotationOrigin = Vector3.zero;
+                rotationOriginPrevious = Vector3.zero;
+                scale = 1;
+                rotation = Quaternion.identity;
+            }
+
             Vector3 objectOffset = this.ObjectProxyPosition - rotationOrigin;
             Vector3 targetOffset = this.TargetProxyPosition - rotationOrigin;
             Vector3 targetCameraOffset = this.CameraProxyPosition - this.TargetProxyPosition;
 
-            
+            Quaternion inverse = Quaternion.Inverse(rotation);
+            //Quaternion rotation = Quaternion.AngleAxis(-angle, upDirection);
+            //Vector3 delta = rotationOrigin - rotationOriginPrevious;
+
+
             //objectOffset = this.TargetProxyPosition - rotationOrigin;
             //objectOffset *= scale;
             //objectOffset = rotation * objectOffset;
             //objectOffset -= delta;
             //this.cameraController.TargetProxy.position = rotationOriginPrevious + objectOffset;
-            
+
             objectOffset *= scale;
             objectOffset = inverse * objectOffset;
             //objectOffset -= delta;

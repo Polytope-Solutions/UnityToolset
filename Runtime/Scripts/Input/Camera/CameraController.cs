@@ -111,8 +111,8 @@ namespace PolytopeSolutions.Toolset.Input {
                 Rigidbody currentRigidbody = GetComponent<Rigidbody>();
                 this.objectRigidbody = this.tObjectProxy.gameObject.AddComponent<Rigidbody>();
                 this.objectRigidbody.mass = currentRigidbody.mass;
-                this.objectRigidbody.drag = currentRigidbody.drag;
-                this.objectRigidbody.angularDrag = currentRigidbody.angularDrag;
+                this.objectRigidbody.linearDamping = currentRigidbody.linearDamping;
+                this.objectRigidbody.angularDamping = currentRigidbody.angularDamping;
                 this.objectRigidbody.useGravity = currentRigidbody.useGravity;
                 this.objectRigidbody.constraints = currentRigidbody.constraints;
                 this.objectRigidbody.interpolation = currentRigidbody.interpolation;
