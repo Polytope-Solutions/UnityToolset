@@ -2,7 +2,19 @@
 
 ---
 
-## 0.0.46
+## 0.0.50
+
+2024-09-02
+
+-	Fix get component to include not just monobehaviours but any component;
+-	Set up avatar animation and navigation system:
+	-	dynamically generate navmesh;
+	-	set up avatar specific animation blend tree with audio sources for footsteps and actions and animationstate for actions;
+	-	generalize animation settings into objects for convinience;
+
+---
+
+## 0.0.47
 
 2024-08-05
 

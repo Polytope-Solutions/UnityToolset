@@ -53,7 +53,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             return goFound;
         }
         public static T TryGetOrAddComponent<T>(this GameObject gItem) 
-            where T : MonoBehaviour { 
+            where T : Component { 
             return (T)gItem.TryGetOrAddComponent(typeof(T));
         }
         public static Component TryGetOrAddComponent(this GameObject gItem, Type componentType){
