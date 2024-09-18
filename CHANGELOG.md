@@ -2,6 +2,25 @@
 
 ---
 
+## 0.0.52
+
+2024-09-18
+
+-	Reorganize Mesh tools;
+-	Add structure to do instanced mesh rendering;
+-	Add trigger detector utility;
+-	Organize camera input provider;
+
+---
+
+## 0.0.51
+
+2024-09-09
+
+-	Expand Runtime settings configurator.
+
+---
+
 ## 0.0.50
 
 2024-09-02

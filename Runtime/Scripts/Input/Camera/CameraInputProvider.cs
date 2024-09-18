@@ -103,24 +103,24 @@ namespace PolytopeSolutions.Toolset.Input {
             this.cameraController.CameraProxy.LookAt(this.TargetProxyPosition, upDirection);// * this.cameraController.CameraProxy.rotation;
         }
 
-        Vector3 lookDirection, inPlaneNormal, horizontalDirection, cameraLocalUp;
-        float distance, verticalAngle;
+        Vector3 constrainLookDirection, constrainInPlaneNormal, constrainHorizontalDirection, constrainCameraLocalUp;
+        float constrainDistance, constrainVerticalAngle;
         protected void ConstrainCameraToTarget(Vector2 verticalAngleRange) {
             // target constraint
-            lookDirection = this.TargetPositionClamped;
-            distance = lookDirection.magnitude;
+            constrainLookDirection = this.TargetPositionClamped;
+            constrainDistance = constrainLookDirection.magnitude;
             // Ensure camera is in correct angular position
-            inPlaneNormal = Vector3.Cross(lookDirection, this.ObjectProxyUp);
-            horizontalDirection = Vector3.ProjectOnPlane(lookDirection, this.ObjectProxyUp);
-            verticalAngle = Vector3.Angle(horizontalDirection, lookDirection);
-            verticalAngle = Mathf.Clamp(verticalAngle, verticalAngleRange.x, verticalAngleRange.y);
-            lookDirection = Quaternion.AngleAxis(-verticalAngle, inPlaneNormal) * horizontalDirection.normalized;
-            cameraLocalUp = Vector3.Cross(lookDirection, this.CameraProxyRight);
-            lookDirection *= distance;
+            constrainInPlaneNormal = Vector3.Cross(constrainLookDirection, this.ObjectProxyUp);
+            constrainHorizontalDirection = Vector3.ProjectOnPlane(constrainLookDirection, this.ObjectProxyUp);
+            constrainVerticalAngle = Vector3.Angle(constrainHorizontalDirection, constrainLookDirection);
+            constrainVerticalAngle = Mathf.Clamp(constrainVerticalAngle, verticalAngleRange.x, verticalAngleRange.y);
+            constrainLookDirection = Quaternion.AngleAxis(-constrainVerticalAngle, constrainInPlaneNormal) * constrainHorizontalDirection.normalized;
+            constrainCameraLocalUp = Vector3.Cross(constrainLookDirection, this.CameraProxyRight);
+            constrainLookDirection *= constrainDistance;
 
             // Update the position and rotation of the camera
-            this.cameraController.CameraProxy.position = this.cameraController.TargetProxy.position - lookDirection;
-            this.cameraController.CameraProxy.LookAt(this.cameraController.TargetProxy, cameraLocalUp);
+            this.cameraController.CameraProxy.position = this.cameraController.TargetProxy.position - constrainLookDirection;
+            this.cameraController.CameraProxy.LookAt(this.cameraController.TargetProxy, constrainCameraLocalUp);
         }
         #endregion
     }

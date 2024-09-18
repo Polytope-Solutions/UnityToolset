@@ -55,8 +55,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             }
         }
 
-        public MeshGameObject(GameObject goParent, string name, GameObject goPrefab, Material _material = null,
-                int? layer = null, bool instantiateMaterial = false, bool useColliders = false, bool shareCollisionMesh = false) {
+        public MeshGameObject(GameObject goParent, string name, GameObject goPrefab,
+                int? layer = null, bool useColliders = false, bool shareCollisionMesh = false) {
             goParent.SetActive(false);
             this.goItem = goParent.TryFindOrAddByName(name, goPrefab);
             if (layer != null)
@@ -79,18 +79,21 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                     this.mcMesh = this.goItem.AddComponent<MeshCollider>();
             }
 
+            //this.MainMesh = new Mesh();
+            //if (useColliders && !this.shareCollisionMesh)
+            //    this.CollisionMesh = new Mesh();
+
+            goParent.SetActive(true);
+        }
+        public MeshGameObject(GameObject goParent, string name, GameObject goPrefab, Material _material = null,
+                int? layer = null, bool instantiateMaterial = false, bool useColliders = false, bool shareCollisionMesh = false)
+                : this(goParent, name, goPrefab, layer, useColliders, shareCollisionMesh) {
             if (_material == null)
                 _material = this.mrDefaultMesh.sharedMaterial;
             if (instantiateMaterial)
                 this.Material = Material.Instantiate(_material);
             else
                 this.Material = _material;
-
-            //this.MainMesh = new Mesh();
-            //if (useColliders && !this.shareCollisionMesh)
-            //    this.CollisionMesh = new Mesh();
-
-            goParent.SetActive(true);
         }
         public void Destroy() {
 #if UNITY_EDITOR
