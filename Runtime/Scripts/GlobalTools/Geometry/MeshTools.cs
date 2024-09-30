@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEngine.Rendering;
+
 using System;
 using System.Linq;
 using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
     public static partial class MeshTools {
-        public static Mesh JoinMeshes(Transform[] origins, Mesh[] sources) {
+        public static Mesh JoinMeshes(Transform[] origins, Mesh[] sources, int[] subMeshIndices = null) {
             Mesh mesh = new Mesh();
 
             List<Vector3> vertices = new List<Vector3>(), currentVertices = new List<Vector3>(),
@@ -17,35 +19,51 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             List<int> indices = new List<int>(), currentIndices = new List<int>(); ;
 
             int currentOffset = 0;
+            int submeshStart, submeshEnd;
+            int startIndex, count;
             for (int i = 0; i < sources.Length; i++) {
                 currentVertices.Clear();
-                sources[i].GetVertices(currentVertices);
-                currentVertices.ForEach(vertex => vertices.Add(origins[i].TransformPoint(vertex)));
-
                 currentNormals.Clear();
+                currentUVs.Clear();
+                sources[i].GetVertices(currentVertices);
                 sources[i].GetNormals(currentNormals);
-                currentNormals.ForEach(normal => normals.Add(origins[i].TransformDirection(normal)));
-
                 // TODO: Add support for multiple channels
                 //for (int c = 0; c < 8; c++)
                 int c = 0;
                 {
-                    currentUVs.Clear();
                     sources[i].GetUVs(c, currentUVs);
-                    if (currentUVs.Count == 0)
-                        currentUVs = (new Vector2[sources[i].vertexCount]).ToList();
-                    uvs.AddRange(currentUVs);
+                }
+                if (currentUVs.Count == 0)
+                    currentUVs = (new Vector2[sources[i].vertexCount]).ToList();
+                startIndex = 0;
+                count = sources[i].vertexCount;
+                if (subMeshIndices != null && sources[i].subMeshCount > 1 && sources[i].subMeshCount > subMeshIndices[i]) {
+                    SubMeshDescriptor descriptor = mesh.GetSubMesh(subMeshIndices[i]);
+                    startIndex = descriptor.baseVertex;
+                    count = descriptor.vertexCount;
+                }
+                for (int j = startIndex, k = 0; k < count; j++, k++) {
+                    vertices.Add(origins[i].TransformPoint(currentVertices[j]));
+                    normals.Add(origins[i].TransformDirection(currentNormals[j]));
+                    // TODO: Add support for multiple channels
+                    //for (int c = 0; c < 8; c++)
+                    uvs.Add(currentUVs[j]);
                 }
 
-                for (int sm = 0; sm < sources[i].subMeshCount; sm++) {
+                submeshStart = 0;
+                submeshEnd = sources[i].subMeshCount;
+                if (subMeshIndices != null) {
+                    submeshStart = subMeshIndices[i];
+                    submeshEnd = submeshStart + 1;
+                }
+                for (int sm = submeshStart; sm < submeshEnd; sm++) {
                     currentIndices.Clear();
                     sources[i].GetTriangles(currentIndices, sm);
                     currentIndices.ForEach(index => indices.Add(index + currentOffset));
                 }
 
-                currentOffset += sources[i].vertexCount;
+                currentOffset += count;
             }
-
             if (vertices.Count >= 65536)
                 mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 

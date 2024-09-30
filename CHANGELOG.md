@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.53
+
+2024-09-30
+
+-	Expand Mesh joining to allow submesh isolation;
+
+---
+
 ## 0.0.52
 
 2024-09-18
