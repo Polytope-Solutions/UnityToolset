@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.54
+
+2024-10-14
+
+-	Allow addressable Sprites to be accessed directly via callback;
+
+---
+
 ## 0.0.53
 
 2024-09-30

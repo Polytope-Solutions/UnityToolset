@@ -51,10 +51,20 @@ namespace PolytopeSolutions.Toolset.AssetManagement {
         }
         public void RequestAddressableSprite(AssetReference assetReference, GameObject goHolder) {
             if (this.currentAssetReferences.Contains(assetReference)) {
-                SpriteOperation.Invoke(goHolder, assetReference.Asset);
+                SpriteOperation.Invoke(goHolder, null, assetReference.Asset);
             }
             else {
-                IOperation operation = new SpriteOperation(assetReference, goHolder);
+                IOperation operation = new SpriteOperation(assetReference, goHolder, null);
+                this.currentOperations.Add(operation);
+                this.currentAssetReferences.Add(assetReference);
+            }
+        }
+        public void RequestAddressableSprite(AssetReference assetReference, Action<Sprite> callback) {
+            if (this.currentAssetReferences.Contains(assetReference)) {
+                SpriteOperation.Invoke(null, callback, assetReference.Asset);
+            }
+            else {
+                IOperation operation = new SpriteOperation(assetReference, null, callback);
                 this.currentOperations.Add(operation);
                 this.currentAssetReferences.Add(assetReference);
             }

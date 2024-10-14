@@ -77,15 +77,22 @@ namespace PolytopeSolutions.Toolset.AssetManagement {
         }
         public class SpriteOperation : Operation<Sprite> {
             private GameObject goHolder;
+            private Action<Sprite> callback;
 
-            public SpriteOperation(AssetReference _reference, GameObject _goHolder) : base(_reference) {
-                this.goHolder = _goHolder;
+            public SpriteOperation(AssetReference _reference, GameObject _goHolder, Action<Sprite> _callback) : base(_reference) {
+                if (_goHolder)
+                    this.goHolder = _goHolder;
+                if (_callback != null)
+                    this.callback = _callback;
                 Init();
             }
-            protected override void Invoke(object result) => Invoke(this.goHolder, result);
-            public static void Invoke(GameObject goHolder, object result) {
+            protected override void Invoke(object result) => Invoke(this.goHolder, this.callback, result);
+            public static void Invoke(GameObject goHolder, Action<Sprite> callback, object result) {
                 Sprite asset = result as Sprite;
-                goHolder.SetImage(asset);
+                if (goHolder)
+                    goHolder.SetImage(asset);
+                if (callback != null)
+                    callback.Invoke(asset);
             }
         }
         public class ScriptableObjectOperation<T> : Operation<ScriptableObject> where T : ScriptableObject {
