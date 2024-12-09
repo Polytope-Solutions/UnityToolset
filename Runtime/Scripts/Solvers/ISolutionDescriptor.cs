@@ -39,18 +39,18 @@ namespace PolytopeSolutions.Toolset.Solvers {
         ///////////////////////////////////////////////////////////////////////
         #region INPUT_HANDLING
         // Exposed trigger for input tick.
-        public void TickInput(ref bool inputStable, SolverInputController inputController) {
+        public void TickInput(ref bool inputStable, System.Random randomizer, SolverInputController inputController) {
             if (inputController.IsComplete) {
                 #if DEBUG2
                 this.Log("InputTick.");
                 #endif
-                HandleInputTick(inputController);
+                HandleInputTick(randomizer, inputController);
 
                 inputStable = inputController.TickInputs();
             }
         }
         // Required overridable function to handle input tick.
-        protected void HandleInputTick(SolverInputController inputController);
+        protected void HandleInputTick(System.Random randomizer, SolverInputController inputController);
         #endregion
 
         ///////////////////////////////////////////////////////////////////////

@@ -20,11 +20,11 @@ namespace PolytopeSolutions.Toolset.Solvers {
 
         public abstract void UpdateState(int newState);
     }
-    
+
     public abstract class ElementList<T> where T : Element, new() {
         protected List<T> _elements;
         public List<T> elements => this._elements;
-        
+
 
         public ElementList() {
             this._elements = new List<T>();

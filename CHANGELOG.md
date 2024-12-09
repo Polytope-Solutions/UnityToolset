@@ -2,6 +2,22 @@
 
 ---
 
+## 0.0.56
+
+2024-12-09
+
+-	Small adjustments to solver and grid structures;
+
+---
+
+## 0.0.55
+
+2024-11-04
+
+-	Create no GC versions for some vector conversions;
+
+---
+
 ## 0.0.54
 
 2024-10-14

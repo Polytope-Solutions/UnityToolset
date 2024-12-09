@@ -6,23 +6,62 @@ using System.Linq;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
     public static partial class ObjectHelpers {
-        public static int[] ToIntArray(this Vector3Int vector) { 
+        public static int[] ToIntArray(this Vector3Int vector) {
             return new int[] { vector.x, vector.y, vector.z };
         }
-        public static int[] ToIntArray(this Vector2Int vector) { 
+        public static void ToIntArrayNoGC(this Vector3Int vector, ref int[] array) {
+            if (array == null || array.Length < 3)
+                array = new int[3];
+            array[0] = vector.x;
+            array[1] = vector.y;
+            array[2] = vector.z;
+        }
+        public static int[] ToIntArray(this Vector2Int vector) {
             return new int[] { vector.x, vector.y };
+        }
+        public static void ToIntArrayNoGC(this Vector2Int vector, ref int[] array) {
+            if (array == null || array.Length < 2)
+                array = new int[2];
+            array[0] = vector.x;
+            array[1] = vector.y;
         }
         public static float[] ToArray(this Vector3 vector) {
             return new float[] { vector.x, vector.y, vector.z };
         }
+        public static void ToArrayNoGC(this Vector3 vector, ref float[] array) {
+            if (array == null || array.Length < 3)
+                array = new float[3];
+            array[0] = vector.x;
+            array[1] = vector.y;
+            array[2] = vector.z;
+        }
         public static float[] ToArray(this Vector2 vector) {
             return new float[] { vector.x, vector.y };
+        }
+        public static void ToArrayNoGC(this Vector2 vector, ref float[] array) {
+            if (array == null || array.Length < 2)
+                array = new float[2];
+            array[0] = vector.x;
+            array[1] = vector.y;
         }
         public static double[] ToDoubleArray(this Vector3 vector) {
             return new double[] { (double)vector.x, (double)vector.y, (double)vector.z };
         }
+        public static void ToDoubleArrayNoGC(this Vector3 vector, ref double[] array) {
+            if (array == null || array.Length < 3)
+                array = new double[3];
+            array[0] = vector.x;
+            array[1] = vector.y;
+            array[2] = vector.z;
+        }
         public static double[] ToDoubleArray(this Vector2 vector) {
             return new double[] { (double)vector.x, (double)vector.y };
+        }
+        public static void ToDoubleArrayNoGC(this Vector2 vector, ref double[] array) {
+            if (array == null || array.Length < 2)
+                array = new double[2];
+            array[0] = vector.x;
+            array[1] = vector.y;
         }
 
         public static Vector3Int ToVector3Int(this int[] array) {

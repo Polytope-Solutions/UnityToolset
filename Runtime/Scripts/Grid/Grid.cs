@@ -15,12 +15,15 @@ namespace PolytopeSolutions.Toolset.Grid {
     public abstract class GridElement : Element {
         protected int[] gridPosition;
 
-        public GridElement() : base() {}
-        public GridElement(int[] _gridPosition) : this() { 
-            this.gridPosition = _gridPosition;
+        public GridElement() : base() { }
+        public GridElement(int[] _gridPosition) : this() {
+            Update(_gridPosition);
         }
-        public virtual void Update(int[] _gridPosition) { 
-            this.gridPosition = _gridPosition;
+        public virtual void Update(int[] _gridPosition) {
+            if (this.gridPosition == null || this.gridPosition.Length != _gridPosition.Length)
+                this.gridPosition = new int[_gridPosition.Length];
+            for (int i = 0; i < _gridPosition.Length; i++)
+                this.gridPosition[i] = _gridPosition[i];
         }
     }
     public abstract class Grid<T> : ElementList<T> where T : GridElement, new() {
@@ -50,7 +53,7 @@ namespace PolytopeSolutions.Toolset.Grid {
         public int[] LastElementIndex {
             get {
                 int[] lastElementIndex = new int[this._dimensions.Length];
-                for (int d = 0; d< this._dimensions.Length; d++) {
+                for (int d = 0; d < this._dimensions.Length; d++) {
                     lastElementIndex[d] = this._dimensions[d] - 1;
                 }
                 return lastElementIndex;
@@ -60,7 +63,7 @@ namespace PolytopeSolutions.Toolset.Grid {
             get {
                 if (this._dimensions == null || this._dimensions.Length == 0)
                     return 0;
-                return Index(this.LastElementIndex)+1;
+                return Index(this.LastElementIndex) + 1;
             }
         }
         public override void Clear() {
@@ -71,8 +74,8 @@ namespace PolytopeSolutions.Toolset.Grid {
 
         public virtual void Update(int[] dimensions) {
             bool changed = (dimensions.Length != this._dimensions?.Length);
-            if (!changed) { 
-                for (int d = 0; d < dimensions.Length; d++) { 
+            if (!changed) {
+                for (int d = 0; d < dimensions.Length; d++) {
                     changed |= this._dimensions[d] != dimensions[d];
                 }
             }
@@ -80,12 +83,12 @@ namespace PolytopeSolutions.Toolset.Grid {
                 int oldCount = this.Count;
                 this._dimensions = dimensions;
                 int newCount = this.Count;
-                if (oldCount < newCount) { 
+                if (oldCount < newCount) {
                     Insert(LastElementIndex, new T());
                 }
                 else if (oldCount > newCount) {
-                    while (this._elements.Count > newCount) { 
-                        RemoveAt(this._elements.Count-1); 
+                    while (this._elements.Count > newCount) {
+                        RemoveAt(this._elements.Count - 1);
                     }
                 }
             }
@@ -96,7 +99,7 @@ namespace PolytopeSolutions.Toolset.Grid {
 
             for (int d0 = 1; d0 < this._dimensions.Length; d0++) {
                 count = this._dimensions[d0];
-                for (int d1 = d0+1; d1 < this._dimensions.Length; d1++){
+                for (int d1 = d0 + 1; d1 < this._dimensions.Length; d1++) {
                     count *= this._dimensions[d1];
                 }
 
@@ -105,8 +108,9 @@ namespace PolytopeSolutions.Toolset.Grid {
             index += axisIndices[axisIndices.Length - 1];
             return index;
         }
-        public virtual int[] AxisInidices(int index) { 
-            int[] axisIndices = new int[this._dimensions.Length];
+        public virtual void AxisInidices(int index, ref int[] axisIndices) {
+            if (axisIndices.Length != this._dimensions.Length)
+                axisIndices = new int[this._dimensions.Length];
             int count = 0;
 
             for (int d0 = 1; d0 < this._dimensions.Length; d0++) {
@@ -115,14 +119,17 @@ namespace PolytopeSolutions.Toolset.Grid {
                     count *= this._dimensions[d1];
                 }
 
-                axisIndices[d0 - 1] = index/count;
+                axisIndices[d0 - 1] = index / count;
                 index -= axisIndices[d0 - 1] * count;
             }
             axisIndices[this._dimensions.Length - 1] = index;
-
+        }
+        public virtual int[] AxisInidices(int index) {
+            int[] axisIndices = new int[this._dimensions.Length];
+            AxisInidices(index, ref axisIndices);
             return axisIndices;
         }
-        public virtual bool ValidIndex(int[] axisIndices) { 
+        public virtual bool ValidIndex(int[] axisIndices) {
             if (this._dimensions == null || this._dimensions.Length == 0 || this._dimensions.Length != axisIndices.Length) return false;
             bool isValid = true;
             for (int d = 0; d < this._dimensions.Length; d++)

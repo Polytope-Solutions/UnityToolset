@@ -113,7 +113,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             bool inputStable = false;
             do {
                 OnUpdateInputs();
-                this.solution.TickInput(ref inputStable, this.inputController);
+                this.solution.TickInput(ref inputStable, this.randomizer, this.inputController);
                 yield return null;
             } while (!inputStable);
             OnStabilizeInputs();

@@ -31,8 +31,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             Transform tFound = goItem.transform.Find(name);
             if (tFound == null){
                 goFound = (goPrefab == null) ? new GameObject() : GameObject.Instantiate(goPrefab);
-                goFound.name = name;
                 goFound.transform.SetParent(goItem.transform);
+                goFound.name = name;
             } else {
                 goFound = tFound.gameObject;
             }
