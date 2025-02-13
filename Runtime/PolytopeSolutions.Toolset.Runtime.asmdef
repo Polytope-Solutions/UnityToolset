@@ -1,6 +1,6 @@
 {
-    "name": "Polytope-Solutions.Toolset.Runtime",
-    "rootNamespace": "",
+    "name": "PolytopeSolutions.Toolset.Runtime",
+    "rootNamespace": "PolytopeSolutions.Toolset",
     "references": [
         "Unity.TextMeshPro",
         "Unity.InputSystem",

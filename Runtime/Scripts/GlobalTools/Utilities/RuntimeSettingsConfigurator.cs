@@ -91,7 +91,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
                 Mathf.Lerp(this.minSettings.TargetFrameRate, this.maxSettings.TargetFrameRate, this.PerformanceFactor)
             );
             //float minTime = 1f / targetFrameRate;
-            Application.targetFrameRate = targetFrameRate;
+            FrameRateSetter.SetFrameRate(targetFrameRate);
             this.Log($"Set up settings: framerate: {targetFrameRate}");
         }
         #endregion

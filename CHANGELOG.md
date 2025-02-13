@@ -2,6 +2,18 @@
 
 ---
 
+## 0.0.57
+
+2025-02-13
+
+-	Introduce Binary tree and Oct tree data structures;
+-	Introduce Frame rate setter;
+-	Adjust web cam accessor closing logic;
+-	Add periminary draft of a tool for Web Dual Builds;
+-	Clean up assembly definitions and web related items;
+
+---
+
 ## 0.0.56
 
 2024-12-09

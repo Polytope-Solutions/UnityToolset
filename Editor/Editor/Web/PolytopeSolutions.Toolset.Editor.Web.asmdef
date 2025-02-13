@@ -1,9 +1,9 @@
 {
-    "name": "PolytopeSolutions.Toolset.Plugins.WebGL",
-    "rootNamespace": "PolytopeSolutions.Toolset.Plugins.WebGL",
+    "name": "Polytope-Solutions.Toolset.Editor.Web",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [
-        "WebGL"
+        "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -138,8 +138,11 @@ namespace PolytopeSolutions.Toolset.Devices {
                 this.LogError("No cameras found");
                 return;
             }
-            if (this.webCamTextures.ContainsKey(cameraIndex))
+            if (this.webCamTextures.ContainsKey(cameraIndex)){
                 this.webCamTextures[cameraIndex].Stop();
+                Texture.Destroy(this.webCamTextures[cameraIndex]);
+                this.webCamTextures.Remove(cameraIndex);
+            }
             if (this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
                 this.webCameraStatusChangeCallbacks[cameraIndex]?.Invoke();
         }
