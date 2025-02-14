@@ -74,7 +74,7 @@ namespace Lifeverse.AdaptiveEnvironment.Editor {
         }
         static System.Diagnostics.Process webServerProcess = new System.Diagnostics.Process();
         static int port = 8081;
-        [MenuItem("PolytopeSolutions/Web/Build/Launch Last Built")]
+        [MenuItem("PolytopeSolutions/Web/Build/Launch Last Build")]
         public static void LaunchLastBuild() {
             try {
                 if (webServerProcess.HasExited) {
@@ -82,16 +82,21 @@ namespace Lifeverse.AdaptiveEnvironment.Editor {
                 }
             }
             catch (System.Exception exception) {
-                EndServer();
                 Debug.Log(exception.Message);
-                return;
+                StartServer();
+                //return;
             }
             System.Diagnostics.Process webPageProcess = new System.Diagnostics.Process();
+#if !UNITY_6000_0_OR_NEWER
             webPageProcess.StartInfo.FileName = "http://localhost:" + port.ToString();
+#else
+            webPageProcess.StartInfo.FileName = EditorUserBuildSettings.webGLClientBrowserPath;
+            webPageProcess.StartInfo.Arguments = "http://localhost:" + port.ToString();
+#endif
             webPageProcess.Start();
         }
 
-        [MenuItem("PolytopeSolutions/Web/Build/EndServer")]
+        [MenuItem("PolytopeSolutions/Web/Build/End Server")]
         static void EndServer() {
             try {
                 webServerProcess.Kill();
@@ -109,6 +114,20 @@ namespace Lifeverse.AdaptiveEnvironment.Editor {
             try {
                 webServerProcess.StartInfo.FileName = Path.Combine(apppath, @"Data\PlaybackEngines\WebGLSupport\BuildTools\SimpleWebServer.exe");
                 webServerProcess.StartInfo.Arguments = $"\"{lastBuildPath}\" {port}";
+                webServerProcess.StartInfo.UseShellExecute = false;
+                webServerProcess.Start();
+            }
+            catch (System.Exception e) {
+                Debug.Log(e.Message);
+            }
+#else
+            string apppath = Path.GetDirectoryName(EditorApplication.applicationPath);
+            string lastBuildPath = EditorUserBuildSettings.GetBuildLocation(EditorUserBuildSettings.activeBuildTarget);
+            Debug.Log($"Web: Starting server at port {port}. Build: {lastBuildPath}");
+
+            try {
+                webServerProcess.StartInfo.FileName = Path.Combine(apppath, @"Data\PlaybackEngines\WebGLSupport\BuildTools\SimpleWebServer.exe");
+                webServerProcess.StartInfo.Arguments = $"\"{lastBuildPath}\" http://localhost:{port}/";
                 webServerProcess.StartInfo.UseShellExecute = false;
                 webServerProcess.Start();
             }

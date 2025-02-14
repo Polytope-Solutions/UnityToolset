@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.58
+
+2025-02-14
+
+-	Try to adjust Web build tools to Unity 6;
+-	Temporarily disable webcam tool for web;
+
+---
+
 ## 0.0.57
 
 2025-02-13
