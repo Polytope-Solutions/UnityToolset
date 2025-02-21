@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.59
+
+2025-02-21
+
+-	Adapt mesh manager to be able to return multiple meshes;
+
+---
+
 ## 0.0.58
 
 2025-02-14
