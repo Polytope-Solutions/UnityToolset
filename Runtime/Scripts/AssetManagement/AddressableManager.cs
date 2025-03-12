@@ -22,7 +22,8 @@ namespace PolytopeSolutions.Toolset.AssetManagement {
             this.currentOperations = new List<IOperation>();
             this.currentAssetReferences = new HashSet<AssetReference>();
         }
-        protected void OnDestroy() {
+        protected override void OnDestroy() {
+            base.OnDestroy();
             foreach (IOperation operation in this.currentOperations) {
                 this.currentAssetReferences.Remove(operation.reference);
                 operation.Release();

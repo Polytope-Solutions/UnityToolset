@@ -42,7 +42,6 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
         protected void EvaluateSystemFactor() {
             string operatingSystem = SystemInfo.operatingSystem;
             this.Log($"Operating System: {operatingSystem}");
-            float t = 0f;
             if (operatingSystem.Contains("Android")) {
                 int APIVersion = EvaluateAndroidAPI(operatingSystem);
                 if (this.minSettings.AndroidAPI == this.maxSettings.AndroidAPI)

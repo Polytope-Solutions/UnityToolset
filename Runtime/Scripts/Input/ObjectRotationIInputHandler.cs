@@ -1,3 +1,4 @@
+using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,20 +22,17 @@ namespace PolytopeSolutions.Toolset.Input {
             if (this.isReset) {
                 this.startingReference = hitInfo.point - transform.position;
                 if (this.fixUpDirection) 
-                    this.startingReference = DoubleCross(this.startingReference, this.upDirection);
+                    this.startingReference = this.startingReference.DoubleCross(this.upDirection);
                 this.startingRotation = transform.rotation;
                 this.isReset = false;
                 return;
             }
             Vector3 currentReference = hitInfo.point - transform.position;
             if (this.fixUpDirection) 
-                currentReference = DoubleCross(currentReference, this.upDirection);
+                currentReference = currentReference.DoubleCross(this.upDirection);
             transform.rotation 
                 = Quaternion.FromToRotation(this.startingReference, currentReference) * this.startingRotation;
         }
 
-        static Vector3 DoubleCross(Vector3 a, Vector3 b) { 
-            return Vector3.Cross(b, Vector3.Cross(a, b));
-        }
     }
 }

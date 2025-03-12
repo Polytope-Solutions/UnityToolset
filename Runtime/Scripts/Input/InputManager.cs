@@ -61,7 +61,8 @@ namespace PolytopeSolutions.Toolset.Input {
         protected virtual void OnDisable() {
             DeactivateReceivers();
         }
-        protected virtual void OnDestroy() {
+        protected override void OnDestroy() {
+            base.OnDestroy();
             if (this.isUIStatic)
                 SceneManagerExtender.Instance.UnregisterSingletonOnAfterSceneActivatedEvent("*", "InputManager");
         }

@@ -108,6 +108,10 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         public static Vector4 ToVector4(this Quaternion quternion) =>
             new Vector4(quternion.x, quternion.y, quternion.z, quternion.w);
 
+        public static Vector3 DoubleCross(this Vector3 a, Vector3 b) {
+            return Vector3.Cross(b, Vector3.Cross(a, b));
+        }
+
     }
     [System.Serializable]
     public struct Vector3Double {
@@ -139,6 +143,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             this.x = v.x;
             this.y = v.y;
             this.z = v.z;
+        }
+        public override string ToString() {
+            return $"({this.x.ToString()},{this.y.ToString()},{this.z.ToString()})";
+        }
+        public string ToString(string format) {
+            return $"({this.x.ToString(format)},{this.y.ToString(format)},{this.z.ToString(format)})";
         }
 
         public Vector3 ToVector3() {

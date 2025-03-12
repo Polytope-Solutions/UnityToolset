@@ -8,12 +8,15 @@ using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
     public static partial class MeshTools {
+        private static readonly float Epsilon = 0.0001f;
         public static (MeshData meshData, Mesh mesh) ExtrudeCurve(List<Vector3> points,
-                float height, Vector3 upDirection, bool capTop,
+                float height, Vector3 upDirection,
                 List<List<Vector3>> innerCurves = null,
+                bool makeClosed = true, bool capTop = true, bool faceIn = false, bool splitFaces = true,
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             Mesh mesh = new Mesh();
-            MeshData meshData = ExtrudeCurve(points, height, upDirection, capTop, innerCurves);
+            MeshData meshData = ExtrudeCurve(points, height, upDirection, innerCurves,
+                makeClosed, capTop, faceIn, splitFaces);
             meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
             return (meshData, mesh);
         }
@@ -32,110 +35,110 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         // TODO: add unweld sides option to have more realistic normals and lighting.
         public static MeshData ExtrudeCurve(List<Vector3> outerCurve,
                 float height, Vector3 upDirection,
-                bool capTop,
-                List<List<Vector3>> innerCurves = null) {
+                List<List<Vector3>> innerCurves = null,
+                bool makeClosed = true, bool capTop = true, bool faceIn = false, bool splitFaces = true) {
+            MeshData meshData = new MeshData();
+            meshData.Merge(
+                ExtrudeCurveBase(outerCurve, height, upDirection, makeClosed, capTop, faceIn, splitFaces)
+            );
             bool hasInnerCurves = (innerCurves != null && innerCurves.Count > 0);
-            List<Vector3> topCurve = new List<Vector3>();
-            List<List<Vector3>> topInnerCurves = new List<List<Vector3>>();
-            List<Vector3> innerCurveCenters = new List<Vector3>();
-
-            // Compute outer curve center for normals
-            Vector3 outerCurveCenter = Vector3.zero;
-            foreach (Vector3 vertex in outerCurve)
-                outerCurveCenter += vertex;
-            outerCurveCenter /= outerCurve.Count;
-
-            int vertexCount = (outerCurve.Count + 1) * 2;
-            int triangleCount = (outerCurve.Count + 1) * 2;
             if (hasInnerCurves)
-                foreach (List<Vector3> innerCurve in innerCurves) {
-                    vertexCount += (innerCurve.Count + 1) * 2;
-                    triangleCount += (innerCurve.Count + 1) * 2;
-                    // Compute center for normals
-                    Vector3 innerCurveCenter = Vector3.zero;
-                    foreach (Vector3 vertex in innerCurve)
-                        innerCurveCenter += vertex;
-                    innerCurveCenter /= innerCurve.Count;
-                    innerCurveCenters.Add(innerCurveCenter);
+                foreach (List<Vector3> innterCurve in innerCurves) {
+                    meshData.Merge(
+                        ExtrudeCurveBase(innterCurve, height, upDirection, true, capTop, !faceIn, splitFaces)
+                    );
                 }
-            MeshData meshData = new MeshData(vertexCount, triangleCount * 3, true, true);
+            if (capTop) {
+                meshData.Merge(
+                    CapTop(outerCurve, upDirection, height, innerCurves)
+                );
+            }
 
-
-            // Add outer curve vertices, accounting for clockwise or counter-clockwise winding.
-            {
-                bool clockwise = EvaluateCurveWindingInPlane(outerCurve, upDirection);
-                for (int j = 0; j < outerCurve.Count + 1; j++) {
-                    Vector3 vertex = outerCurve[(clockwise ? j : 2 * outerCurve.Count - 1 - j) % outerCurve.Count],
-                        topVertex = vertex + upDirection * height,
-                        normal = (vertex - outerCurveCenter).normalized;
-                    meshData.SetVertex(j, vertex,
-                        new Vector2(j / ((float)vertexCount / 2), 0),
-                        normal);
-                    meshData.SetVertex(j + outerCurve.Count + 1, topVertex,
-                        new Vector2(j / ((float)vertexCount / 2), (!capTop) ? 1 : 0.5f),
-                        normal);
-                    if (j < outerCurve.Count)
-                        topCurve.Add(topVertex);
+            return meshData;
+        }
+        private static MeshData ExtrudeCurveBase(List<Vector3> curve,
+                float height, Vector3 upDirection,
+                bool makeClosed = true, bool capTop = true, bool faceIn = false, bool splitFaces = true) {
+            if (makeClosed) {
+                if (splitFaces) {
+                    if ((curve[curve.Count - 1] - curve[0]).sqrMagnitude < Epsilon) {
+                        // last matches first - remove as split automatically
+                        curve.RemoveAt(curve.Count - 1);
+                    }
+                }
+                else {
+                    if ((curve[curve.Count - 1] - curve[0]).sqrMagnitude > Epsilon) {
+                        // last doesn't matches first - add first to end to simplify triangulation
+                        curve.Add(curve[0]);
+                    }
                 }
             }
-            // Add inner curve vertices, accounting for clockwise or counter-clockwise winding.
-            if (hasInnerCurves) {
-                int startIndex = (outerCurve.Count + 1) * 2;
-                for (int i = 0; i < innerCurves.Count; i++) {
-                    List<Vector3> innerCurve = innerCurves[i],
-                        topInnerCurve = new List<Vector3>();
-                    bool clockwise = EvaluateCurveWindingInPlane(innerCurve, upDirection);
-                    for (int j = 0; j < innerCurve.Count + 1; j++) {
-                        Vector3 vertex = innerCurve[(clockwise ? j : (2 * innerCurve.Count - 1 - j)) % innerCurve.Count],
-                            topVertex = vertex + upDirection * height,
-                            normal = -(vertex - innerCurveCenters[i]).normalized;
-                        meshData.SetVertex(startIndex + j, vertex,
-                            new Vector2((startIndex / 2 + j) / ((float)vertexCount / 2), 0),
-                            normal);
-                        meshData.SetVertex(startIndex + j + innerCurve.Count + 1, topVertex,
-                            new Vector2((startIndex / 2 + j) / ((float)vertexCount / 2), (!capTop) ? 1 : 0.5f),
-                            normal);
-                        if (j < innerCurve.Count)
-                            topInnerCurve.Add(topVertex);
-                    }
-                    topInnerCurves.Add(topInnerCurve);
-                    startIndex += (innerCurve.Count + 1) * 2;
+
+            int vertexCount = (splitFaces) ? curve.Count * 4 : curve.Count * 2;
+            int uvXCount = (makeClosed) ? curve.Count + 1 : curve.Count;
+            int faceCount = (makeClosed) ? curve.Count : curve.Count - 1;
+            int triangleCount = faceCount * 2;
+            MeshData meshData = new MeshData(vertexCount, triangleCount * 3, true, true);
+
+            // Add curve vertices, accounting for clockwise or counter-clockwise winding.
+            Vector3 vertex, nextVertex, topVertex, normal, prevNormal;
+            int uvX;
+            bool clockwise = EvaluateCurveWindingInPlane(curve, upDirection);
+            if (faceIn) clockwise = !clockwise;
+
+            // Compute outer curve center for normals
+            Vector3 curveCenter = Vector3.zero;
+            if (splitFaces) {
+                foreach (Vector3 temp in curve)
+                    curveCenter += temp;
+                curveCenter /= curve.Count;
+            }
+
+            vertex = curve[clockwise ? curve.Count - 1 : 1];
+            nextVertex = curve[0];
+            normal = ((splitFaces) ?
+                Vector3.Cross(nextVertex - vertex, upDirection)
+                : vertex - curveCenter
+            ).normalized;
+            for (int j = 0; j < curve.Count; j++) {
+                vertex = nextVertex;
+                nextVertex = curve[(clockwise ? j + 1 : 2 * curve.Count - 1 - j - 1) % curve.Count];
+                topVertex = vertex + upDirection * height;
+                prevNormal = normal;
+                normal = ((splitFaces) ?
+                    Vector3.Cross(nextVertex - vertex, upDirection)
+                    : vertex - curveCenter
+                ).normalized;
+                meshData.SetVertex(j, vertex,
+                    new Vector2(j / (float)uvXCount, 0),
+                    normal);
+                meshData.SetVertex(j + curve.Count, topVertex,
+                    new Vector2(j / (float)uvXCount, (!capTop) ? 1 : 0.5f),
+                    normal);
+                if (splitFaces) {
+                    uvX = (j == 0) ? curve.Count : j;
+                    meshData.SetVertex(j + curve.Count * 2, vertex,
+                        new Vector2(uvX / (float)uvXCount, 0),
+                        prevNormal);
+                    meshData.SetVertex(j + curve.Count * 3, topVertex,
+                        new Vector2(uvX / (float)uvXCount, (!capTop) ? 1 : 0.5f),
+                        prevNormal);
                 }
             }
 
             // Add triangles for outer walls
-            for (int i = 0; i < outerCurve.Count; i++) {
+            for (int i = 0; i < faceCount; i++) {
                 int ti = i * 6;
-                int a = i, b = i + 1,
-                    c = i + outerCurve.Count + 1, d = i + 1 + outerCurve.Count + 1;
+                int a = i, b = (i + 1) % curve.Count,
+                    c = a + curve.Count, d = b + curve.Count;
+                if (splitFaces) {
+                    b += curve.Count * 2;
+                    d += curve.Count * 2;
+                }
                 meshData.SetTriangle(ti,
                     a, b, c);
                 meshData.SetTriangle(ti + 3,
                     b, d, c);
-            }
-            // Add triangles for inner walls (in counterClockwise manner as indices are in clockwise but triangles shoud face inwards).
-            if (hasInnerCurves) {
-                int startIndex = (outerCurve.Count + 1) * 2, triangleStartIndex = outerCurve.Count * 6;
-                foreach (List<Vector3> innerCurve in innerCurves) {
-                    for (int i = 0; i < innerCurve.Count; i++) {
-                        int ti = i * 6 + triangleStartIndex;
-                        int a = i + startIndex, b = i + 1 + startIndex,
-                            c = i + innerCurve.Count + 1 + startIndex, d = i + 1 + innerCurve.Count + 1 + startIndex;
-                        meshData.SetTriangle(ti,
-                            a, c, b);
-                        meshData.SetTriangle(ti + 3,
-                            b, c, d);
-                    }
-                    startIndex += (innerCurve.Count + 1) * 2;
-                    triangleStartIndex += innerCurve.Count * 6;
-                }
-            }
-
-            if (capTop && outerCurve.Count > 2) {
-                MeshData topMeshData;
-                //topMeshData = CapTopSimple(topCurve, upDirection);
-                topMeshData = CapTop(topCurve, upDirection, topInnerCurves);
-                meshData.Merge(topMeshData);
             }
             return meshData;
         }
@@ -196,14 +199,14 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         // Applies flat prorjection to plane defined by normal in top half of UV.
         // Applies normal along up direction.
         public static MeshData CapTop(List<Vector3> outerCurve,
-                Vector3 upDirection,
+                Vector3 upDirection, float offset = 0,
                 List<List<Vector3>> innerCurves = null) {
             List<Vector3> totalPoints = new List<Vector3>();
             Matrix4x4 reorient = Matrix4x4.TRS(Vector3.zero, Quaternion.FromToRotation(upDirection, Vector3.up), Vector3.one);
             Vector2 minMaxU = new Vector2(float.MaxValue, float.MinValue),
                 minMaxV = new Vector2(float.MaxValue, float.MinValue);
             outerCurve.ForEach(vertex => {
-                totalPoints.Add(vertex);
+                totalPoints.Add(vertex + upDirection * offset);
                 Vector3 reorientedPoint = reorient.MultiplyPoint3x4(vertex);
                 minMaxU.x = Mathf.Min(minMaxU.x, reorientedPoint.x);
                 minMaxU.y = Mathf.Max(minMaxU.y, reorientedPoint.x);
@@ -218,7 +221,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             int start = outerCurve.Count;
             if (innerCurves != null)
                 foreach (List<Vector3> innerCurve in innerCurves) {
-                    innerCurve.ForEach(item => totalPoints.Add(item));
+                    innerCurve.ForEach(item => totalPoints.Add(item + upDirection * offset));
 
                     temp = Vector3.zero;
                     innerCurve.ForEach(item => temp += item);

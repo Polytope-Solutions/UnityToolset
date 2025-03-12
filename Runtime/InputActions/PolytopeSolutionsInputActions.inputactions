@@ -9,7 +9,7 @@
                     "name": "cameraRotateLeftRight",
                     "type": "Button",
                     "id": "b9503c5c-56d5-4aad-b4b5-ce121b44839c",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -54,7 +54,7 @@
                     "name": "touchAny",
                     "type": "Button",
                     "id": "88d79813-33a4-4bd6-a30c-6dd2334095d4",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -511,7 +511,7 @@
                     "name": "PointerContact",
                     "type": "Button",
                     "id": "14f18cdf-d9ff-44aa-b95d-b9f36a59db84",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -529,7 +529,7 @@
                     "name": "DualContact",
                     "type": "Button",
                     "id": "b7f023b8-5676-4300-a69c-272fa576fd2f",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -623,6 +623,34 @@
                     "action": "DualContact",
                     "isComposite": false,
                     "isPartOfComposite": true
+                }
+            ]
+        },
+        {
+            "name": "NewInput",
+            "id": "854ba7c8-4134-481d-b6e1-dc50693b652e",
+            "actions": [
+                {
+                    "name": "PointerDown",
+                    "type": "Button",
+                    "id": "511b1520-005a-440b-811c-73273abbc347",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "386ead67-ce14-452b-850f-4cdf5fec55c4",
+                    "path": "<Pointer>/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PointerDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

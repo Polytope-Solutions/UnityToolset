@@ -32,7 +32,8 @@ namespace PolytopeSolutions.Toolset.UI {
             SceneManagerExtender.Instance.RegisterSingletonOnAfterSceneActivatedEvent("*", "UIManager", UIManager_OnAfterSceneActivated);
             EventManager.Instance.RegisterEvenetCallback(UIManager.PREVIOUS_STATE_EVENTKEY, this.Undo);
         }
-        protected virtual void OnDestroy() {
+        protected override void OnDestroy() {
+            base.OnDestroy();
             if (SceneManagerExtender.Instance)
                 SceneManagerExtender.Instance.UnregisterSingletonOnAfterSceneActivatedEvent("*", "UIManager");
             if (EventManager.Instance)

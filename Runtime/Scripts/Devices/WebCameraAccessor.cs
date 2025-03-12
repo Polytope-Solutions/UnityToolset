@@ -57,7 +57,8 @@ namespace PolytopeSolutions.Toolset.Devices {
             if (this.autoRequestOnStart)
                 RequestAccess();
         }
-        protected void OnDestroy() {
+        protected override void OnDestroy() {
+            base.OnDestroy();
             CleanUp();
         }
         #endregion

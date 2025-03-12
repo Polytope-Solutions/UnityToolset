@@ -2,6 +2,26 @@
 
 ---
 
+## 0.0.60
+
+2025-03-12
+
+-	Rework Mesh Curve tools to be able to split mesh at edges and simplify workflow;
+-	Initiate new input system;
+	-	set up centralized input action monitoring Manager;
+	-	set up handler and receiver interfaces;
+	-	set up layers to handle event priority automatically;
+	-   start adapting events to new structure for pointer and mouse;
+-	Add interface serialization with editor tools;
+-	Try to adapt navmesh agent to be able to find closest point and add target visualizer;
+-	Add Double Cross Vector operator and Vector3Double to string utility;
+-	Add utility to find component in closest relative upstream in parents;
+-	Rework logger to work with fixed buffer and reduce string operations;
+-	Add Layer Attribute to preview single layer dropdowns in editor;
+-	Small fixes with unused variables, nullables, static variable reset and obsolete methods;
+
+---
+
 ## 0.0.59
 
 2025-02-21

@@ -63,6 +63,19 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             }
             return tFound;
         }
+        public static T GetFirstComponentInParentRecursively<T>(this GameObject gItem)
+            where T : Component {
+            return gItem?.transform.GetFirstComponentInParentRecursively<T>();
+        }
+        public static T GetFirstComponentInParentRecursively<T>(this Transform tItem)
+            where T : Component {
+            Component item = tItem?.GetComponent(typeof(T));
+            if (item != null)
+                return (T)item;
+            if (tItem.parent == null)
+                return null;
+            return tItem.parent.GetFirstComponentInParentRecursively<T>();
+        }
         public static T CopyComponent<T>(this GameObject goTarget, T source, bool copyFields=true, bool copyProperties=false) where T: Component {
             Type type = source.GetType();
             Component copy = goTarget.AddComponent(type);

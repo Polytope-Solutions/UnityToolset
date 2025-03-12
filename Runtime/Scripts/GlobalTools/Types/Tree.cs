@@ -26,16 +26,22 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
             // Add the node..
             this.nodes.Add(_itemNode.GetHashCode(), _itemNode);
             // If poarent present set the node as child otherwise add to roots
+            #if DEBUG2
             bool parentPresent = false;
+            #endif
             if (_itemNode.ParentHash != null && HasNode(_itemNode.ParentHash.Value)) { 
                 T _parentNode = GetNode(_itemNode.ParentHash.Value);
                 _itemNode.SetParent(_parentNode);
                 _parentNode.AddChild(_itemNode);
+                #if DEBUG2
                 parentPresent = true;
+                #endif
             } else 
                 this.roots.Add(_itemNode);
             // Check if children are present and set their parent
+            #if DEBUG2
             bool childrenPresent = false;
+            #endif
             List<int> possibleChildrenHashes = new List<int>(_itemNode.ChildrenHash);
             foreach (int childHash in possibleChildrenHashes) {
                 if (!HasNode(childHash)) {
@@ -44,7 +50,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
                 }
                 T childNode = GetNode(childHash);
                 SetNodeParent(childNode, _itemNode);
+                #if DEBUG2
                 childrenPresent = true;
+                #endif
             }
             #if DEBUG2
             this.Log($"Node: {_itemNode.ToString()} added, is root {IsRoot(_itemNode)}. Parent Present: {parentPresent}. Children present: {childrenPresent}, count: {_itemNode.ChildrenCount}.");
@@ -63,9 +71,10 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
 
         public bool HasNode(T node) => node != null && HasNode(node.GetHashCode());
         public bool HasNode(int hashCode) => this.nodes.ContainsKey(hashCode);
-
+#nullable enable
         public T? GetNode(T node) => GetNode(node.GetHashCode());
         private T? GetNode(int haashCode) => (T)this.nodes[haashCode];
+#nullable restore
 
         public bool IsRoot(T node) => node != null && this.roots.Contains(node);
 

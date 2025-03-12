@@ -35,7 +35,7 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
             Gizmos.DrawWireSphere(this.targetPosition, 0.1f);
         }
         ///////////////////////////////////////////////////////////////////////
-        private void UpdateDestination(Vector3 targetPosition) { 
+        private void UpdateDestination(Vector3 targetPosition) {
             this.targetPosition = targetPosition;
             this.agent.SetDestination(this.targetPosition);
         }
@@ -58,8 +58,13 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
 
         private IEnumerator PrepareMove(Vector3 targetPosition) {
             this.preplanPath.ClearCorners();
-            if (!this.agent.CalculatePath(targetPosition, this.preplanPath) || this.preplanPath.corners.Length == 0)
-                yield break;
+            if (!this.agent.CalculatePath(targetPosition, this.preplanPath) || this.preplanPath.corners.Length == 0) { 
+                if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, 10, NavMesh.AllAreas))
+                    targetPosition = hit.position;
+                if (!this.agent.CalculatePath(targetPosition, this.preplanPath) || this.preplanPath.corners.Length == 0)
+                    yield break;
+            }
+
             this.startTime = Time.time;
             this.startRotation = transform.rotation;
             Vector3 newForward = (this.preplanPath.corners[1] - transform.position).normalized;

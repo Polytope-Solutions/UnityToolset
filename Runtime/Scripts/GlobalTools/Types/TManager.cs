@@ -13,7 +13,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
 			get {
 				if (_instance == null) {
 					// Find It
-					_instance = FindObjectOfType<TItem>();
+					_instance = FindFirstObjectByType<TItem>();
 				}
 				return _instance;
 			}
@@ -21,6 +21,10 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
 		protected virtual void Awake() { 
 			if (!Instance)
                 this.LogWarning("No instance of found in scene.");
-		}
-	}
+        }
+        protected virtual void OnDestroy() {
+			if (!Instance)
+				_instance = null;
+        }
+    }
 }
