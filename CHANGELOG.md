@@ -2,6 +2,19 @@
 
 ---
 
+## 0.0.61
+
+2025-03-20
+
+-	Rework triangulation to be based on the ear-clipping algorythm modified to work with holes, extend options;
+-	Add ability to rotate a list;
+-	Add name accessor for mesh objects;
+-	Start curve offset utility;
+-	Add world drag new input handler;
+-	Adjust new input manager;
+
+---
+
 ## 0.0.60
 
 2025-03-12

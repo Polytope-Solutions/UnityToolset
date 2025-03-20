@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using System;
+using System.Linq;
 using System.Globalization;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
@@ -15,6 +16,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
 
 		public static float InvariantConvertToSingle(object item) {
 			return Convert.ToSingle(item, CultureInfo.InvariantCulture.NumberFormat);
+        }
+        public static IEnumerable<T> Rotate<T>(this IEnumerable<T> list, int offset) {
+            return list.Skip(offset).Concat(list.Take(offset)).ToList();
         }
     }
 }

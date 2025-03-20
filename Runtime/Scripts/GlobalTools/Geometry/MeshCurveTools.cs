@@ -8,14 +8,14 @@ using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
     public static partial class MeshTools {
-        private static readonly float Epsilon = 0.0001f;
+        private static readonly float Epsilon = 0.000001f;
         public static (MeshData meshData, Mesh mesh) ExtrudeCurve(List<Vector3> points,
-                float height, Vector3 upDirection,
+                float startHeight, float endHeight, Vector3 upDirection,
                 List<List<Vector3>> innerCurves = null,
                 bool makeClosed = true, bool capTop = true, bool faceIn = false, bool splitFaces = true,
                 bool computeNormals = true, bool computeBounds = true, bool isMeshFinal = false) {
             Mesh mesh = new Mesh();
-            MeshData meshData = ExtrudeCurve(points, height, upDirection, innerCurves,
+            MeshData meshData = ExtrudeCurve(points, startHeight, endHeight, upDirection, innerCurves,
                 makeClosed, capTop, faceIn, splitFaces);
             meshData.PassData2Mesh(ref mesh, computeNormals, computeBounds, isMeshFinal);
             return (meshData, mesh);
@@ -23,41 +23,86 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         public static bool EvaluateCurveWindingInPlane(List<Vector3> curve, Vector3 normal) {
             Matrix4x4 correction = Matrix4x4.TRS(Vector3.zero, Quaternion.FromToRotation(normal, Vector3.up), Vector3.one);
             float winding = 0;
+            Vector3 planarVertex, planarVertexNext = correction * curve[curve.Count - 1];
             for (int i = 0; i < curve.Count; i++) {
-                Vector3 planarVertex = correction * curve[i], planarNextVertex = curve[(i + 1) % curve.Count];
-                winding += (planarVertex.x + planarNextVertex.x) * (planarVertex.z - planarNextVertex.z);
+                planarVertex = planarVertexNext;
+                planarVertexNext = correction * curve[i];
+                winding += (planarVertexNext.x - planarVertex.x) * (planarVertexNext.z + planarVertex.z);
             }
             return winding > 0;
         }
-        // NB! expexts curves in order without duplicate point on the end to close loop (repeats start point for better UV mapping)
+        // Forces curve to be in clockwise order if closed. Positive is outwards.
+        public static void OffsetCurve(List<Vector3> curve, Vector3 upDirection, float offset, ref List<Vector3> offsetCurve,
+                bool isClosed) {
+            offsetCurve.Clear();
+            if (isClosed) {
+                // Make sure first and last are not duplicates
+                if ((curve[curve.Count - 1] - curve[0]).sqrMagnitude < Epsilon) {
+                    curve.RemoveAt(curve.Count - 1);
+                }
+                bool clockwise = EvaluateCurveWindingInPlane(curve, upDirection);
+                if (!clockwise)
+                    curve.Reverse();
+            }
+            int currentIndex = (isClosed) ? 0 : 1, previousIndex = (isClosed) ? curve.Count - 1 : 0;
+            Vector3 currentVertex = curve[currentIndex], previousVertex = curve[previousIndex],
+                currentSide = currentVertex - previousVertex, previousSide,
+                currentInPlaneNormal = Vector3.Cross(currentSide, upDirection).normalized, previousInPlaneNormal,
+                shift;
+            float angle, magnitude;
+            // Add the start if not closed.
+            if (!isClosed)
+                offsetCurve.Add(curve[0] + currentInPlaneNormal * offset);
+            // go through sides, evalueate angles with porevious, compute offset vector and add points
+            for (int i = (isClosed) ? 1 : 2; i < curve.Count + ((isClosed) ? 1 : 0); i++) {
+                previousIndex = currentIndex;
+                currentIndex = i % curve.Count;
+
+                previousVertex = currentVertex;
+                currentVertex = curve[currentIndex];
+
+                previousSide = currentSide;
+                currentSide = currentVertex - curve[previousIndex];
+
+                previousInPlaneNormal = currentInPlaneNormal;
+                currentInPlaneNormal = Vector3.Cross(currentSide, upDirection).normalized;
+
+                angle = Vector3.SignedAngle(-previousSide, currentSide, upDirection);
+                magnitude = offset / Mathf.Sin(angle * Mathf.Deg2Rad / 2);
+                shift = (previousInPlaneNormal + currentInPlaneNormal).normalized * magnitude;
+                offsetCurve.Add(previousVertex + shift);
+            }
+            // Add the end if not closed.
+            if (!isClosed)
+                offsetCurve.Add(currentVertex + currentInPlaneNormal * offset);
+        }
         // Applies uv in equal distance per side over v (in bottom half if capping top) with a gap between sides
         // Applies normals out from centers or in to centers for internal curves.
-        // TODO: add unweld sides option to have more realistic normals and lighting.
         public static MeshData ExtrudeCurve(List<Vector3> outerCurve,
-                float height, Vector3 upDirection,
+                float startHeight, float endHeight, Vector3 upDirection,
                 List<List<Vector3>> innerCurves = null,
                 bool makeClosed = true, bool capTop = true, bool faceIn = false, bool splitFaces = true) {
             MeshData meshData = new MeshData();
             meshData.Merge(
-                ExtrudeCurveBase(outerCurve, height, upDirection, makeClosed, capTop, faceIn, splitFaces)
+                ExtrudeCurveBase(outerCurve, startHeight, endHeight, upDirection, makeClosed, capTop, faceIn, splitFaces)
             );
             bool hasInnerCurves = (innerCurves != null && innerCurves.Count > 0);
             if (hasInnerCurves)
                 foreach (List<Vector3> innterCurve in innerCurves) {
                     meshData.Merge(
-                        ExtrudeCurveBase(innterCurve, height, upDirection, true, capTop, !faceIn, splitFaces)
+                        ExtrudeCurveBase(innterCurve, startHeight, endHeight, upDirection, true, capTop, !faceIn, splitFaces)
                     );
                 }
             if (capTop) {
                 meshData.Merge(
-                    CapTop(outerCurve, upDirection, height, innerCurves)
+                    TriangulateCurve(outerCurve, upDirection, endHeight, innerCurves)
                 );
             }
 
             return meshData;
         }
         private static MeshData ExtrudeCurveBase(List<Vector3> curve,
-                float height, Vector3 upDirection,
+                float startHeight, float endHeight, Vector3 upDirection,
                 bool makeClosed = true, bool capTop = true, bool faceIn = false, bool splitFaces = true) {
             if (makeClosed) {
                 if (splitFaces) {
@@ -81,35 +126,39 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             MeshData meshData = new MeshData(vertexCount, triangleCount * 3, true, true);
 
             // Add curve vertices, accounting for clockwise or counter-clockwise winding.
-            Vector3 vertex, nextVertex, topVertex, normal, prevNormal;
+            Vector3 baseVertex, nextBaseVertex, bottomVertex, topVertex, normal, prevNormal;
             int uvX;
             bool clockwise = EvaluateCurveWindingInPlane(curve, upDirection);
-            if (faceIn) clockwise = !clockwise;
+            if (clockwise == faceIn) {
+                curve.Reverse();
+                clockwise = !clockwise;
+            }
 
             // Compute outer curve center for normals
             Vector3 curveCenter = Vector3.zero;
-            if (splitFaces) {
+            if (!splitFaces) {
                 foreach (Vector3 temp in curve)
                     curveCenter += temp;
                 curveCenter /= curve.Count;
             }
 
-            vertex = curve[clockwise ? curve.Count - 1 : 1];
-            nextVertex = curve[0];
+            baseVertex = curve[curve.Count - 1];//[clockwise ? curve.Count - 1 : 1];
+            nextBaseVertex = curve[0];
             normal = ((splitFaces) ?
-                Vector3.Cross(nextVertex - vertex, upDirection)
-                : vertex - curveCenter
+                Vector3.Cross(nextBaseVertex - baseVertex, upDirection)
+                : baseVertex - curveCenter
             ).normalized;
             for (int j = 0; j < curve.Count; j++) {
-                vertex = nextVertex;
-                nextVertex = curve[(clockwise ? j + 1 : 2 * curve.Count - 1 - j - 1) % curve.Count];
-                topVertex = vertex + upDirection * height;
+                baseVertex = nextBaseVertex;
+                nextBaseVertex = curve[(j + 1) % curve.Count];//[(clockwise ? j + 1 : 2 * curve.Count - 1 - j - 1) % curve.Count];
+                bottomVertex = baseVertex + upDirection * startHeight;
+                topVertex = baseVertex + upDirection * endHeight;
                 prevNormal = normal;
                 normal = ((splitFaces) ?
-                    Vector3.Cross(nextVertex - vertex, upDirection)
-                    : vertex - curveCenter
+                    Vector3.Cross(nextBaseVertex - baseVertex, upDirection)
+                    : baseVertex - curveCenter
                 ).normalized;
-                meshData.SetVertex(j, vertex,
+                meshData.SetVertex(j, bottomVertex,
                     new Vector2(j / (float)uvXCount, 0),
                     normal);
                 meshData.SetVertex(j + curve.Count, topVertex,
@@ -117,7 +166,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                     normal);
                 if (splitFaces) {
                     uvX = (j == 0) ? curve.Count : j;
-                    meshData.SetVertex(j + curve.Count * 2, vertex,
+                    meshData.SetVertex(j + curve.Count * 2, bottomVertex,
                         new Vector2(uvX / (float)uvXCount, 0),
                         prevNormal);
                     meshData.SetVertex(j + curve.Count * 3, topVertex,
@@ -142,253 +191,233 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             }
             return meshData;
         }
-        public static MeshData CapTopSimple(List<Vector3> outerCurve,
-                Vector3 upDirection) {
-            MeshData meshData = new MeshData(outerCurve.Count, (outerCurve.Count - 2) * 3, true, true);
-            //List<int> indices = Enumerable.Range(2, points.Count).ToList();
 
-            for (int i = 0; i < outerCurve.Count; i++) {
-                Vector3 vertex = outerCurve[i];
-                // TODO: should have other UVs
-                meshData.SetVertex(i, vertex,
-                    new Vector2(i / (float)(outerCurve.Count - 1), 1), upDirection);
-            }
-
-            int startIndex = 0;
-            int a, b, c, d;
-            float dotC, dotD;
-            Vector3 currentSide, sideC, sideD, inplaneCurrentSideNormal;
-            a = 0;
-            b = 1;
-            do {
-                // Find next and previous points.
-                c = b + 1;
-                d = (a - 1 + outerCurve.Count) % outerCurve.Count;
-                // Find vectors for the current and two possible next sides.
-                currentSide = outerCurve[b] - outerCurve[a];
-                sideC = outerCurve[c] - outerCurve[b];
-                sideD = outerCurve[d] - outerCurve[a];
-                // Compute in plane normal to check if on the correct side.
-                inplaneCurrentSideNormal = //(clockwise) ?
-                    Vector3.Cross(upDirection, currentSide).normalized;
-                //: Vector3.Cross(currentSide, upDirection).normalized;
-                // Compute how alligned are the two next possible sides with the normal.
-                dotC = Vector3.Dot(inplaneCurrentSideNormal, sideC);
-                dotD = Vector3.Dot(inplaneCurrentSideNormal, sideD);
-                // Pick a side and change indices for the next iteration.
-                if (dotC > dotD) {
-                    meshData.SetTriangle(startIndex,
-                        a + outerCurve.Count, b + outerCurve.Count, c + outerCurve.Count);
-                    //((clockwise) ? b : c) + outerCurve.Count, ((clockwise) ? c : b) + outerCurve.Count);
-                    b = c;
-                    startIndex += 3;
-                }
-                else {
-                    meshData.SetTriangle(startIndex,
-                        a + outerCurve.Count, b + outerCurve.Count, d + outerCurve.Count);
-                    //((clockwise) ? b : d) + outerCurve.Count, ((clockwise) ? d : b) + outerCurve.Count);
-                    a = d;
-                    startIndex += 3;
-                }
-                // Repeat until after both c and d are the same (finished processing all points).
-            } while (c != d);
-            return meshData;
-        }
-
-        // NB! Expects curves organized in clockwise order to face correctly in the up direction.
         // Applies flat prorjection to plane defined by normal in top half of UV.
         // Applies normal along up direction.
-        public static MeshData CapTop(List<Vector3> outerCurve,
-                Vector3 upDirection, float offset = 0,
-                List<List<Vector3>> innerCurves = null) {
-            List<Vector3> totalPoints = new List<Vector3>();
+        public static MeshData TriangulateCurve(List<Vector3> outerCurve, Vector3 upDirection, float upOffset,
+            List<List<Vector3>> innerCurves = null) {
+
+            bool clockwise = EvaluateCurveWindingInPlane(outerCurve, upDirection);
+            if (!clockwise)
+                outerCurve.Reverse();
+
+            List<Vector3> totalPoints = new();
+            List<int> totalIndices = new();
+            List<int> totalTriangles = new();
+            int i, j, k;
             Matrix4x4 reorient = Matrix4x4.TRS(Vector3.zero, Quaternion.FromToRotation(upDirection, Vector3.up), Vector3.one);
             Vector2 minMaxU = new Vector2(float.MaxValue, float.MinValue),
                 minMaxV = new Vector2(float.MaxValue, float.MinValue);
-            outerCurve.ForEach(vertex => {
-                totalPoints.Add(vertex + upDirection * offset);
-                Vector3 reorientedPoint = reorient.MultiplyPoint3x4(vertex);
-                minMaxU.x = Mathf.Min(minMaxU.x, reorientedPoint.x);
-                minMaxU.y = Mathf.Max(minMaxU.y, reorientedPoint.x);
-                minMaxV.x = Mathf.Min(minMaxV.x, reorientedPoint.z);
-                minMaxV.y = Mathf.Max(minMaxV.y, reorientedPoint.z);
-            });
-            List<int> triangles = new List<int>();
+            Vector3 temp, prevPoint;
 
-            List<Vector3> innerCurveCenters = new List<Vector3>();
-            List<List<int>> innerIndices = new List<List<int>>();
-            Vector3 temp;
-            int start = outerCurve.Count;
-            if (innerCurves != null)
-                foreach (List<Vector3> innerCurve in innerCurves) {
-                    innerCurve.ForEach(item => totalPoints.Add(item + upDirection * offset));
-
-                    temp = Vector3.zero;
-                    innerCurve.ForEach(item => temp += item);
-                    temp /= innerCurve.Count;
-                    innerCurveCenters.Add(temp);
-                    innerIndices.Add(Enumerable.Range(start, innerCurve.Count).ToList());
-                    start += innerCurve.Count;
-                }
-
-            List<List<int>> availableOuterCurves = new List<List<int>>();
-            List<int> currentOuterCurveIndices = Enumerable.Range(0, outerCurve.Count).ToList();
-            availableOuterCurves.Add(currentOuterCurveIndices);
-            while (availableOuterCurves.Count > 0) {
-                currentOuterCurveIndices = availableOuterCurves[0];
-                // select two points
-                int a = 0, b = 1;
-                Vector3 side = totalPoints[currentOuterCurveIndices[b]] - totalPoints[currentOuterCurveIndices[a]];
-                Vector3 sideCenter = (totalPoints[currentOuterCurveIndices[b]] + totalPoints[currentOuterCurveIndices[a]]) / 2;
-                Vector3 sideInPlaneNormal = Vector3.Cross(upDirection, side);
-
-                bool found = false;
-                int selectedInnerCurve = -1;
-                int selectedInnerPointIndex = -1;
-                if (innerIndices.Count > 0) {
-                    // loop through inner curves
-                    selectedInnerCurve = 0;
-                    float allignmentTemp;
-                    float minDistance = float.MaxValue, currentDistance;
-                    for (int i = 0; i < innerIndices.Count; i++) {
-                        for (int j = 0; j < innerIndices[selectedInnerCurve].Count; j++) {
-                            currentDistance = (totalPoints[innerIndices[selectedInnerCurve][j]]
-                                - sideCenter)
-                                .sqrMagnitude;
-                            allignmentTemp = Vector3.Dot(totalPoints[innerIndices[selectedInnerCurve][j]]
-                                - sideCenter, sideInPlaneNormal);
-                            if (allignmentTemp > 0 && currentDistance < minDistance) {
-                                selectedInnerCurve = i;
-                                minDistance = currentDistance;
-                                selectedInnerPointIndex = innerIndices[selectedInnerCurve][j];
-                            }
-                        }
-                    }
-                    found = selectedInnerPointIndex >= 0;
-                }
-
-                // select next and previous
-                int c = a, d = b;
-                Vector3 nextSide = Vector3.zero, previousSide = Vector3.zero;
-                float allignmentNext = float.MinValue, allignmentPrevious = float.MinValue;
-                List<int> previousLoopIndices = new List<int>();
-                List<int> nextLoopIndices = new List<int>();
-                previousLoopIndices.Add(currentOuterCurveIndices[a]);
-                nextLoopIndices.Add(currentOuterCurveIndices[b]);
-                Vector3 nextNextSide, previousNextSide;
-                do {
-                    if (c == a || allignmentPrevious < 0) {
-                        c = (c - 1 + currentOuterCurveIndices.Count) % currentOuterCurveIndices.Count;
-                        previousLoopIndices.Add(currentOuterCurveIndices[c]);
-                        previousSide = totalPoints[currentOuterCurveIndices[a]] - totalPoints[currentOuterCurveIndices[c]];
-                        allignmentPrevious = -Vector3.Dot(previousSide, sideInPlaneNormal);
-                    }
-                    if (d == b || allignmentNext < 0) {
-                        d = d + 1;
-                        nextLoopIndices.Add(currentOuterCurveIndices[d]);
-                        nextSide = totalPoints[currentOuterCurveIndices[d]] - totalPoints[currentOuterCurveIndices[b]];
-                        allignmentNext = Vector3.Dot(nextSide, sideInPlaneNormal);
-                    }
-                    // are they on the correct side?
-                    // - no - select next ansd repeat
-                    // - yes - continue
-                } while ((allignmentNext < 0 || allignmentPrevious < 0) && (c > d));
-                nextNextSide = totalPoints[currentOuterCurveIndices[d]] - totalPoints[currentOuterCurveIndices[a]];
-                previousNextSide = totalPoints[currentOuterCurveIndices[c]] - totalPoints[currentOuterCurveIndices[b]];
-                Vector3 nextNextNormalInPlane = Vector3.Cross(nextNextSide, upDirection),
-                    previousNextNormalInPlane = Vector3.Cross(upDirection, previousNextSide);
-
-                // Check if inner point was selected, is it inside one of the next triangles
-                if (found) {
-                    Vector3 innerPointA = totalPoints[selectedInnerPointIndex] - totalPoints[currentOuterCurveIndices[a]],
-                        innerPointB = totalPoints[selectedInnerPointIndex] - totalPoints[currentOuterCurveIndices[b]];
-                    Vector3 nextNormal = Vector3.Cross(upDirection, nextSide);
-                    bool insideNext =
-                        Vector3.Dot(nextNormal, innerPointB) > 0
-                        && Vector3.Dot(nextNextNormalInPlane, innerPointA) > 0;
-                    found = insideNext;
-                    if (!found) {
-                        Vector3 previousNormal = Vector3.Cross(upDirection, previousSide);
-                        bool insidePrevious = Vector3.Dot(previousNormal, innerPointA) > 0
-                            && Vector3.Dot(previousNextNormalInPlane, innerPointB) > 0;
-                        found = insidePrevious;
-                    }
-                }
-
-                // if adding merging inner point
-                if (found) {
-                    triangles.Add(currentOuterCurveIndices[a]);
-                    triangles.Add(currentOuterCurveIndices[b]);
-                    triangles.Add(selectedInnerPointIndex);
-
-                    // reorganize the curves:
-                    List<int> newPoints = new List<int>();
-                    int curveStartIndex = innerIndices[selectedInnerCurve][0];
-                    for (int i = 0; i < innerIndices[selectedInnerCurve].Count; i++) {
-                        int j =
-                            curveStartIndex
-                            + (selectedInnerPointIndex - curveStartIndex + i)
-                                % innerIndices[selectedInnerCurve].Count;
-                        newPoints.Add(j);
-                    }
-                    newPoints.Add(selectedInnerPointIndex);
-                    newPoints.Reverse();
-                    currentOuterCurveIndices.InsertRange(1, newPoints);
-
-                    innerIndices.RemoveAt(selectedInnerCurve);
-                    innerCurveCenters.RemoveAt(selectedInnerCurve);
-                }
-                else {
-                    bool nextInPrevious = c != d && Vector3.Dot(previousNextNormalInPlane, nextSide) >= 0;
-                    float distanceNext = (totalPoints[currentOuterCurveIndices[d]] - sideCenter).sqrMagnitude,
-                        distancePrevious = (totalPoints[currentOuterCurveIndices[c]] - sideCenter).sqrMagnitude;
-                    if ((nextInPrevious && allignmentNext > 0) || (allignmentNext > 0 && distanceNext < distancePrevious)) {
-                        triangles.Add(currentOuterCurveIndices[a]);
-                        triangles.Add(currentOuterCurveIndices[b]);
-                        triangles.Add(currentOuterCurveIndices[d]);
-                        if (nextLoopIndices.Count > 2) {
-                            for (int i = 0; i < nextLoopIndices.Count - 1; i++) {
-                                currentOuterCurveIndices.RemoveAt(b);
-                            }
-                            availableOuterCurves.Add(nextLoopIndices);
-                        }
-                        else
-                            currentOuterCurveIndices.RemoveAt(b);
-                    }
-                    else {
-                        triangles.Add(currentOuterCurveIndices[c]);
-                        triangles.Add(currentOuterCurveIndices[a]);
-                        triangles.Add(currentOuterCurveIndices[b]);
-                        if (previousLoopIndices.Count > 2) {
-                            int index = a;
-                            for (int i = 0; i < previousLoopIndices.Count - 1; i++) {
-                                currentOuterCurveIndices.RemoveAt(index);
-                                index = (index - 1 + currentOuterCurveIndices.Count) % currentOuterCurveIndices.Count;
-                            }
-                            previousLoopIndices.Reverse();
-                            availableOuterCurves.Add(previousLoopIndices);
-                        }
-                        else
-                            currentOuterCurveIndices.RemoveAt(a);
-                    }
-                }
-                if (currentOuterCurveIndices.Count == 2)
-                    availableOuterCurves.RemoveAt(0);
+            // Register outer curve - reducing any duplicates.
+            prevPoint = outerCurve[outerCurve.Count - 1];
+            for (j = 0; j < outerCurve.Count; j++) {
+                // skip duplicates
+                if ((outerCurve[j] - prevPoint).sqrMagnitude < Epsilon)
+                    continue;
+                prevPoint = outerCurve[j];
+                totalIndices.Add(totalPoints.Count);
+                totalPoints.Add(outerCurve[j] + upDirection * upOffset);
+                temp = reorient.MultiplyPoint3x4(outerCurve[j]);
+                minMaxU.x = Mathf.Min(minMaxU.x, temp.x);
+                minMaxU.y = Mathf.Max(minMaxU.y, temp.x);
+                minMaxV.x = Mathf.Min(minMaxV.x, temp.z);
+                minMaxV.y = Mathf.Max(minMaxV.y, temp.z);
             }
-            MeshData meshData = new MeshData(totalPoints.Count, triangles.Count, true, true);
 
-            for (int i = 0; i < totalPoints.Count; i++) {
-                Vector3 reorientedPoint = reorient.MultiplyPoint3x4(totalPoints[i]);
-                Vector2 uv = new Vector2(
-                    Mathf.InverseLerp(minMaxU.x, minMaxU.y, reorientedPoint.x),
-                    Mathf.Lerp(0.5f, 1f, Mathf.InverseLerp(minMaxV.x, minMaxV.y, reorientedPoint.z))
+            // Merge the inner cuves into the outercurve bridging to the closest point from inner to outer recursively
+            if (innerCurves != null && innerCurves.Count > 0) {
+                List<int> newIndices = new();
+                int minI, minJ = -1, minK = -1, currentStart, currentCount;
+                float minSqrDistance = float.MaxValue, currentSqrDistance;
+                List<int> innerCurveIndices = Enumerable.Range(0, innerCurves.Count).ToList();
+                while (innerCurveIndices.Count > 0) {
+                    currentStart = totalPoints.Count;
+                    currentCount = currentStart;
+                    newIndices.Clear();
+                    // Find inner curve closest to the outer one.
+                    minSqrDistance = float.MaxValue;
+                    minI = -1;
+                    minK = -1;
+                    minJ = -1;
+                    for (k = 0; k < totalIndices.Count; k++) {
+                        for (i = 0; i < innerCurveIndices.Count; i++) {
+                            for (j = 0; j < innerCurves[innerCurveIndices[i]].Count; j++) {
+                                currentSqrDistance = (innerCurves[innerCurveIndices[i]][j] - totalPoints[totalIndices[k]]).sqrMagnitude;
+                                if (currentSqrDistance < minSqrDistance) {
+                                    minSqrDistance = currentSqrDistance;
+                                    minI = innerCurveIndices[i];
+                                    minJ = j;
+                                    minK = k;
+                                }
+                            }
+                        }
+                    }
+                    // found a curve closest to the outer curve - add it
+                    // Flip curve if it is clockwise to maintain consistent winding.
+                    clockwise = EvaluateCurveWindingInPlane(innerCurves[minI], upDirection);
+                    if (clockwise)
+                        innerCurves[minI].Reverse();
+                    // Add points themselves
+                    prevPoint = innerCurves[minI][innerCurves[minI].Count - 1];
+                    for (j = 0; j < innerCurves[minI].Count; j++) {
+                        // skip duplicates
+                        if ((innerCurves[minI][j] - prevPoint).sqrMagnitude < Epsilon)
+                            continue;
+                        prevPoint = innerCurves[minI][j];
+                        newIndices.Add(currentCount);
+                        currentCount++;
+                        totalPoints.Add(innerCurves[minI][j] + upDirection * upOffset);
+                    }
+                    // Insert indicies correctly into the outercurve.
+                    totalIndices.InsertRange(minK + 1, newIndices.Rotate(minJ));
+                    totalIndices.Insert(minK + innerCurves[minI].Count + 1, currentStart + minJ);
+                    totalIndices.Insert(minK + innerCurves[minI].Count + 2, totalIndices[minK]);
+                    innerCurveIndices.Remove(minI);
+                }
+            }
+
+            // Now have simple clockwise polygon - apply the Ear Clipping Algorythm.
+            int a, b, c, failCount;
+            int currentIndex, nextIndex, previousIndex, checkIndex;
+            Vector3 currentVertex, nextVertex, previousVertex, sidePrevious, sideNext, cross, sideClosing, inPlaneNormalPrevious, inPlaneNormalNext, inPlaneNormalClosing, checkVertex, checkVector;
+            float checkAllignment;
+            bool found;
+            // Prepare with previous side so it becomes current in the loop
+            a = (totalIndices.Count - 1);
+            b = 0;
+            currentIndex = totalIndices[a];
+            nextIndex = totalIndices[b];
+            currentVertex = totalPoints[currentIndex];
+            nextVertex = totalPoints[nextIndex];
+            sideNext = nextVertex - currentVertex;
+            inPlaneNormalNext = Vector3.Cross(upDirection, sideNext);
+            failCount = 0;
+            while (totalIndices.Count > 3 && failCount < totalIndices.Count) {
+                // Indicies from index map
+                c = a % totalIndices.Count;
+                a = b % totalIndices.Count;
+                b = (a + 1) % totalIndices.Count;
+                // indicies from vertex list
+                previousIndex = currentIndex;
+                currentIndex = nextIndex;
+                nextIndex = totalIndices[b];
+                // sides
+                previousVertex = currentVertex;
+                currentVertex = nextVertex;
+                nextVertex = totalPoints[nextIndex];
+                sidePrevious = -sideNext;
+                sideNext = nextVertex - currentVertex;
+                inPlaneNormalPrevious = inPlaneNormalNext;
+                inPlaneNormalNext = Vector3.Cross(upDirection, sideNext);
+                sideClosing = nextVertex - previousVertex;
+                inPlaneNormalClosing = Vector3.Cross(sideClosing, upDirection);
+                // determine angle
+                cross = Vector3.Cross(sideNext, sidePrevious);
+                checkAllignment = Vector3.Dot(cross, upDirection);
+                if (checkAllignment == 0) {
+                    // angle is equal to 180 degrees or duplicate point
+                    // TODO: if happens - also remove from vertex array
+                    totalIndices.RemoveAt(a);
+                    // Shift indicies as they both might have wrapped around and be affected by vertex removal
+                    if (c > a) // account for cyclic indices
+                        c = totalIndices.Count + c - 1;
+                    if (b > a) // account for cyclic indices
+                        b = totalIndices.Count + b - 1;
+                    // update variables from which previous will be taken in next iteration
+                    a = c;
+                    currentIndex = previousIndex;
+                    currentVertex = previousVertex;
+                    sideNext = sideClosing;
+                    inPlaneNormalNext = -inPlaneNormalClosing;
+                    continue;
+                }
+                if (checkAllignment < 0) {
+                    // angle is greater then 180 degrees - not an ear
+                    failCount++;
+                    continue;
+                }
+                // angle is less than 180 degrees - an ear
+                // check if contains other vertices
+                found = false;
+                for (i = 0; i < totalIndices.Count; i++) {
+                    // skip check for current points
+                    if (i == b || i == a || i == c)
+                        continue;
+                    checkIndex = totalIndices[i];
+                    // skip if they map to the same point
+                    if (checkIndex == previousIndex || checkIndex == currentIndex || checkIndex == nextIndex)
+                        continue;
+                    checkVertex = totalPoints[checkIndex];
+                    // Compare vertex to each side:
+                    // check against next side
+                    checkVector = checkVertex - currentVertex;
+                    checkAllignment = Vector3.Dot(inPlaneNormalNext, checkVector);
+                    if (checkAllignment < 0) // on the outer side - skip to next
+                        continue;
+                    // check against previous side
+                    checkAllignment = Vector3.Dot(inPlaneNormalPrevious, checkVector);
+                    if (checkAllignment < 0) // on the outer side - skip to next
+                        continue;
+                    // check against closing side
+                    checkVector = checkVertex - nextVertex;
+                    checkAllignment = Vector3.Dot(inPlaneNormalClosing, checkVector);
+                    if (checkAllignment < 0) // on the outer side - skip to next
+                        continue;
+                    // vertex is in the triangle
+                    found = true;
+                    break;
+                }
+                if (found) { // There is a vertex in the ear - skip to next point
+                    failCount++;
+                    continue;
+                }
+                failCount = 0;
+                // No verticies inside - add triangle, remove current vertex and update loop variables
+                totalTriangles.Add(currentIndex);
+                totalTriangles.Add(nextIndex);
+                totalTriangles.Add(previousIndex);
+                totalIndices.RemoveAt(a);
+                // Shift indicies as they both might have wrapped around and be affected by vertex removal
+                if (c > a) // account for cyclic indices
+                    c = totalIndices.Count + c - 1;
+                if (b > a) // account for cyclic indices
+                    b = totalIndices.Count + b - 1;
+                // update variables from which previous will be taken in next iteration
+                a = c;
+                currentIndex = previousIndex;
+                currentVertex = previousVertex;
+                sideNext = sideClosing;
+                inPlaneNormalNext = -inPlaneNormalClosing;
+            }
+            // NB! Check if failed to finalize the mesh - for now just accept and try to continue.
+            if (totalIndices.Count > 3 && failCount == totalIndices.Count)
+                throw new Exception("Failed to triangulate curve");
+            else {
+                // Add Remaining triangle
+                totalTriangles.Add(totalIndices[0]);
+                totalTriangles.Add(totalIndices[1]);
+                totalTriangles.Add(totalIndices[2]);
+            }
+            MeshData meshData = new MeshData(totalPoints.Count, totalTriangles.Count, true, true);
+
+            // Set Vertex Data.
+            // Recalculate UVs within boundary in top half of UV space
+            Vector2 uv;
+            for (i = 0; i < totalPoints.Count; i++) {
+                temp = reorient.MultiplyPoint3x4(totalPoints[i]);
+                uv = new Vector2(
+                    Mathf.InverseLerp(minMaxU.x, minMaxU.y, temp.x),
+                    Mathf.Lerp(0.5f, 1f, Mathf.InverseLerp(minMaxV.x, minMaxV.y, temp.z))
                 );
                 meshData.SetVertex(i, totalPoints[i],
                     uv, upDirection);
             }
-            for (int i = 0; i < triangles.Count / 3; i++) {
+            // Set Triangle Data.
+            for (i = 0; i < totalTriangles.Count / 3; i++) {
                 meshData.SetTriangle(i * 3,
-                    triangles[i * 3], triangles[i * 3 + 1], triangles[i * 3 + 2]
+                    totalTriangles[i * 3], totalTriangles[i * 3 + 1], totalTriangles[i * 3 + 2]
                 );
             }
             return meshData;

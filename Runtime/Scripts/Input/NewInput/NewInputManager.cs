@@ -9,7 +9,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace PolytopeSolutions.Toolset.Input {
-    public class NewInputManager: TManager<NewInputManager> {
+    public class NewInputManager : TManager<NewInputManager> {
         [System.Serializable]
         private class ActionPairing {
             [SerializeField] private InputActionReference action;
@@ -34,7 +34,7 @@ namespace PolytopeSolutions.Toolset.Input {
             private void OnStarted(InputAction.CallbackContext context) {
                 if (this.rootHandler == null) return;
                 this.isApplicable = this.rootHandler.Value.IsApplicable(context);
-                if (this.isApplicable) 
+                if (this.isApplicable)
                     this.rootHandler.Value.HandleStarted(context);
             }
             private void OnPerformed(InputAction.CallbackContext context) {
@@ -55,7 +55,6 @@ namespace PolytopeSolutions.Toolset.Input {
             for (int i = 0; i < this.actionPairings.Count; i++) {
                 this.actionPairings[i].Enable();
             }
-            this.raycasters = GameObject.FindObjectsByType<GraphicRaycaster>(FindObjectsSortMode.None);
         }
         protected override void OnDestroy() {
             base.OnDestroy();
@@ -77,6 +76,7 @@ namespace PolytopeSolutions.Toolset.Input {
             this.frameOfPointerUpdate = Time.frameCount;
             this.pointerEventData = new PointerEventData(EventSystem.current);
             this.pointerEventData.position = Pointer.current.position.value;
+            this.raycasters = GameObject.FindObjectsByType<GraphicRaycaster>(FindObjectsSortMode.None);
             foreach (GraphicRaycaster raycaster in this.raycasters) {
                 raycaster.Raycast(this.pointerEventData, rayCastUIResults);
                 if (rayCastUIResults.Count > 0) {

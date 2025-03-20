@@ -7,6 +7,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
     public class MeshGameObject {
         public GameObject goItem { get; private set; }
         public Transform tItem { get; private set; }
+        public string name => this.goItem.name;
 
         public MeshFilter mfDefaultMesh { get; private set; }
         public MeshRenderer mrDefaultMesh { get; private set; }
