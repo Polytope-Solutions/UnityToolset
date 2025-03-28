@@ -17,7 +17,7 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] protected bool useProxies;
         [SerializeField] protected bool useMovementMonitor = true;
         [SerializeField] protected float minMovementMonitorDelay = 0.05f;
-        [SerializeField] private Vector2 targetDistanceRange = new Vector2(0, 0);
+        [SerializeField] protected Vector2 targetDistanceRange = new Vector2(0, 0);
 
         protected Rigidbody objectRigidbody;
         protected Camera cCamera;

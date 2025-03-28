@@ -2,6 +2,17 @@
 
 ---
 
+## 0.0.62
+
+2025-03-28
+
+-	Safeguard AI navigation with conditional comiplation;
+-	Fix curve offsetiing to handle curves better;
+-	Expose Camera controller ZoomDistanceRanges to be able to override in derived classes;
+-	Add default dummy network certificate handler;
+	
+---
+
 ## 0.0.61
 
 2025-03-20

@@ -1,3 +1,4 @@
+#if ALLOW_AI_NAVIGATION
 using UnityEngine;
 
 namespace PolytopeSolutions.Toolset.Animations.Avatar {
@@ -45,3 +46,4 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
         }
     }
 }
+#endif

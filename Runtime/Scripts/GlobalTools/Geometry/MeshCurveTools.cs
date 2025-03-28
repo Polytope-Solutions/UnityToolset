@@ -67,7 +67,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 previousInPlaneNormal = currentInPlaneNormal;
                 currentInPlaneNormal = Vector3.Cross(currentSide, upDirection).normalized;
 
-                angle = Vector3.SignedAngle(-previousSide, currentSide, upDirection);
+                angle = Mathf.Abs(Vector3.SignedAngle(-previousSide, currentSide, upDirection));
                 magnitude = offset / Mathf.Sin(angle * Mathf.Deg2Rad / 2);
                 shift = (previousInPlaneNormal + currentInPlaneNormal).normalized * magnitude;
                 offsetCurve.Add(previousVertex + shift);

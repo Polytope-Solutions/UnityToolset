@@ -1,3 +1,4 @@
+#if ALLOW_AI_NAVIGATION
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System.Collections.Generic;
 using UnityEngine;
@@ -52,3 +53,4 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
         }
     }
 }
+#endif
