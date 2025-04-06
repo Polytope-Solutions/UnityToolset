@@ -2,6 +2,17 @@
 
 ---
 
+## 0.0.63
+
+2025-04-06
+
+-	Expand New Input:
+	-	add all applicable layer
+	-	add world pinch detector
+	-	expand world drag to have exposed start-end events;
+
+---
+
 ## 0.0.62
 
 2025-03-28

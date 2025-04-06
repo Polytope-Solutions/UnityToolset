@@ -15,8 +15,11 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] private string description = "WorldLongDrag";
         [SerializeField] private bool normalizeInScreenSize = true;
         [SerializeField] private bool invertHorizontal, invertVertical;
+        [SerializeField] private bool resetOnRelease = true;
         [SerializeField] private UnityEvent<float> onDragHorizontal, onDragVertical;
+        [SerializeField] private UnityEvent onStarted, onEnded;
         private Vector2 startPosition;
+        private bool isStarted = false;
 
         #region MANAGEMENT
         public string Description => this.description;
@@ -30,13 +33,18 @@ namespace PolytopeSolutions.Toolset.Input {
             #if DEBUG2
             this.Log($"WorldLongDrag Started");
             #endif
-            this.startPosition = Pointer.current.position.value;
+            this.isStarted = false;
         }
         public void HandlePerformed(InputAction.CallbackContext input) {
             #if DEBUG2
             this.Log($"WorldLongDrag Performed");
             #endif
             Vector2 screenPosition = Pointer.current.position.value;
+            if (!this.isStarted) {
+                this.startPosition = screenPosition;
+                this.onStarted?.Invoke();
+                this.isStarted = true;
+            }
             float horizontal = screenPosition.x - this.startPosition.x;
             float vertical = screenPosition.y - this.startPosition.y;
             if (this.normalizeInScreenSize) {
@@ -60,8 +68,12 @@ namespace PolytopeSolutions.Toolset.Input {
             #if DEBUG2
             this.Log($"WorldLongDrag Ended");
             #endif
-            this.onDragHorizontal?.Invoke(0);
-            this.onDragVertical?.Invoke(0);
+            if (this.resetOnRelease) { 
+                this.onDragHorizontal?.Invoke(0);
+                this.onDragVertical?.Invoke(0);
+            }
+
+            this.onEnded?.Invoke();
         }
         #endregion
     }
