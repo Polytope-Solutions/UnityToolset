@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using UnityEngine.InputSystem.EnhancedTouch;
 
 using PolytopeSolutions.Toolset.GlobalTools.Types;
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace PolytopeSolutions.Toolset.Input {
     public class NewInputManager : TManager<NewInputManager> {
@@ -48,16 +49,21 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         [SerializeField] private List<ActionPairing> actionPairings;
         [SerializeField] private float minDuration = .5f;
+        [SerializeField] private bool useEnhancedTouch = true;
         public float MinDuration => this.minDuration;
 
         protected override void Awake() {
             base.Awake();
+            if (this.useEnhancedTouch)
+                EnhancedTouchSupport.Enable();
             for (int i = 0; i < this.actionPairings.Count; i++) {
                 this.actionPairings[i].Enable();
             }
         }
         protected override void OnDestroy() {
             base.OnDestroy();
+            if (this.useEnhancedTouch)
+                EnhancedTouchSupport.Disable();
             for (int i = 0; i < this.actionPairings.Count; i++) {
                 this.actionPairings[i].Disable();
             }

@@ -3,11 +3,10 @@
 // #define DEBUG2
 #undef DEBUG2
 
-using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System.Collections.Generic;
 using UnityEngine;
+
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace PolytopeSolutions.Toolset.Input {

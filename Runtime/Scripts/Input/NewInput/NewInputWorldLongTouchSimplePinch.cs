@@ -3,18 +3,16 @@
 // #define DEBUG2
 #undef DEBUG2
 
-using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using System.Collections.Generic;
 using UnityEngine;
+
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace PolytopeSolutions.Toolset.Input {
-    public class NewInputWorldPinch : MonoBehaviour, INewInputHandler {
-        [SerializeField] private string description = "WorldLongPinch";
+    public class NewInputWorldLongTouchSimplePinch : MonoBehaviour, INewInputHandler {
+        [SerializeField] private string description = "WorldLongTouchSimplePinch";
         [SerializeField] private bool normalizeInScreenSize = true;
         [SerializeField] private bool invertDirection = false;
         [SerializeField] private bool resetOnRelease = true;
@@ -48,10 +46,10 @@ namespace PolytopeSolutions.Toolset.Input {
                 screenPosition1 = Touch.activeTouches[0].screenPosition;
                 screenPosition2 = Touch.activeTouches[1].screenPosition;
                 this.startDelta = (screenPosition2 - screenPosition1).magnitude;
-                StartPinch();
+                StartInteraction();
             }
             else if (this.isStarted && Touch.activeTouches.Count <= 1)
-                ReleasePinch();
+                EndInteraction();
             else if (this.isStarted && Touch.activeTouches.Count > 1) {
                 screenPosition1 = Touch.activeTouches[0].screenPosition;
                 screenPosition2 = Touch.activeTouches[1].screenPosition;
@@ -77,23 +75,23 @@ namespace PolytopeSolutions.Toolset.Input {
             #if DEBUG2
             this.Log($"WorldLongPinch Ended");
             #endif
-            ReleasePinch();
+            EndInteraction();
         }
 
-        private void StartPinch() {
+        private void StartInteraction() {
             this.isStarted = true;
             this.onStarted?.Invoke();
             #if DEBUG2
-            this.Log("Pinch Started");
+            this.Log("WorldLongPinch Pinch Started");
             #endif
         }
-        private void ReleasePinch() {
+        private void EndInteraction() {
             this.isStarted = false;
             if (this.resetOnRelease) 
                 this.onPinch?.Invoke(0);
             this.onEnded?.Invoke();
             #if DEBUG2
-            this.Log("Pinch Ended");
+            this.Log("WorldLongPinch Pinch Ended");
             #endif
         }
         #endregion

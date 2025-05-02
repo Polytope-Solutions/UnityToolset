@@ -2,6 +2,16 @@
 
 ---
 
+## 0.0.64
+
+2025-05-02
+
+-	Expand new input system:
+	-	Add dual touch drag handler passing the 3D touch locations with overridable plane handler (default horizontal 0 plane);
+	-	Add auto enabling of enhanced touch in the manager;
+
+---
+
 ## 0.0.63
 
 2025-04-06
