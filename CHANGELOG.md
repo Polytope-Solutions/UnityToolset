@@ -2,6 +2,20 @@
 
 ---
 
+## 0.0.65
+
+2025-05-27
+
+-	Expand spatial range structure:
+	-	serialize;
+	-	add encapsulation;
+	-	add some static defaults;
+	-	convert to bounds;
+-	Expand NavMesh structure:	-	try to generalize navmesh controller to allow for multiple walkable build sources;
+	-	start to abstract away the structure to allow for inherited alterations;
+	
+---
+
 ## 0.0.64
 
 2025-05-02
