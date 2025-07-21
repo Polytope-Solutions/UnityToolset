@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.66
+
+2025-07-21
+
+-	Allow to queue events in event manager;
+
+---
+
 ## 0.0.65
 
 2025-05-27
