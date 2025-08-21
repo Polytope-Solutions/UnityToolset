@@ -2,6 +2,16 @@
 
 ---
 
+## 0.0.67
+
+2025-08-21
+
+-	Create generic Rolling Average structure;
+-	Allow the world touch to have dynamic touch plane and expose private camera property for overrides;
+-	Add mini tool to show cursor in editor;
+	
+---
+
 ## 0.0.66
 
 2025-07-21
@@ -19,7 +29,8 @@
 	-	add encapsulation;
 	-	add some static defaults;
 	-	convert to bounds;
--	Expand NavMesh structure:	-	try to generalize navmesh controller to allow for multiple walkable build sources;
+-	Expand NavMesh structure:
+	-	try to generalize navmesh controller to allow for multiple walkable build sources;
 	-	start to abstract away the structure to allow for inherited alterations;
 	
 ---

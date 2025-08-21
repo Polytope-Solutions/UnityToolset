@@ -21,8 +21,9 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] private UnityEvent onPrimaryReset, onSecondaryReset;
         [SerializeField] private UnityEvent<Vector3, Vector3> onPrimaryInteract;
         [SerializeField] private UnityEvent<Vector3, Vector3, Vector3, Vector3> onDualInteract;
+        [SerializeField] private bool isPlaneDynamic = false;
         
-        private Camera rayCamera;
+        protected Camera rayCamera;
         private Touch[] currentTouches;
         private int currentTouchCount, previousTouchCount = -1;
 
@@ -53,10 +54,11 @@ namespace PolytopeSolutions.Toolset.Input {
                 //this.touchID = -1;
                 this.onReset?.Invoke();
             }
-            public bool Update(Touch[] currentTouches, Camera camera, Func<Vector2, Plane> evaluateInteractionPlane) {
+            public bool Update(Touch[] currentTouches, Camera camera, Func<Vector2, Plane> evaluateInteractionPlane, bool isPlaneDynamic) {
                 if (this.isResetPending) {
                     Init(currentTouches, evaluateInteractionPlane);
-                }
+                } else if (isPlaneDynamic)
+                    this.interactionPlane = evaluateInteractionPlane.Invoke(this.currentScreenPosition);
                 return EvaluateCurrentWorldPositions(currentTouches, camera);
             }
 
@@ -121,13 +123,13 @@ namespace PolytopeSolutions.Toolset.Input {
                 ;// EndInteraction();
             else {
                 if (this.currentTouchCount > 0 && this.primary.IsInProgress(this.currentTouches)) {
-                    if (this.primary.Update(this.currentTouches, this.rayCamera, EvaluateInteractionPlane)) {
+                    if (this.primary.Update(this.currentTouches, this.rayCamera, EvaluateInteractionPlane, this.isPlaneDynamic)) {
                         // Primary touch is in progress and updated
                         this.onPrimaryInteract?.Invoke(
                             this.primary.CurrentPreviousWorldPosition, this.primary.CurrentCurrentWorldPosition
                         );
                         if (this.currentTouchCount > 1 && this.secondary.IsInProgress(this.currentTouches)){
-                            if (this.secondary.Update(this.currentTouches, this.rayCamera, EvaluateInteractionPlane)) {
+                            if (this.secondary.Update(this.currentTouches, this.rayCamera, EvaluateInteractionPlane, this.isPlaneDynamic)) {
                                 // Both touches are in progress and updated
                                 this.onDualInteract?.Invoke(
                                     this.primary.CurrentPreviousWorldPosition, this.primary.CurrentCurrentWorldPosition,
