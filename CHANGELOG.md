@@ -2,6 +2,16 @@
 
 ---
 
+## 0.0.68
+
+2025-09-02
+
+-	Extend the dual touch
+	-	to allow for exclusive single and dual touch events;
+	-	to allow variable raycast planes;
+
+---
+
 ## 0.0.67
 
 2025-08-21

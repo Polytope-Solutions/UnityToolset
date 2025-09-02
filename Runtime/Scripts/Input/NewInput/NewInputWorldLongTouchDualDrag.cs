@@ -22,7 +22,10 @@ namespace PolytopeSolutions.Toolset.Input {
         [SerializeField] private UnityEvent<Vector3, Vector3> onPrimaryInteract;
         [SerializeField] private UnityEvent<Vector3, Vector3, Vector3, Vector3> onDualInteract;
         [SerializeField] private bool isPlaneDynamic = false;
-        
+        [SerializeField] private bool isPrimaryExclusive = false;
+        [SerializeField] private bool isRayInfinite = false;
+        [SerializeField] private float maxRayDistance = 1000f;
+
         protected Camera rayCamera;
         private Touch[] currentTouches;
         private int currentTouchCount, previousTouchCount = -1;
@@ -54,12 +57,13 @@ namespace PolytopeSolutions.Toolset.Input {
                 //this.touchID = -1;
                 this.onReset?.Invoke();
             }
-            public bool Update(Touch[] currentTouches, Camera camera, Func<Vector2, Plane> evaluateInteractionPlane, bool isPlaneDynamic) {
+            public bool Update(Touch[] currentTouches, Camera camera, Func<Vector2, Plane> evaluateInteractionPlane, bool isPlaneDynamic, bool isRayInfinite, float maxDistance) {
                 if (this.isResetPending) {
                     Init(currentTouches, evaluateInteractionPlane);
-                } else if (isPlaneDynamic)
+                }
+                else if (isPlaneDynamic)
                     this.interactionPlane = evaluateInteractionPlane.Invoke(this.currentScreenPosition);
-                return EvaluateCurrentWorldPositions(currentTouches, camera);
+                return EvaluateCurrentWorldPositions(currentTouches, camera, isRayInfinite, maxDistance);
             }
 
             private void Init(Touch[] currentTouches, Func<Vector2, Plane> evaluateInteractionPlane) {
@@ -71,26 +75,27 @@ namespace PolytopeSolutions.Toolset.Input {
                 this.currentCurrentWorldPosition = Vector3.zero;
                 this.interactionPlane = evaluateInteractionPlane.Invoke(this.currentScreenPosition);
             }
-            private bool EvaluateCurrentWorldPositions(Touch[] currentTouches, Camera camera) {
+            private bool EvaluateCurrentWorldPositions(Touch[] currentTouches, Camera camera, bool isRayInfinite, float maxDistance) {
                 this.previousScreenPosition = this.currentScreenPosition;
                 float distance;
                 // Evaluate where previous position results in the world in the camera space
                 this.ray = camera.ScreenPointToRay(this.previousScreenPosition.ToXY());
-                if (!EvaluateRay(this.ray, out distance))
+                if (!EvaluateRay(ref this.ray, out distance, maxDistance, isRayInfinite))
                     return false;
                 this.currentPreviousWorldPosition = this.ray.GetPoint(distance);
                 // Evaluate where previous position results in the world in the camera space
                 this.currentScreenPosition = currentTouches[this.touchIndex].screenPosition;
                 this.ray = camera.ScreenPointToRay(this.currentScreenPosition.ToXY());
-                if (!EvaluateRay(this.ray, out distance))
+                if (!EvaluateRay(ref this.ray, out distance, maxDistance, isRayInfinite))
                     return false;
                 this.currentCurrentWorldPosition = this.ray.GetPoint(distance);
                 return true;
             }
-            protected virtual bool EvaluateRay(Ray ray, out float distance, float maxDistance=1000) {
+            protected virtual bool EvaluateRay(ref Ray ray, out float distance, float maxDistance = 1000, bool isRayInfinite = false) {
+                if (isRayInfinite) ray.origin -= ray.direction * 1000f;
                 if (!this.interactionPlane.Raycast(ray, out distance))
                     return false;
-                if (distance > maxDistance)
+                if (!isRayInfinite && distance > maxDistance)
                     return false;
                 return true;
             }
@@ -98,7 +103,7 @@ namespace PolytopeSolutions.Toolset.Input {
 
         #region MANAGEMENT
         public string Description => this.description;
-        public void Init() { 
+        public void Init() {
             this.rayCamera = Camera.main;
             this.primary = new TouchInfo(0, this.onPrimaryReset);
             this.secondary = new TouchInfo(1, this.onSecondaryReset);
@@ -107,7 +112,7 @@ namespace PolytopeSolutions.Toolset.Input {
             return true;
         }
         #endregion
-        
+
         #region HANDLERS
         public void HandleStarted(InputAction.CallbackContext input) {
             #if DEBUG2
@@ -123,20 +128,23 @@ namespace PolytopeSolutions.Toolset.Input {
                 ;// EndInteraction();
             else {
                 if (this.currentTouchCount > 0 && this.primary.IsInProgress(this.currentTouches)) {
-                    if (this.primary.Update(this.currentTouches, this.rayCamera, EvaluateInteractionPlane, this.isPlaneDynamic)) {
-                        // Primary touch is in progress and updated
-                        this.onPrimaryInteract?.Invoke(
-                            this.primary.CurrentPreviousWorldPosition, this.primary.CurrentCurrentWorldPosition
-                        );
-                        if (this.currentTouchCount > 1 && this.secondary.IsInProgress(this.currentTouches)){
-                            if (this.secondary.Update(this.currentTouches, this.rayCamera, EvaluateInteractionPlane, this.isPlaneDynamic)) {
+                    if (this.primary.Update(this.currentTouches, this.rayCamera, EvaluateInteractionPlane, this.isPlaneDynamic, this.isRayInfinite, this.maxRayDistance)) {
+                        bool isSecondaryInprogress = false;
+                        if (this.currentTouchCount > 1 && this.secondary.IsInProgress(this.currentTouches)) {
+                            if (this.secondary.Update(this.currentTouches, this.rayCamera, EvaluateInteractionPlane, this.isPlaneDynamic, this.isRayInfinite, this.maxRayDistance)) {
                                 // Both touches are in progress and updated
                                 this.onDualInteract?.Invoke(
                                     this.primary.CurrentPreviousWorldPosition, this.primary.CurrentCurrentWorldPosition,
                                     this.secondary.CurrentPreviousWorldPosition, this.secondary.CurrentCurrentWorldPosition
                                 );
+                                isSecondaryInprogress = true;
                             }
                         }
+                        if (this.isPrimaryExclusive || !isSecondaryInprogress)
+                            // Primary touch is in progress and updated
+                            this.onPrimaryInteract?.Invoke(
+                                this.primary.CurrentPreviousWorldPosition, this.primary.CurrentCurrentWorldPosition
+                            );
                     }
                 }
             }
@@ -161,7 +169,7 @@ namespace PolytopeSolutions.Toolset.Input {
             }
             return (this.currentTouchCount != 0);
         }
-        protected virtual Plane EvaluateInteractionPlane(Vector2 screenPosition) 
+        protected virtual Plane EvaluateInteractionPlane(Vector2 screenPosition)
             => new Plane(Vector3.up, Vector3.zero);
         private void StartInteraction() {
             this.previousTouchCount = -1;
