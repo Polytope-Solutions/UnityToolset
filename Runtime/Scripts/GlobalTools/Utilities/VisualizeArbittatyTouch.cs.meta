@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: d08787a7b7b13448aa55cd86786398ac
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - touchSpritePrefab: {fileID: 5044804720045090124, guid: e346d3107ac104a698fa6be2b0b3e1c5, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

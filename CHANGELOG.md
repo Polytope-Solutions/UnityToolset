@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.69
+
+2025-09-05
+
+-	Add a primitive tool to visualize pointer and up to 10 touches;
+-	Slightly more descriptive variable name in previous commit;
+
+---
+
 ## 0.0.68
 
 2025-09-02
