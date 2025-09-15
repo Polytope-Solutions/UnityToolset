@@ -166,6 +166,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 this.primary.Reset();
                 this.secondary.Reset();
                 this.previousTouchCount = this.currentTouchCount;
+                this.onStarted?.Invoke();
             }
             return (this.currentTouchCount != 0);
         }
@@ -173,7 +174,6 @@ namespace PolytopeSolutions.Toolset.Input {
             => new Plane(Vector3.up, Vector3.zero);
         private void StartInteraction() {
             this.previousTouchCount = -1;
-            this.onStarted?.Invoke();
             #if DEBUG2
             this.Log("WorldLongTouchDual Interaction Started");
             #endif

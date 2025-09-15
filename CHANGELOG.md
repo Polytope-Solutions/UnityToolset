@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.70
+
+2025-09-15
+
+-	Allow to clear event manager subscriptions;
+-	Reset dual drag event on finger count change;
+
+---
+
 ## 0.0.69
 
 2025-09-05

@@ -41,5 +41,10 @@ namespace PolytopeSolutions.Toolset.Events {
                 this.events[eventName] -= callback;
             }
         }
+        public void ForceCleanEvent(string eventName) {
+            if (this.events.ContainsKey(eventName)) {
+                this.events.Remove(eventName);
+            }
+        }
     }
 }
