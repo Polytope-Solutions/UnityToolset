@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.71
+
+2025-09-24
+
+-	Dummy utility auto-detect and disable other audiolisteners;
+
+---
+
 ## 0.0.70
 
 2025-09-15
