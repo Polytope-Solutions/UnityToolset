@@ -2,6 +2,16 @@
 
 ---
 
+## 0.0.72
+
+2025-09-25
+
+-	Fix Long-Short Interaction layer to evaluate Applicability for both long and short;
+-	Add option to react to long within mintime;
+-	Create preliminary base structure for third person Rig and Rig state.
+
+---
+
 ## 0.0.71
 
 2025-09-24
