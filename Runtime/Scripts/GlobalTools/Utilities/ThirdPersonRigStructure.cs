@@ -35,20 +35,44 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
             }
         }
 
+        protected bool IsChangedAndRelevant(TRigState state, ThirdPersonRigJoint joint, ThirdPersonRigJoint mask)
+            => state.IsChanged(joint) && mask.HasFlag(joint);
+
         public virtual void ApplyRigStateImmediate(TRigState state, uint updateState = ThirdPersonRigState.AllJoints) {
+            state.Constrain();
+            ThirdPersonRigJoint joints = (ThirdPersonRigJoint)updateState;
+            bool horizontalPositionChanged = IsChangedAndRelevant(state, ThirdPersonRigJoint.HorizontalPosition, joints),
+                horizontalRotationChanged = IsChangedAndRelevant(state, ThirdPersonRigJoint.HorizontalRotation, joints),
+                verticalRotationChanged = IsChangedAndRelevant(state, ThirdPersonRigJoint.VerticalRotation, joints),
+                distanceChanged = IsChangedAndRelevant(state, ThirdPersonRigJoint.Distance, joints);
+            if (horizontalPositionChanged)
+                this.tHorizontalPositioningJoint.position
+                    = state.HorizontalPosition.ToXZ();
+            if (horizontalRotationChanged)
+                this.tHorizontalRotationJoint.rotation
+                    = Quaternion.Euler(Vector3.up * state.HorizontalAngle);
+            if (verticalRotationChanged)
+                this.tVerticalRotationJoint.localRotation
+                    = Quaternion.Euler(Vector3.right * state.VerticalAngle);
+            if (distanceChanged)
+                this.tDistanceControlJoint.localPosition
+                    = Vector3.forward * -state.Depth;
+        }
+        public virtual void ApplyRigStateSmoothed(TRigState state, float smoothTime, uint updateState = ThirdPersonRigState.AllJoints) {
+            state.Constrain();
             ThirdPersonRigJoint joints = (ThirdPersonRigJoint)updateState;
             if (state.IsChanged((uint)ThirdPersonRigJoint.HorizontalPosition) && joints.HasFlag(ThirdPersonRigJoint.HorizontalPosition))
                 this.tHorizontalPositioningJoint.position
-                    = state.HorizontalPosition.ToXZ();
+                    = state.HorizontalPositionSmoothed(this.tHorizontalPositioningJoint.position.XZ(), smoothTime).ToXZ();
             if (state.IsChanged((uint)ThirdPersonRigJoint.HorizontalRotation) && joints.HasFlag(ThirdPersonRigJoint.HorizontalRotation))
                 this.tHorizontalRotationJoint.rotation
-                    = Quaternion.Euler(Vector3.up * state.HorizontalAngle);
+                    = Quaternion.Euler(Vector3.up * state.HorizontalAngleSmoothed(this.tHorizontalRotationJoint.eulerAngles.y, smoothTime));
             if (state.IsChanged((uint)ThirdPersonRigJoint.VerticalRotation) && joints.HasFlag(ThirdPersonRigJoint.VerticalRotation))
                 this.tVerticalRotationJoint.localRotation
-                    = Quaternion.Euler(Vector3.right * state.VerticalAngle);
+                    = Quaternion.Euler(Vector3.right * state.VerticalAngleSmoothed(this.tVerticalRotationJoint.eulerAngles.x, smoothTime));
             if (state.IsChanged((uint)ThirdPersonRigJoint.Distance) && joints.HasFlag(ThirdPersonRigJoint.Distance))
                 this.tDistanceControlJoint.localPosition
-                    = Vector3.forward * -state.Depth;
+                    = Vector3.forward * -state.DepthSmoothed(Mathf.Abs(this.tDistanceControlJoint.localPosition.z), smoothTime);
         }
         public virtual TRigState FromRig() {
             TRigState rigState = new();
@@ -58,15 +82,30 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
             rigState.Depth = Mathf.Abs(this.tDistanceControlJoint.localPosition.z);
             return rigState;
         }
+        public virtual bool IsStateApplied(TRigState state) {
+            return (ResolvedMask(state) & ThirdPersonRigState.AllJoints) == ThirdPersonRigState.AllJoints;
+        }
+        public virtual uint ResolvedMask(TRigState state) {
+            uint mask = 0;
+            if ((this.tHorizontalPositioningJoint.position.XZ() - state.HorizontalPosition).sqrMagnitude < ThirdPersonRigState.epsilonSqr)
+                mask |= (uint)ThirdPersonRigJoint.HorizontalPosition;
+            if (Mathf.Abs(Mathf.DeltaAngle(this.tHorizontalRotationJoint.eulerAngles.y, state.HorizontalAngle)) < ThirdPersonRigState.epsilon)
+                mask |= (uint)ThirdPersonRigJoint.HorizontalRotation;
+            if (Mathf.Abs(Mathf.DeltaAngle(this.tVerticalRotationJoint.eulerAngles.x, state.VerticalAngle)) < ThirdPersonRigState.epsilon)
+                mask |= (uint)ThirdPersonRigJoint.VerticalRotation;
+            if (Mathf.Abs(Mathf.Abs(this.tDistanceControlJoint.localPosition.z) - state.Depth) < ThirdPersonRigState.epsilon)
+                mask |= (uint)ThirdPersonRigJoint.Distance;
+            return mask;
+        }
     }
     [Serializable]
     public class ThirdPersonRigState {
-        protected const float epsilon = 0.0001f;
-        protected const float epsilonSqr = epsilon * epsilon;
-        [SerializeField] private Vector2 horizontalPosition;
-        [SerializeField] private float horizontalAngle;
-        [SerializeField] private float verticalAngle;
-        [SerializeField] private float depth;
+        public const float epsilon = 0.0001f;
+        public const float epsilonSqr = epsilon * epsilon;
+        [SerializeField] private Vector2 horizontalPosition, horizontalPositionVelocity;
+        [SerializeField] private float horizontalAngle, horizontalAngleVelocity;
+        [SerializeField] private float verticalAngle, verticalAngleVelocity;
+        [SerializeField] private float depth, depthVelocity;
         protected uint changeMask;
         public const uint AllJoints = (uint)
             (ThirdPersonRigJoint.HorizontalPosition
@@ -84,6 +123,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
                 this.changeMask |= (uint)ThirdPersonRigJoint.HorizontalPosition;
             }
         }
+        public Vector2 HorizontalPositionSmoothed(Vector2 current, float smoothTime)
+            => Vector2.SmoothDamp(current, this.horizontalPosition, ref this.horizontalPositionVelocity, smoothTime);
         public float HorizontalAngle {
             get => this.horizontalAngle;
             set {
@@ -93,6 +134,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
                 this.changeMask |= (uint)ThirdPersonRigJoint.HorizontalRotation;
             }
         }
+        public float HorizontalAngleSmoothed(float current, float smoothTime)
+            => Mathf.SmoothDampAngle(current, this.horizontalAngle, ref this.horizontalAngleVelocity, smoothTime);
         public float VerticalAngle {
             get => this.verticalAngle;
             set {
@@ -102,6 +145,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
                 this.changeMask |= (uint)ThirdPersonRigJoint.VerticalRotation;
             }
         }
+        public float VerticalAngleSmoothed(float current, float smoothTime)
+            => Mathf.SmoothDampAngle(current, this.verticalAngle, ref this.verticalAngleVelocity, smoothTime);
         public float Depth {
             get => this.depth;
             set {
@@ -111,9 +156,16 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
                 this.changeMask |= (uint)ThirdPersonRigJoint.Distance;
             }
         }
+        public float DepthSmoothed(float current, float smoothTime)
+            => Mathf.SmoothDamp(current, this.depth, ref this.depthVelocity, smoothTime);
         public bool IsChanged(uint testMask) => (this.changeMask & testMask) == testMask;
+        public bool IsChanged(ThirdPersonRigJoint joint)
+            => IsChanged((uint)joint);
         public bool IsAnyChanged => this.changeMask != 0;
 
+        public virtual void Constrain() {
+
+        }
         public virtual void ClearMask(uint acknowledgedChanges = uint.MaxValue) {
             this.changeMask &= ~acknowledgedChanges;
         }

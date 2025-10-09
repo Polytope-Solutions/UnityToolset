@@ -19,23 +19,33 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
         }
         private void Update() {
             // Handle pointer universally
-            this.touchSprites[0].gameObject.SetActive(true);
-            Vector2 itemPosition = Pointer.current.position.ReadValue();
-            this.touchSprites[0].position = itemPosition;
+            bool show =
+                (Pointer.current != null &&
+                (Pointer.current is not Touchscreen || Touchscreen.current.primaryTouch.isInProgress));
+            Vector2 itemPosition = Vector2.zero;
+            if (this.touchSprites[0].gameObject.activeSelf != show) {
+                this.touchSprites[0].gameObject.SetActive(show);
+            }
+            if (show) {
+                itemPosition = Pointer.current.position.ReadValue();
+                this.touchSprites[0].position = itemPosition;
+            }
 
             for (int i = 1; i < this.touchSprites.Length; i++) {
+                show = false;
                 if (Touchscreen.current != null && i < Touchscreen.current.touches.Count) {
                     TouchControl touch = Touchscreen.current.touches[i];
                     if (touch.isInProgress) {
-                        this.touchSprites[i].gameObject.SetActive(true);
+                        show = true;
                         itemPosition = touch.position.ReadValue();
-                        this.touchSprites[i].position = itemPosition;
-                    } else {
-                        this.touchSprites[i].gameObject.SetActive(false);
                     }
-                } else {
-                    this.touchSprites[i].gameObject.SetActive(false);
                 }
+
+                if (this.touchSprites[i].gameObject.activeSelf != show) {
+                    this.touchSprites[i].gameObject.SetActive(show);
+                }
+                if (show)
+                    this.touchSprites[i].position = itemPosition;
             }
 
         }

@@ -2,6 +2,19 @@
 
 ---
 
+## 0.0.73
+
+2025-10-09
+
+-	Improve touch visualization to autohide first touch if in touchscreen and to not try to turn on/off everyframe if already in state;
+-	Expand Third Persson Rig:
+	-	Allow constraining;
+	-	Allow Smoothing;
+	-	Allow dynamic resolved state checking;
+	-	Simplify changed state checking in derivatives;
+
+---
+
 ## 0.0.72
 
 2025-09-25
