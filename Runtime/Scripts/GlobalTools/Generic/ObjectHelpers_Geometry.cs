@@ -154,6 +154,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         public Vector3 ToVector3() {
             return new Vector3((float)this.x, (float)this.y, (float)this.z);
         }
+        public double[] ToDoubleArray() {
+            return new double[] { this.x, this.y, this.z };
+        }
 
         public static Vector3Double operator +(Vector3Double v1, Vector3Double v2) => new Vector3Double(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
         public static Vector3Double operator -(Vector3Double v1, Vector3Double v2) => new Vector3Double(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);

@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.74
+
+2025-10-30
+
+-	Helper function for Vector3Doube to double array converstion;
+	
+---
+
 ## 0.0.73
 
 2025-10-09
