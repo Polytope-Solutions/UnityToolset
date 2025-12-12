@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.75
+
+2025-10-30
+
+-	Expand Mesh Game Object to support multi-material and multi-textures;
+
+---
+
 ## 0.0.74
 
 2025-10-30

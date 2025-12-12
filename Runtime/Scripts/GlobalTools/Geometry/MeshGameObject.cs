@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
 
@@ -12,22 +13,48 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
         public MeshFilter mfDefaultMesh { get; private set; }
         public MeshRenderer mrDefaultMesh { get; private set; }
         public MeshCollider mcMesh { get; private set; }
-        private Material material;
+        private List<Material> materials;
         public Material Material {
-            get => this.material;
+            get => this.materials?[0];
             set {
-                this.material = value;
-                this.mrDefaultMesh.sharedMaterial = this.material;
+                if (this.materials.Count == 0)
+                    this.materials.Add(null);
+                this.materials[0] = value;
+                this.mrDefaultMesh.SetSharedMaterials(this.materials);
             }
         }
-        private Texture2D mainTexture;
+        public List<Material> Materials {
+            get => this.materials;
+            set {
+                this.materials = value;
+                this.mrDefaultMesh.SetSharedMaterials(this.materials);
+            }
+        }
+        private List<Texture2D> mainTextures;
         public Texture2D MainTexture {
             set {
-                this.mainTexture = value;
-                this.material.mainTexture = this.mainTexture;
+                if (this.mainTextures.Count == 0)
+                    this.mainTextures.Add(null);
+                this.mainTextures[0] = value;
+                this.Material.mainTexture = this.mainTextures[0];
+                this.mrDefaultMesh.SetSharedMaterials(this.materials);
             }
             get {
-                return this.mainTexture;
+                return this.mainTextures?[0];
+            }
+        }
+        public List<Texture2D> MainTextures {
+            set {
+                this.mainTextures = value;
+                while (this.materials.Count < this.mainTextures.Count)
+                    this.materials.Add(new(this.materials[0]));
+                for (int i = 0; i < this.mainTextures.Count; i++) {
+                    this.materials[i].mainTexture = this.mainTextures[i];
+                }
+                this.mrDefaultMesh.SetSharedMaterials(this.materials);
+            }
+            get {
+                return this.mainTextures;
             }
         }
 
@@ -56,8 +83,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
             }
         }
 
+        private MeshGameObject() {
+            this.materials = new();
+            this.mainTextures = new();
+        }
         public MeshGameObject(GameObject goParent, string name, GameObject goPrefab,
-                int? layer = null, bool useColliders = false, bool shareCollisionMesh = false) {
+                int? layer = null, bool useColliders = false, bool shareCollisionMesh = false) : this() {
             goParent.SetActive(false);
             this.goItem = goParent.TryFindOrAddByName(name, goPrefab);
             if (layer != null)
@@ -102,10 +133,14 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 Mesh.DestroyImmediate(this.mainMesh, true);
             if (this.collisionMesh)
                 Mesh.DestroyImmediate(this.collisionMesh, true);
-            if (this.mainTexture)
-                Texture2D.DestroyImmediate(this.mainTexture, true);
-            if (this.material)
-                Material.DestroyImmediate(this.material, true);
+            if (this.mainTextures != null && this.mainTextures.Count > 0)
+                for (int i = this.mainTextures.Count - 1; i >= 0; i--)
+                    if (this.mainTextures[i])
+                        Texture2D.DestroyImmediate(this.mainTextures[i], true);
+            if (this.materials != null && this.materials.Count > 0)
+                for (int i = this.materials.Count - 1; i >= 0; i--)
+                    if (this.materials[i])
+                        Material.DestroyImmediate(this.materials[i], true);
             if (this.goItem)
                 GameObject.DestroyImmediate(this.goItem, true);
 #else
@@ -113,10 +148,14 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Geometry {
                 Mesh.Destroy(this.mainMesh);
             if (this.collisionMesh)
                 Mesh.Destroy(this.collisionMesh);
-            if (this.mainTexture)
-                Texture2D.Destroy(this.mainTexture);
-            if (this.material)
-                Material.Destroy(this.material);
+            if (this.mainTextures != null && this.mainTextures.Count > 0)
+                for (int i = this.mainTextures.Count - 1; i >= 0; i--)
+                    if (this.mainTextures[i])
+                        Texture2D.Destroy(this.mainTextures[i]);
+            if (this.materials != null && this.materials.Count > 0)
+                for (int i = this.materials.Count - 1; i >= 0; i--)
+                    if (this.materials[i])
+                        Material.Destroy(this.materials[i]);
             if (this.goItem)
                 GameObject.Destroy(this.goItem);
 #endif
