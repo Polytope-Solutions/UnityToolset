@@ -14,7 +14,7 @@ using UnityEngine.Playables;
 namespace PolytopeSolutions.Toolset.Animations.Avatar {
     public class AvatarAnimationSystem {
         private readonly MonoBehaviour owner;
-        
+
         private readonly PlayableGraph animationGraph;
         private AnimationMixerPlayable coreAnimationMixer;
         private AnimationLayerMixerPlayable layerAnimationMixer;
@@ -56,11 +56,11 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
         private Coroutine currentActionBlendCoroutine;
         #else
         #endif
-        
+
         ///////////////////////////////////////////////////////////////////////
         #region MAIN
-        public AvatarAnimationSystem(MonoBehaviour owner, 
-                AvatarAnimationSystemAvatarAnimationSettings avatarAnimationSettings, 
+        public AvatarAnimationSystem(MonoBehaviour owner,
+                AvatarAnimationSystemAvatarAnimationSettings avatarAnimationSettings,
                 AvatarAnimationSystemAvatarAudioSettings avatarAudioSettings) {
             this.owner = owner;
             this.animationGraph = PlayableGraph.Create("AvatarAnimationSystem");
@@ -140,7 +140,7 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
         #endregion
         ///////////////////////////////////////////////////////////////////////
         #region ANIMATION_MOVEMENT
-        public void UpdateMovement(Vector3 velocity, float maxSpeed) { 
+        public void UpdateMovement(Vector3 velocity, float maxSpeed) {
             float weight = Mathf.InverseLerp(0f, maxSpeed, velocity.magnitude);
             this.movementAnimationMixer.SetInputWeight(
                 AvatarAnimationSystem.ANIMATION_MOVEMENT_IDLE_INPUT, AvatarAnimationSystem.FULLWEIGHT - weight
@@ -156,7 +156,7 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
             if (this.actionPlayable.IsValid() && this.actionPlayable.GetAnimationClip() == actionSettings.ActionClip)
                 return;
             InteruptAction();
-            
+
             // Animation
             this.actionPlayable = AnimationClipPlayable.Create(this.animationGraph, actionSettings.ActionClip);
             this.layerAnimationMixer.ConnectInput(
@@ -164,7 +164,7 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
             );
             this.layerAnimationMixer.SetLayerMaskFromAvatarMask((uint)AvatarAnimationSystem.ANIMATION_LAYER_ACTION_INPUT, actionSettings.ActionAvatarMask);
             // Speech
-            if (this.coreAudioMixer.IsValid() && actionSettings.SpeechAudioClip != null) { 
+            if (this.coreAudioMixer.IsValid() && actionSettings.SpeechAudioClip != null) {
                 this.speechAudioPlayable = AudioClipPlayable.Create(this.animationGraph, actionSettings.SpeechAudioClip, false);
                 this.coreAudioMixer.ConnectInput(
                     AvatarAnimationSystem.AUDIO_CORE_SPEECH_INPUT, this.speechAudioPlayable, AvatarAnimationSystem.AUDIO_SPEECH_OUTPUT, AvatarAnimationSystem.NOWEIGHT

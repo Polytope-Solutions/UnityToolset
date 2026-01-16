@@ -8,7 +8,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
             if (this.autoSetOnAwake)
                 SetFrameRate();
         }
-        public void SetFrameRate() 
+        public void SetFrameRate()
             => FrameRateSetter.SetFrameRate(this.targetFrameRate);
         public static void SetFrameRate(int targetFrameRate) {
             Application.targetFrameRate = targetFrameRate;

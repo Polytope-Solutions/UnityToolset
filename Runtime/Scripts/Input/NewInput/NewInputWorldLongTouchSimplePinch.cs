@@ -28,7 +28,7 @@ namespace PolytopeSolutions.Toolset.Input {
             return true;
         }
         #endregion
-        
+
         #region HANDLERS
         public void HandleStarted(InputAction.CallbackContext input) {
             #if DEBUG2
@@ -87,7 +87,7 @@ namespace PolytopeSolutions.Toolset.Input {
         }
         private void EndInteraction() {
             this.isStarted = false;
-            if (this.resetOnRelease) 
+            if (this.resetOnRelease)
                 this.onPinch?.Invoke(0);
             this.onEnded?.Invoke();
             #if DEBUG2

@@ -21,16 +21,16 @@ namespace PolytopeSolutions.Toolset.Input {
         private void OnInteracting(RaycastHit hitInfo) {
             if (this.isReset) {
                 this.startingReference = hitInfo.point - transform.position;
-                if (this.fixUpDirection) 
+                if (this.fixUpDirection)
                     this.startingReference = this.startingReference.DoubleCross(this.upDirection);
                 this.startingRotation = transform.rotation;
                 this.isReset = false;
                 return;
             }
             Vector3 currentReference = hitInfo.point - transform.position;
-            if (this.fixUpDirection) 
+            if (this.fixUpDirection)
                 currentReference = currentReference.DoubleCross(this.upDirection);
-            transform.rotation 
+            transform.rotation
                 = Quaternion.FromToRotation(this.startingReference, currentReference) * this.startingRotation;
         }
 

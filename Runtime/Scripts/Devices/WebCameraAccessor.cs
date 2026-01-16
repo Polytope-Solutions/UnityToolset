@@ -47,7 +47,7 @@ namespace PolytopeSolutions.Toolset.Devices {
                 this.webCameraStatusChangeCallbacks[cameraIndex] -= callback;
         }
 
-        public bool IsPlaying(int index) 
+        public bool IsPlaying(int index)
             => this.IsPresent(index) && this.webCamTextures[index].isPlaying;
         public bool IsPresent(int index)
             => this.HasCameras ? this.webCamTextures.ContainsKey(index) : false;
@@ -76,13 +76,13 @@ namespace PolytopeSolutions.Toolset.Devices {
                 this.Log($"Webcams found {this.cameras.Length}");
                 #endif
                 #if DEBUG2
-                for (int cameraIndex = 0; cameraIndex < this.cameras.Length; cameraIndex++) 
+                for (int cameraIndex = 0; cameraIndex < this.cameras.Length; cameraIndex++)
                     this.Log($"\tCamera name: {this.cameras[cameraIndex].name}: kind: {this.cameras[cameraIndex].kind}, front facing: {this.cameras[cameraIndex].isFrontFacing}"
-                        + ((this.cameras[cameraIndex].availableResolutions != null) 
+                        + ((this.cameras[cameraIndex].availableResolutions != null)
                             ? $", resolutions: [{string.Join(",",this.cameras[cameraIndex].availableResolutions.Select(item => $"{item.width.ToString()}:{item.height.ToString()}"))}]" : string.Empty)
                     );
                 #endif
-                for (int cameraIndex = 0; cameraIndex < this.cameras.Length; cameraIndex++) 
+                for (int cameraIndex = 0; cameraIndex < this.cameras.Length; cameraIndex++)
                     if (!this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
                         this.webCameraStatusChangeCallbacks.Add(cameraIndex, null);
             }
@@ -101,16 +101,16 @@ namespace PolytopeSolutions.Toolset.Devices {
         #endregion
         #region CAMERA_CONTROLS
         public void StartCameraTexture(int cameraIndex, Action OnTextureReady=null) {
-            if (!this.HasCameras) { 
+            if (!this.HasCameras) {
                 this.LogError("No cameras found");
                 return;
             }
-            if (cameraIndex < 0 || cameraIndex >= this.cameras.Length) { 
+            if (cameraIndex < 0 || cameraIndex >= this.cameras.Length) {
                 this.LogError($"Camera index {cameraIndex} is out of range");
                 return;
             }
 
-            if (!this.webCamTextures.ContainsKey(cameraIndex)) { 
+            if (!this.webCamTextures.ContainsKey(cameraIndex)) {
                 WebCamTexture texture = new WebCamTexture();
                 texture.deviceName = this.cameras[cameraIndex].name;
                 texture.filterMode = FilterMode.Trilinear;

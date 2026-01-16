@@ -13,4 +13,3 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
 		}
 	}
 }
-

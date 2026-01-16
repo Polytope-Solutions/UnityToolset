@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace PolytopeSolutions.Toolset.Animations.Avatar { 
+namespace PolytopeSolutions.Toolset.Animations.Avatar {
     public class AvatarActionProvider : MonoBehaviour {
         [SerializeField] private AvatarAnimationController aniamationController;
         [SerializeField] private AvatarAnimationSystemActionAnimationSettings actionSettings;
@@ -12,7 +12,7 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
             this.actionSettings.UnloadData();
         }
 
-        public void TriggerAction() { 
+        public void TriggerAction() {
             this.aniamationController.SetAction(this.actionSettings);
         }
     }

@@ -6,9 +6,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
         public BinaryTreeNode<T> Root { get; private set; } = null;
 
         public void Add(T value) {
-            if (this.Root == null) 
+            if (this.Root == null)
                 this.Root = new BinaryTreeNode<T>(value);
-            else 
+            else
                 this.Root.Add(value);
         }
         public void Remove(T value) {
@@ -26,15 +26,15 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
 
         public void Add(T newValue) {
             if (newValue.CompareTo(this.Value) < 0) {
-                if (this.Left == null) 
+                if (this.Left == null)
                     this.Left = new BinaryTreeNode<T>(newValue);
-                else 
+                else
                     this.Left.Add(newValue);
             }
             else if (newValue.CompareTo(this.Value) > 0) {
-                if (this.Right == null) 
+                if (this.Right == null)
                     this.Right = new BinaryTreeNode<T>(newValue);
-                else 
+                else
                     this.Right.Add(newValue);
             }
             // Ignore if equals to have only unique items.
@@ -79,7 +79,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
             }
             else if (this.Left != null && value.CompareTo(this.Value) < 0) {
                 // Left might have the item
-                if (this.Left.Remove(value)) 
+                if (this.Left.Remove(value))
                     this.Left = null;
             }
             else if (this.Right != null && value.CompareTo(this.Value) < 0) {

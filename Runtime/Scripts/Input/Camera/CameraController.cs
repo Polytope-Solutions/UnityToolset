@@ -45,7 +45,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 return Mathf.InverseLerp(this.targetDistanceRange.x, this.targetDistanceRange.y, distance);
             }
         }
-        public Vector3 TargetPositionClamped { 
+        public Vector3 TargetPositionClamped {
             get {
                 Vector3 lookDirection = this.tTargetProxy.position - this.tCameraProxy.position;
                 float distance = lookDirection.magnitude;

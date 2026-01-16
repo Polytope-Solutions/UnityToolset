@@ -19,7 +19,7 @@ namespace PolytopeSolutions.Toolset.Devices {
         protected virtual bool IsAutoStart => this.autoStart;
 
         protected virtual void Awake() {
-            if (this.rawImage) { 
+            if (this.rawImage) {
                 this.rawImageRectTransform = this.rawImage.GetComponent<RectTransform>();
                 this.originalSize = new Vector2(this.rawImageRectTransform.rect.width, this.rawImageRectTransform.rect.height);
             }
@@ -42,7 +42,7 @@ namespace PolytopeSolutions.Toolset.Devices {
             if (this.rawImage)
                 this.rawImage.texture = null;
         }
-        protected override void OnTextureInitialized() { 
+        protected override void OnTextureInitialized() {
             UpdateRawImage();
         }
         private void UpdateRawImage() {

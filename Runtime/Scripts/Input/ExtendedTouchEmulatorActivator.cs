@@ -55,12 +55,12 @@ namespace PolytopeSolutions.Toolset.Input {
 
             if (this.isStartingInteraction){
                 bool isPointerOverUI = (InputManager.Instance) ? this.IsPointerOverUI : EventSystem.current.IsPointerOverGameObject();
-                if (this.IsInteractorEnabled && isPointerOverUI) { 
+                if (this.IsInteractorEnabled && isPointerOverUI) {
                     InputSystem.DisableDevice(this.extentdedTouch);
                 }
                 this.isStartingInteraction = false;
             }
-            if (this.isEndingInteraction) { 
+            if (this.isEndingInteraction) {
                 if (!this.IsInteractorEnabled) {
                     InputSystem.EnableDevice(this.extentdedTouch);
                 }

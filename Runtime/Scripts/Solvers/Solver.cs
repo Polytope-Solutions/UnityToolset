@@ -62,7 +62,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             get {
                 if (this.DependsOnSolvers == null) return true;
                 bool state = true;
-                this.DependsOnSolvers.ForEach(solver => 
+                this.DependsOnSolvers.ForEach(solver =>
                     state &= solver.FlagSolutionFinished
                 );
                 return state;
@@ -160,10 +160,10 @@ namespace PolytopeSolutions.Toolset.Solvers {
         [ContextMenu("SolveOneTime")]
         public virtual void OneTimeSolve() {
             OnSolutionReset();
-            if (this.flagLiveUpdate) { 
+            if (this.flagLiveUpdate) {
                 this.solution.FlagSolutionActiveInternal = true;
             }
-            else { 
+            else {
                 PrepareSolve();
                 this.solution.FlagSolutionActiveInternal = true;
                 this.selectSolutionCoroutine = StartCoroutine(SelectSolutionOnce());
@@ -196,13 +196,13 @@ namespace PolytopeSolutions.Toolset.Solvers {
                 cycleCount++;
             } while (!finished);
             #if DEBUG2
-            this.Log($"Selection: Time for Solver: {(DateTime.Now - tempTimeStart).TotalSeconds.ToString("F3")}" 
+            this.Log($"Selection: Time for Solver: {(DateTime.Now - tempTimeStart).TotalSeconds.ToString("F3")}"
                 + $". cycles attemted: {cycleCount}");
             #endif
             FinishSolve();
             yield return null;
         }
-        private IEnumerator ContinuousSolve() { 
+        private IEnumerator ContinuousSolve() {
             yield return null;
             #if DEBUG
             this.Log("Starting Continuous Solve");
@@ -215,7 +215,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
                     while (!this.flagDebugNextStep)
                         yield return null;
                     this.flagDebugNextStep = false;
-                } else 
+                } else
                     yield return null;
 
                 bool finished = this.solution.TickMain(this.randomizer, this.inputController);
@@ -230,9 +230,9 @@ namespace PolytopeSolutions.Toolset.Solvers {
             #if DEBUG
             this.Log($"Solution Finished: {this.solution.SolutionLog}");
             #endif
-            if (this.solution.FlagSolutionSuccess) 
+            if (this.solution.FlagSolutionSuccess)
                 this.OnSolutionSucces?.Invoke();
-            else 
+            else
                 this.OnSolutionFail?.Invoke();
         }
         #endregion
@@ -246,7 +246,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
                 Invoke("Solve", 0.05f); // Delay to allow for cleanup.
         }
         public virtual void OneTimeClear() {
-            if (!this.flagLiveUpdate && this.selectSolutionCoroutine != null) 
+            if (!this.flagLiveUpdate && this.selectSolutionCoroutine != null)
                 StopCoroutine(this.selectSolutionCoroutine);
 
             if (this.solution != null)
@@ -295,7 +295,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
             this.flagAutoUpdateSeed = false;
         }
         protected void UpdateSeed(string _seed = null) {
-            if (this.flagAutoUpdateSeed) { 
+            if (this.flagAutoUpdateSeed) {
                 this.seed = DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss:fff");
             }
             this.randomizer = new System.Random(this.seed.GetHashCode());

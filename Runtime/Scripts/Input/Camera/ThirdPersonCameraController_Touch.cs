@@ -211,7 +211,7 @@ namespace PolytopeSolutions.Toolset.Input {
             secondaryTouchCurrentGamePosition = secondaryTouchRay.GetPoint(distance);
             differenceCurrent = secondaryTouchCurrentGamePosition - primaryTouchCurrentGamePosition;
 
-            // 
+            //
             float currentMagnitude = differenceCurrent.magnitude;
             float previousMagnitude = differencePrevious.magnitude;
             if (currentMagnitude != 0 && previousMagnitude != 0) {

@@ -26,7 +26,7 @@ namespace PolytopeSolutions.Toolset.UI {
         }
 
         public virtual void Activate(UIState previous=null, bool immediate = false) {
-            if (!this.isActive) { 
+            if (!this.isActive) {
                 #if DEBUG2
                 this.Log($"Activating {this.name}");
                 #endif
@@ -34,7 +34,7 @@ namespace PolytopeSolutions.Toolset.UI {
             }
         }
         public virtual void Deactivate(UIState previous=null, bool immediate = false) {
-            if (this.isActive) { 
+            if (this.isActive) {
                 #if DEBUG2
                 this.Log($"Deactivating {this.name}");
                 #endif

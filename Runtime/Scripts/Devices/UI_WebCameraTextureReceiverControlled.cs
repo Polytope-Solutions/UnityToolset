@@ -11,7 +11,7 @@ using PolytopeSolutions.Toolset.GlobalTools.Generic;
 namespace PolytopeSolutions.Toolset.Devices {
     // TODO: make it react to screen resizing
     public class UI_WebCameraTextureReceiverControlled : UI_WebCameraTextureReceiver {
-        protected override bool IsAutoRequest 
+        protected override bool IsAutoRequest
             => ((this.streamControl == null || !this.streamControl.IsValid) && base.IsAutoRequest) || this.streamControl.IsAutoRequest;
         protected override bool IsAutoStart
             => ((this.streamControl == null || !this.streamControl.IsValid) && base.IsAutoStart) || this.streamControl.IsAutoStart;
@@ -57,17 +57,17 @@ namespace PolytopeSolutions.Toolset.Devices {
             public void Initialize(Action onRequest, Action<int> onSelectCamera, Action onStart, Action onPause, Action onStop) {
                 if (this.requestCameraAccessButton)
                     this.requestCameraAccessButton.onClick.AddListener(() => onRequest?.Invoke());
-                
+
                 if (this.cameraSelectorDropdown) {
                     this.cameraSelectorDropdown.ClearOptions();
                     this.cameraSelectorDropdown.onValueChanged.AddListener(value => onSelectCamera?.Invoke(value-1));
                 }
-                
+
                 if (this.startStreamButton)
                     this.startStreamButton.onClick.AddListener(() => onStart?.Invoke());
                 if (this.pauseStreamButton)
                     this.pauseStreamButton.onClick.AddListener(() => onPause?.Invoke());
-                if (this.stopStreamButton) 
+                if (this.stopStreamButton)
                     this.stopStreamButton?.onClick.AddListener(() => onStop?.Invoke());
 
                 if (!this.startStreamButton && this.pauseStreamButton && this.stopStreamButton)
@@ -127,15 +127,15 @@ namespace PolytopeSolutions.Toolset.Devices {
                 // cameras not available, start stream mode.
                 this.streamControl.SetState(false, false, false, false);
             }
-            else { 
+            else {
                 this.streamControl.SetActive(false);
             }
             base.Awake();
         }
 
-        protected override void OnCamerasConnected() { 
+        protected override void OnCamerasConnected() {
             base.OnCamerasConnected();
-            if (this.streamControl.IsValid) { 
+            if (this.streamControl.IsValid) {
                 this.streamControl.ResetOptions(WebCameraAccessor.Instance.CameraNames);
                 if (this.IsAutoStart)
                     this.streamControl.SetState(true, false, true, true);

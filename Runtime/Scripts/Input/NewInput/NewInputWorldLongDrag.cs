@@ -51,7 +51,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 horizontal = Mathf.Sign(horizontal) * Mathf.InverseLerp(
                     0, limit,
                     Mathf.Abs(horizontal)
-                ); 
+                );
                 limit = Mathf.Min(Screen.height - Mathf.Abs(this.startPosition.y), Mathf.Abs(this.startPosition.y));
                 vertical = Mathf.Sign(vertical) * Mathf.InverseLerp(
                     0, limit,
@@ -67,7 +67,7 @@ namespace PolytopeSolutions.Toolset.Input {
             #if DEBUG2
             this.Log($"WorldLongDrag Ended");
             #endif
-            if (this.resetOnRelease) { 
+            if (this.resetOnRelease) {
                 this.onDragHorizontal?.Invoke(0);
                 this.onDragVertical?.Invoke(0);
             }

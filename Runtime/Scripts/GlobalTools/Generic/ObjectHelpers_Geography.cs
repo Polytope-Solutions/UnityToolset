@@ -7,7 +7,7 @@ using static PolytopeSolutions.Toolset.GlobalTools.Generic.ObjectHelpers;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
     public static class Geography {
-        /* 
+        /*
             * Supported coordinate systems:
             *  - Geo coordinates (horizontal: longitude, and vertical: latitude, noth in fractional degrees);
             *  - Geo tile (zoom level ordered tiles used for slippy map APIs);
@@ -25,12 +25,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             *  - Spherical game coordinates (in absolute orientation with 0,0 being -forward axis);
             *  - Game UVs;
             *      NB! UVs follow convention of bottom-left as 0,0 and top-right as 1,1.
-            *  
+            *
             *  All intermediate conversions account for axis flips and offsets.
-            *  
+            *
             *  Additionally has:
             *  - Extra constatnts for geo-related calculations.
-            *  
+            *
             *  TODO: further reduce cross-calls between converters.
             *  TODO: switch to using doubles for all coordinates.
             */

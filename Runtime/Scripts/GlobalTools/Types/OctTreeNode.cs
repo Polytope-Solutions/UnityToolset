@@ -52,7 +52,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
                         child = tree[this.children[i]];
                         if (child.range.Intesects(elementRelativeRange))
                             child.AddElement(tree, element, elementRelativeRange);
-                    } 
+                    }
                     return;
                 }
                 // Otherwise try to add
@@ -101,7 +101,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
                 // Otherwise try to remove
                 this.elements.Remove(element);
                 // TODO: Check if this is needed
-                //// if doesn't contain elements - maybe try to merge 
+                //// if doesn't contain elements - maybe try to merge
                 //if (this.elements.Count == 0)
                 //    tree[this.parent].TryMerge(tree);
             }

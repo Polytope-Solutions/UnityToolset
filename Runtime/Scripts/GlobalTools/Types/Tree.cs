@@ -29,14 +29,14 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
             #if DEBUG2
             bool parentPresent = false;
             #endif
-            if (_itemNode.ParentHash != null && HasNode(_itemNode.ParentHash.Value)) { 
+            if (_itemNode.ParentHash != null && HasNode(_itemNode.ParentHash.Value)) {
                 T _parentNode = GetNode(_itemNode.ParentHash.Value);
                 _itemNode.SetParent(_parentNode);
                 _parentNode.AddChild(_itemNode);
                 #if DEBUG2
                 parentPresent = true;
                 #endif
-            } else 
+            } else
                 this.roots.Add(_itemNode);
             // Check if children are present and set their parent
             #if DEBUG2

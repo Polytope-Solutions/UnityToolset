@@ -13,7 +13,7 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
             this.audioClips = audioClips;
             this.audioSourceReference = new ExposedReference<AudioSource> {
                 defaultValue = audioSource
-            }; 
+            };
         }
 
         public override void OnGraphStart(Playable playable) {

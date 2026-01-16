@@ -41,7 +41,7 @@ namespace PolytopeSolutions.Toolset.Input {
         #endregion
         #region HANDLERS
         public void HandleStarted(InputAction.CallbackContext input) {
-            foreach (INewInputHandler handler in this.currentHandlers) 
+            foreach (INewInputHandler handler in this.currentHandlers)
                 handler?.HandleStarted(input);
         }
         public void HandlePerformed(InputAction.CallbackContext input) {

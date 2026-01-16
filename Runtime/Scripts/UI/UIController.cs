@@ -15,7 +15,7 @@ namespace PolytopeSolutions.Toolset.UI {
         private int currentStateIndex = -1;
 
         private T this[int index] {
-            get { 
+            get {
                 index = Mathf.Clamp(index, 0, this.Count-1);
                 return this.states[index];
             }
@@ -26,7 +26,7 @@ namespace PolytopeSolutions.Toolset.UI {
                 return this.states[index];
             return null;
         }
-        protected int GetStateIndexByID(string stateID) { 
+        protected int GetStateIndexByID(string stateID) {
             return this.states.FindIndex(item => item.StateID == stateID);
         }
         public int Count => this.states.Count;
@@ -47,7 +47,7 @@ namespace PolytopeSolutions.Toolset.UI {
             if (UIManager.Instance.RegisterController(this.controllerID, this.interactions)
                 && this.autoSetFirstStateOnStart)
                 SetInitialState();
-            if (EventManager.Instance != null) { 
+            if (EventManager.Instance != null) {
                 EventManager.Instance.RegisterEvenetCallback(UIManager.NEXT_STATE_EVENTKEY, Next);
             }
         }
@@ -69,7 +69,7 @@ namespace PolytopeSolutions.Toolset.UI {
                 UIManager.Instance.LogSwitchUIState(this.controllerID, this.CurrentStateID);
             }
         }
-        private void SetInitialState() 
+        private void SetInitialState()
             => SetInitialState(0);
         protected void SetInitialState(int index) {
                 for (int i = 0; i < this.states.Count; i++) {

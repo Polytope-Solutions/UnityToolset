@@ -19,7 +19,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.UI {
 		private int currentIndex = 0;
 		private bool filled;
 		private float averageFPS {
-			get { 
+			get {
 				float sum = 0;
 				int count = (this.filled) ? this.bufferSize : this.currentIndex;
 				for (int i = 0; i < count; i++)

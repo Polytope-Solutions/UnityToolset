@@ -65,7 +65,7 @@ namespace Lifeverse.AdaptiveEnvironment.Editor {
             if (File.Exists(Path.Combine(desktopPath, "Build", mobileBuildName + ".data")))
                 FileUtil.DeleteFileOrDirectory(Path.Combine(desktopPath, "Build", mobileBuildName + ".data"));
             FileUtil.CopyFileOrDirectory(
-                Path.Combine(mobilePath, "Build", mobileBuildName + ".data"), 
+                Path.Combine(mobilePath, "Build", mobileBuildName + ".data"),
                 Path.Combine(desktopPath, "Build", mobileBuildName + ".data")
             );
 

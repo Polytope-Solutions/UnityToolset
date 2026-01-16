@@ -18,7 +18,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
 				return _instance;
 			}
 		}
-		protected virtual void Awake() { 
+		protected virtual void Awake() {
 			if (!Instance)
                 this.LogWarning("No instance of found in scene.");
         }

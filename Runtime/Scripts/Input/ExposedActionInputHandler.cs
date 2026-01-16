@@ -32,13 +32,13 @@ namespace PolytopeSolutions.Toolset.Input {
             return IsRelevantHandler((RaycastHit)data);
         }
         // if at the moment of press, this handler is being hovered over
-        void IInputHandler.OnInteractionStarted() { 
+        void IInputHandler.OnInteractionStarted() {
             #if DEBUG2
             this.Log($"Interaction started");
             #endif
             this.onInteractionStarted?.Invoke();
         }
-        void IInputHandler.OnInteractionPerformed(object data) { 
+        void IInputHandler.OnInteractionPerformed(object data) {
             #if DEBUG2
             this.Log($"Ray hit: {hitinfo.transform.gameObject.name}");
             #endif

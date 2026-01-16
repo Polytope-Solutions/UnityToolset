@@ -21,7 +21,7 @@ namespace PolytopeSolutions.Toolset.Input {
         public void Init() {}
         public bool IsApplicable(InputAction.CallbackContext input) {
             this.activeReceiver = null;
-            if (NewInputManager.Instance.IsOverUI(out List<RaycastResult> raycastResults)) { 
+            if (NewInputManager.Instance.IsOverUI(out List<RaycastResult> raycastResults)) {
                 IsOverExtendedUI(raycastResults);
                 return true;
             }

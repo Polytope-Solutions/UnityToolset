@@ -9,7 +9,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
         [SerializeField] protected Transform target;
 
         protected virtual void Awake() {
-            if (this.target == null) { 
+            if (this.target == null) {
                 this.LogWarning($"No target transform assigned on {gameObject.name}. Disabling SyncTransform.");
                 this.enabled = false;
             }

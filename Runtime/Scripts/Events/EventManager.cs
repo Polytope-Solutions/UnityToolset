@@ -17,12 +17,12 @@ namespace PolytopeSolutions.Toolset.Events {
                 InvokeEvent(this.pendingEvents.Dequeue());
             }
         }
-        public void InvokeEvent(string eventName) { 
+        public void InvokeEvent(string eventName) {
             if (this.events.ContainsKey(eventName)){
                 try {
                     this.events[eventName]?.Invoke();
                 }
-                catch (Exception exception) { 
+                catch (Exception exception) {
                     this.LogError($"Failed to invoke {eventName}: {exception.Message}");
                 }
             }

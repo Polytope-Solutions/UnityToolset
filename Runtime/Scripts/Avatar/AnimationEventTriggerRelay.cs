@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.Events;
 
-namespace PolytopeSolutions.Toolset.GlobalTools.Utilities { 
+namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
     public class AnimationEventTriggerRelay : MonoBehaviour {
         [SerializeField] private List<AnimationEventDescriptor> descriptors;
         [System.Serializable]

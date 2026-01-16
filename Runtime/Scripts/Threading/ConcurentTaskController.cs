@@ -31,7 +31,7 @@ namespace PolytopeSolutions.Toolset.Threading {
         private CancellationToken token;
         private SemaphoreSlim concurrencySemaphore;
 
-        public ConcurentTaskController(string _source, int _concurentCount, float _minDelay, 
+        public ConcurentTaskController(string _source, int _concurentCount, float _minDelay,
             Action<T, Action<T>> _InTaskAction) {
             this.source = _source;
             this.minDelay = _minDelay;
@@ -62,7 +62,7 @@ namespace PolytopeSolutions.Toolset.Threading {
             #if DEBUG
             this.Log($"[{this.source}]: Stopping.");
             #endif
-            if (this.tokenSource != null) { 
+            if (this.tokenSource != null) {
                 this.tokenSource.Cancel();
                 //this.tokenSource.Dispose();
             }
@@ -113,7 +113,7 @@ namespace PolytopeSolutions.Toolset.Threading {
             }
         }
 
-        public void AddRequest(T request, Action<T> _OnCompletionAction=null) { 
+        public void AddRequest(T request, Action<T> _OnCompletionAction=null) {
             #if DEBUG
             this.Log($"[{this.source}]: Adding a task");
             #endif

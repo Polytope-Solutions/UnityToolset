@@ -76,34 +76,34 @@ namespace PolytopeSolutions.Toolset.Input {
 			this.rotateLeftRightValue = context.ReadValue<float>() * this.rotateSpeed;
 			TriggerPerformInteraction();
 		}
-		private void RotateLeftRightEnded(InputAction.CallbackContext context) { 
+		private void RotateLeftRightEnded(InputAction.CallbackContext context) {
 			this.rotateLeftRightValue = 0f;
             TriggerPerformInteraction();
         }
-		private void RotateUpDownPerformed(InputAction.CallbackContext context) { 
+		private void RotateUpDownPerformed(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
 			this.rotateUpDownValue = context.ReadValue<float>() * this.rotateSpeed;
 			TriggerPerformInteraction();
 		}
-		private void RotateUpDownEnded(InputAction.CallbackContext context) { 
+		private void RotateUpDownEnded(InputAction.CallbackContext context) {
 			this.rotateUpDownValue = 0f;
             TriggerPerformInteraction();
         }
-		private void MoveLeftRightPerformed(InputAction.CallbackContext context) { 
+		private void MoveLeftRightPerformed(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
 			this.moveLeftRightValue = context.ReadValue<float>() * this.moveSpeed;
             TriggerPerformInteraction();
         }
-		private void MoveLeftRightEnded(InputAction.CallbackContext context) { 
+		private void MoveLeftRightEnded(InputAction.CallbackContext context) {
 			this.moveLeftRightValue = 0f;
             TriggerPerformInteraction();
         }
-		private void MoveUpDownPerformed(InputAction.CallbackContext context) { 
+		private void MoveUpDownPerformed(InputAction.CallbackContext context) {
             if (!this.IsInputEnabled) return;
 			this.moveUpDownValue = context.ReadValue<float>() * this.moveSpeed;
             TriggerPerformInteraction();
         }
-		private void MoveUpDownEnded(InputAction.CallbackContext context) { 
+		private void MoveUpDownEnded(InputAction.CallbackContext context) {
 			this.moveUpDownValue = 0f;
             TriggerPerformInteraction();
         }

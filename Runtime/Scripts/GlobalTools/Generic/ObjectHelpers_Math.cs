@@ -100,7 +100,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             foreach(float value in data)
                 mean += value;
             mean /= count;
-            
+
             float standardDeviation = 0;
             foreach (float value in data)
                 standardDeviation += Mathf.Pow(value - mean, 2);
@@ -114,7 +114,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             (mean, standardDeviation) = EvaluateStandardDeviation(data);
             float[] normalizedData = new float[data.Count()];
             int i = 0;
-            foreach (float value in data) 
+            foreach (float value in data)
                 normalizedData[i++] = (value - mean) / standardDeviation;
             return normalizedData;
         }

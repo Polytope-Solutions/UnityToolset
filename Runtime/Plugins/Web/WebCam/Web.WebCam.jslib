@@ -70,7 +70,7 @@
 //            )
 //        }
 //	},
-	
+
 //	///////////////////////////////////////////////////////////////////////////
 //    WebCamStartCustom: function(cameraName) {
 //        WebWebCam.WebCamStartCustom(cameraName);

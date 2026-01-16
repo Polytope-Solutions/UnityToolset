@@ -28,7 +28,7 @@ namespace PolytopeSolutions.Toolset.Input {
             this.sourceCamera = Camera.main;
             Collider[] colliders = GetComponentsInChildren<Collider>();
             this.initialLayers.Clear();
-            foreach (Collider collider in colliders) 
+            foreach (Collider collider in colliders)
                 this.initialLayers.Add(collider, collider.gameObject.layer);
         }
         #region HANDLERS

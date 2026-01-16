@@ -10,11 +10,11 @@ using System.Linq;
 namespace PolytopeSolutions.Toolset.Files {
     public class OBJHandler {
         public static void Encode(string name, Transform[] transforms, Mesh[] meshes,
-                out string meshData, out string materialData, 
+                out string meshData, out string materialData,
                 string[] names = null, Material[] materials = null,
-                bool saveUVs=true, bool saveNormals=true, bool embedTextureDetails=false) { 
+                bool saveUVs=true, bool saveNormals=true, bool embedTextureDetails=false) {
             StringBuilder meshDataBuilder = new StringBuilder(), materialDataBuilder = new StringBuilder();
-            bool useNames = ((names != null) && (names.Length == meshes.Length)), 
+            bool useNames = ((names != null) && (names.Length == meshes.Length)),
                 useMaterials = ((materials != null) && (materials.Length == meshes.Length));
             string objFileName = name + ".obj", mtlFileName = name + ".mtl";
             string numberPrecisionFormat = "F4";
@@ -53,7 +53,7 @@ namespace PolytopeSolutions.Toolset.Files {
                 meshDataBuilder.AppendLine("# Vertices.");
                 for (int j = 0; j < vertices.Count; j++, currentVertexCount++) {
                     vertices[j] = transforms[i].TransformPoint(vertices[j]);
-                    meshDataBuilder.AppendFormat("v {0} {1} {2}", 
+                    meshDataBuilder.AppendFormat("v {0} {1} {2}",
                         (-vertices[j].x).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), (vertices[j].y).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat), (vertices[j].z).ToString(numberPrecisionFormat, CultureInfo.InvariantCulture.NumberFormat));
                     meshDataBuilder.AppendLine();
                 }
@@ -62,11 +62,11 @@ namespace PolytopeSolutions.Toolset.Files {
                     channelCount = 0;
                     meshDataBuilder.AppendLine("# UVs.");
                     bool foundAny = false;
-                    int c = 0; { 
+                    int c = 0; {
                     //for (int c = 0; c < 8; c++) {
                         List<Vector2> uvs = new List<Vector2>();
                         meshes[i].GetUVs(c, uvs);
-                        if (uvs.Count > 0) {  
+                        if (uvs.Count > 0) {
                             meshDataBuilder.AppendLine("#\tChannel " + c);
                             channelCount++;
                         }

@@ -84,7 +84,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 HandleInvalid();
             PlaceObject(this.screenRay.origin + invalidDistance * this.screenRay.direction, Vector3.up);
         }
-        private void PlaceObject(Vector3 place, Vector3 normal) { 
+        private void PlaceObject(Vector3 place, Vector3 normal) {
             this.goSpawnedObject.transform.position = place;
             this.goSpawnedObject.transform.up = normal;
         }

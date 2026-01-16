@@ -75,7 +75,7 @@ namespace PolytopeSolutions.Toolset.Input {
             if (this.currentHandlers.Contains(handler))
                 this.currentHandlers.Remove(handler);
         }
-        protected void TriggerStartInteraction() { 
+        protected void TriggerStartInteraction() {
             this.isStartingInteraction = true;
         }
         protected void TriggerPerformInteraction() {
@@ -88,7 +88,7 @@ namespace PolytopeSolutions.Toolset.Input {
             // Handle End
             if (this.isEndingInteraction) {
                 if (this.isInteracting) {
-                    if (this.CanHaveHandlers && this.activeHandlers.Count > 0) { 
+                    if (this.CanHaveHandlers && this.activeHandlers.Count > 0) {
                         this.activeHandlers.ForEach(handler => handler.OnInteractionEnded());
                         this.activeHandlers.Clear();
                         #if DEBUG2
@@ -111,7 +111,7 @@ namespace PolytopeSolutions.Toolset.Input {
             }
             // Handle Start
             if (this.isStartingInteraction) {
-                if (this.CanHaveHandlers) { 
+                if (this.CanHaveHandlers) {
                     UpdateActiveHandlers();
                     if (this.activeHandlers.Count == 0) {
                         this.isEndingInteraction = true;
@@ -120,8 +120,8 @@ namespace PolytopeSolutions.Toolset.Input {
                     this.Log($"Trying to start interaction. Active Handlers: [{this.activeHandlers.Count}].");
                     #endif
                 }
-                if ((!this.allowUIOnStart || this.IsPointerOverUI) 
-                        && TryPassStartToActiveHandlers()) { 
+                if ((!this.allowUIOnStart || this.IsPointerOverUI)
+                        && TryPassStartToActiveHandlers()) {
                     #if DEBUG2
                     this.Log($"Starting interaction.");
                     #endif
@@ -145,7 +145,7 @@ namespace PolytopeSolutions.Toolset.Input {
             }
             return false;
         }
-        private void TryPassPermormedToActiveHandlers(object data) { 
+        private void TryPassPermormedToActiveHandlers(object data) {
             if (data != null)
                 this.activeHandlers.ForEach(handler => handler.OnInteractionPerformed(data));
         }

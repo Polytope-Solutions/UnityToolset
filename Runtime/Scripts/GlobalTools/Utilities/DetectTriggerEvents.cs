@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace PolytopeSolutions.Toolset.GlobalTools.Utilities { 
+namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
     public class DetectTriggerEvents : MonoBehaviour {
         [SerializeField] private List<string> tags;
         [SerializeField] private UnityEvent onValidTriggerEnter;

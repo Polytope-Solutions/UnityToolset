@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace PolytopeSolutions.Toolset.Files {
     public class CSVHandler {
-        public abstract class CSVEntry : IEnumerable<object> { 
+        public abstract class CSVEntry : IEnumerable<object> {
             protected abstract List<object> values {
                 get;
                 set;
@@ -29,7 +29,7 @@ namespace PolytopeSolutions.Toolset.Files {
             IEnumerator IEnumerable.GetEnumerator() {
                 return this.GetEnumerator();
             }
-            public void SetValues(IEnumerable<object> _values) { 
+            public void SetValues(IEnumerable<object> _values) {
                 this.values = _values.ToList();
             }
         }

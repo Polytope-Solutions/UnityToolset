@@ -2,6 +2,19 @@
 
 ---
 
+## 0.0.76
+
+2026-01-16
+
+-	Rig:
+	-	Pull out generic Rig structure;
+	-	Expand Third Person Rig template
+	-	Introduce First Person Rig template;
+	-	Introduce Rig State Value types to streamline State composition;
+-	Fix white space warnings in git;
+
+---
+
 ## 0.0.75
 
 2025-10-30
@@ -15,7 +28,7 @@
 2025-10-30
 
 -	Helper function for Vector3Doube to double array converstion;
-	
+
 ---
 
 ## 0.0.73
@@ -84,7 +97,7 @@
 -	Create generic Rolling Average structure;
 -	Allow the world touch to have dynamic touch plane and expose private camera property for overrides;
 -	Add mini tool to show cursor in editor;
-	
+
 ---
 
 ## 0.0.66
@@ -107,7 +120,7 @@
 -	Expand NavMesh structure:
 	-	try to generalize navmesh controller to allow for multiple walkable build sources;
 	-	start to abstract away the structure to allow for inherited alterations;
-	
+
 ---
 
 ## 0.0.64
@@ -139,7 +152,7 @@
 -	Fix curve offsetiing to handle curves better;
 -	Expose Camera controller ZoomDistanceRanges to be able to override in derived classes;
 -	Add default dummy network certificate handler;
-	
+
 ---
 
 ## 0.0.61
@@ -682,7 +695,7 @@
 2023-11-15
 
 -	Introduce Concurrent Task Controller for threaded operations with limited amount of sub-tasks;
--	Expand Scene Manager Extender: 	
+-	Expand Scene Manager Extender:
 	-	Improve order of operations;
 	-	Simplify callbacks;
 	-	Introduce blocking coroutine for scene Setup;
@@ -699,7 +712,7 @@
 2023-11-13
 
 -	Fix Scene loading for builds (didn't waot enough time to load scene before setting it active);
--	Redo Geography converters: 	
+-	Redo Geography converters:
 	-	Switch to fractional tile indices encoding UVs directly;
 	-	Simplify and minimize cross calls;
 	-	Improve precision;
@@ -851,7 +864,7 @@
 
 ## 0.0.2
 
--	Add basic Unity Object extensions in ObjectHelpers_UnityObjects: 
+-	Add basic Unity Object extensions in ObjectHelpers_UnityObjects:
 	-	TryFind a component;
 	-	Actiavate/Deactivate children;
 	-	TryFind GameObject in gameObject;

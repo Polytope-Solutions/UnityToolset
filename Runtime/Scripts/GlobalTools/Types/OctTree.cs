@@ -51,7 +51,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
             this.root.RemoveElement(this, element, elementRelativeRange.Value);
         }
 
-        public void EvaluateRange(SpatialRange range, ref HashSet<object> objects) { 
+        public void EvaluateRange(SpatialRange range, ref HashSet<object> objects) {
             this.root.EvaluateRange(this, range, ref objects);
         }
 

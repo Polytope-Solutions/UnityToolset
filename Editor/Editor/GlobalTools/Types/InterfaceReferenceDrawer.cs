@@ -19,10 +19,10 @@ namespace PolytopeSolutions.Toolset.Editor.GlobalTools {
 
             EditorGUI.BeginProperty(position, label, property);
             UnityEngine.Object assignedObject = EditorGUI.ObjectField(position, label, internalProperty.objectReferenceValue, typeof(UnityEngine.Object), true);
-            if (assignedObject == null) 
+            if (assignedObject == null)
                 internalProperty.objectReferenceValue = null;
             else {
-                if (assignedObject is GameObject goItem) 
+                if (assignedObject is GameObject goItem)
                     ValidateAndAssignObject(internalProperty, goItem.GetComponent(args.interfaceType), goItem.name, args.interfaceType.Name);
                 else
                     ValidateAndAssignObject(internalProperty, assignedObject, args.interfaceType.Name);

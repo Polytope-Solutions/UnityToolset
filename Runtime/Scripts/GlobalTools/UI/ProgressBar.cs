@@ -15,7 +15,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.UI {
         private float currentProgress;
         private float currentVelocity;
 
-        private void Update() { 
+        private void Update() {
             this.currentProgress = Mathf.SmoothDamp(this.currentProgress, this.targetProgress, ref this.currentVelocity, this.smoothDuration);
             this.progressBarImage.fillAmount = this.currentProgress;
         }

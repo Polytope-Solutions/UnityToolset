@@ -28,7 +28,7 @@ namespace PolytopeSolutions.Toolset.Input {
         [FieldOffset(0 * sizeof(float))]
         public float singleFingerLeft;
         [InputControl(displayName = "Right Single Finger Touch", layout = "Analog", parameters = parameters)]
-        [FieldOffset(1 * sizeof(float))] 
+        [FieldOffset(1 * sizeof(float))]
         public float singleFingerRight;
         [InputControl(displayName = "Up Single Finger Touch", layout = "Analog", parameters = parameters)]
         [FieldOffset(2 * sizeof(float))]
@@ -125,7 +125,7 @@ namespace PolytopeSolutions.Toolset.Input {
             base.FinishSetup();
         }
         public void BindActions() {
-            if (Touchscreen.current != null) { //Mouse.current != null || 
+            if (Touchscreen.current != null) { //Mouse.current != null ||
                 InputSystem.EnableDevice(Touchscreen.current);
                 //InputSystem.EnableDevice(Mouse.current);
                 InputAction primaryContactAction = new InputAction(binding: "<Touchscreen>/touch0/press");//"<Mouse>/leftButton");//
@@ -174,7 +174,7 @@ namespace PolytopeSolutions.Toolset.Input {
                         this._secondaryFingerDelta = ctx.ReadValue<Vector2>();
                         CheckState();
                     }
-                }; 
+                };
                 secondaryDeltaAction.canceled += _ => {
                     if (this._secondaryFingerCurrentContact) {
                         this._secondaryFingerDelta = Vector2.zero;
@@ -220,44 +220,44 @@ namespace PolytopeSolutions.Toolset.Input {
                     Vector2 primaryDelta = this._primaryFingerDelta;
                     Vector2 secondaryDelta = this._secondaryFingerDelta;
                     float allignmentFactor = Vector2.Dot(primaryDelta.normalized, secondaryDelta.normalized);
-                    if (allignmentFactor > ExtendedTouch.allignmentUpThreshold) { 
+                    if (allignmentFactor > ExtendedTouch.allignmentUpThreshold) {
                         // alligned movement
                         if (primaryDelta.x < 0) {
                             this.twoFingerLeft.WriteValueIntoEvent(-primaryDelta.x, eventPtr);
                             this.twoFingerLeft.ApplyParameterChanges();
                         }
-                        else if (primaryDelta.x > 0) { 
+                        else if (primaryDelta.x > 0) {
                             this.twoFingerRight.WriteValueIntoEvent(primaryDelta.x, eventPtr);
                             this.twoFingerRight.ApplyParameterChanges();
                         }
-                        if (primaryDelta.y < 0) { 
+                        if (primaryDelta.y < 0) {
                             this.twoFingerDown.WriteValueIntoEvent(-primaryDelta.y, eventPtr);
                             this.twoFingerDown.ApplyParameterChanges();
                         }
-                        else if (primaryDelta.y > 0) { 
+                        else if (primaryDelta.y > 0) {
                             this.twoFingerUp.WriteValueIntoEvent(primaryDelta.y, eventPtr);
                             this.twoFingerUp.ApplyParameterChanges();
                         }
                     } else if (allignmentFactor < ExtendedTouch.allignmentDownThreshold) {
                         float previousDistance = Vector2.Distance(this._primaryFingerPosition-this._primaryFingerDelta, this._secondaryFingerPosition-this._secondaryFingerDelta);
                         float currentDistance = Vector2.Distance(this._primaryFingerPosition, this._secondaryFingerPosition);
-                        if (currentDistance > previousDistance) { 
+                        if (currentDistance > previousDistance) {
                             this.twoFingerZoom.WriteValueIntoEvent(currentDistance - previousDistance, eventPtr);
                             this.twoFingerZoom.ApplyParameterChanges();
                         }
-                        else if (currentDistance < previousDistance) { 
+                        else if (currentDistance < previousDistance) {
                             this.twoFingerPinch.WriteValueIntoEvent(previousDistance - currentDistance, eventPtr);
                             this.twoFingerPinch.ApplyParameterChanges();
                         }
                     }
-                } else if (this._primaryFingerCurrentContact && timeSincePrimaryTouch > this.singleTouchTimeout) { 
+                } else if (this._primaryFingerCurrentContact && timeSincePrimaryTouch > this.singleTouchTimeout) {
                     // Single finger touch
                     Vector2 primaryDelta = this._primaryFingerDelta;
                     //this.Log($"SingleTouch: {delta.ToString("F6")}");
                     float allignmentFactorHorizontal = Mathf.Abs(Vector2.Dot(primaryDelta.normalized, Vector2.left));
                     float allignmentFactorVertical = Mathf.Abs(Vector2.Dot(primaryDelta.normalized, Vector2.up));
                     float threshold = 0.5f;
-                    if (allignmentFactorHorizontal > threshold) { 
+                    if (allignmentFactorHorizontal > threshold) {
                         if (primaryDelta.x < 0) {
                             this.singleFingerRight.WriteValueIntoEvent(-primaryDelta.x, eventPtr);
                             this.singleFingerRight.ApplyParameterChanges();
@@ -267,7 +267,7 @@ namespace PolytopeSolutions.Toolset.Input {
                             this.singleFingerLeft.ApplyParameterChanges();
                         }
                     }
-                    if (allignmentFactorVertical > threshold) { 
+                    if (allignmentFactorVertical > threshold) {
                         if (primaryDelta.y < 0) {
                             this.singleFingerUp.WriteValueIntoEvent(-primaryDelta.y, eventPtr);
                             this.singleFingerUp.ApplyParameterChanges();

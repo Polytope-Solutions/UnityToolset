@@ -11,7 +11,7 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
         private MeshRenderer[] renderers;
         private bool wasValid = false;
         private void Awake() {
-            if (this.tGizmoPrefab) { 
+            if (this.tGizmoPrefab) {
                 this.tGizmo = Instantiate(this.tGizmoPrefab);
                 this.tGizmo.position = transform.position;
                 this.tGizmo.localRotation = Quaternion.identity;
@@ -24,7 +24,7 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
         public void OnValidTarget(Vector3 position) {
             if (!this.tGizmo) return;
             this.tGizmo.position = position;
-            if (!this.wasValid || !this.tGizmo.gameObject.activeSelf) { 
+            if (!this.wasValid || !this.tGizmo.gameObject.activeSelf) {
                 this.wasValid = true;
                 this.tGizmo.gameObject.SetActive(true);
                 for (int i = 0; i < this.renderers.Length; i++) {

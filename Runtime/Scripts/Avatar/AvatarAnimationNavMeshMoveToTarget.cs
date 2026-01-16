@@ -11,7 +11,7 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
     public class AvatarAnimationNavMeshMoveToTarget : MonoBehaviour, IAvatarMoveProvider {
         [SerializeField] private float proximityThreshold = 0.01f;
         [SerializeField] private float rotateSmoothTime = 0.2f;
-        
+
         private AvatarAnimationController aniamationController;
         private NavMeshAgent agent;
 
@@ -53,13 +53,13 @@ namespace PolytopeSolutions.Toolset.Animations.Avatar {
         public void OnInterruptMove() {
             if (this.prepareMoveCoroutine != null)
                 StopCoroutine(this.prepareMoveCoroutine);
-            if ((transform.position - this.targetPosition).sqrMagnitude > this.sqrProximityThreshold) 
+            if ((transform.position - this.targetPosition).sqrMagnitude > this.sqrProximityThreshold)
                 UpdateDestination(transform.position);
         }
 
         private IEnumerator PrepareMove(Vector3 targetPosition) {
             this.preplanPath.ClearCorners();
-            if (!this.agent.CalculatePath(targetPosition, this.preplanPath) || this.preplanPath.corners.Length == 0) { 
+            if (!this.agent.CalculatePath(targetPosition, this.preplanPath) || this.preplanPath.corners.Length == 0) {
                 if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, 10, NavMesh.AllAreas))
                     targetPosition = hit.position;
                 if (!this.agent.CalculatePath(targetPosition, this.preplanPath) || this.preplanPath.corners.Length == 0)

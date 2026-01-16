@@ -111,7 +111,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         }
         public class Vector3ArrayInputEntry : InputEntry<Vector3[]> {
             public Vector3ArrayInputEntry(float _smoothDuration) : base(_smoothDuration) { }
-            
+
             protected override Vector3[] CopyValue(Vector3[] value) {
                 Vector3[] newValue = new Vector3[value.Length];
                 for(int i = 0; i < value.Length; i++)
@@ -184,7 +184,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         public bool IsValueChanged(string key) => this.states[key].IsValueChanged;
         public bool IsAnyValueChanged => this.states.Any(item => item.Value.IsValueChanged);
         public object this[string key] {
-            get { 
+            get {
                 if (this.states == null || !this.states.ContainsKey(key)) {
                     this.LogError($"[{this.owner}] accessing: key [" + key + "] was not added on initialization.");
                     return null;

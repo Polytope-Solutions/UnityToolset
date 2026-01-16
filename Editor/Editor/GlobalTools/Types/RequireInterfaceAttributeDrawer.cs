@@ -16,7 +16,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             Type interfaceType = internalAttribute.interfaceType;
             EditorGUI.BeginProperty(position, label, property);
-            if (property.isArray && property.propertyType == SerializedPropertyType.Generic) 
+            if (property.isArray && property.propertyType == SerializedPropertyType.Generic)
                 DrawInterfaceCollectionObjectField(position, property, label, interfaceType);
             else
                 DrawInterfaceSingleObjectField(position, property, label, interfaceType);
@@ -61,7 +61,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools {
             property.objectReferenceValue = null;
         }
 
-        private Type GetTypeOrElementType(Type type) { 
+        private Type GetTypeOrElementType(Type type) {
             if (type.IsArray) return type.GetElementType();
             if (type.IsGenericType) return type.GetGenericArguments()[0];
             return type;

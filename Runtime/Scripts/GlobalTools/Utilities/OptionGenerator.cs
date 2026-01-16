@@ -51,8 +51,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
                 return;
             }
             int i = this.options.ToList().IndexOf(key);
-            GameObject goPrefab = (this.overrideOptions.Any(item => Equals(item.key, key))) 
-                ? this.overrideOptions.First(item => Equals(item.key, key)).goOverride 
+            GameObject goPrefab = (this.overrideOptions.Any(item => Equals(item.key, key)))
+                ? this.overrideOptions.First(item => Equals(item.key, key)).goOverride
                 : this.goOptionPrefab;
             GameObject goItem = Instantiate(goPrefab, transform);
             TValue value = GetValue(goItem);

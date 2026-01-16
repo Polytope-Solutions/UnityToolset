@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PolytopeSolutions.Toolset.Scenes {
 	public class PersistentObject : MonoBehaviour {
-		private void Awake() { 
+		private void Awake() {
 			DontDestroyOnLoad(gameObject);
 		}
 	}

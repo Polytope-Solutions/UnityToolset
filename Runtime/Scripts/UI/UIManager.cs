@@ -63,7 +63,7 @@ namespace PolytopeSolutions.Toolset.UI {
                     this.controllers.Remove(removeList[i]);
                 }
             }
-            catch { 
+            catch {
             }
         }
         public bool RegisterController(string controllerID, UIControllerInteractions interactions) {
@@ -76,7 +76,7 @@ namespace PolytopeSolutions.Toolset.UI {
             // TODO: handle with scene initialization
             // Come to a scene that is the current in the history - activate corresponding UI
             //if (this.IsValidCurrentUISceneState
-            //        && this.CurrentUISceneState.SceneName == SceneManagerExtender.Instance.CurrentSceneName 
+            //        && this.CurrentUISceneState.SceneName == SceneManagerExtender.Instance.CurrentSceneName
             //        && this.CurrentUISceneState.ControllerID == controllerID) {
             //    ActivateCurrentState();
             //    return false;

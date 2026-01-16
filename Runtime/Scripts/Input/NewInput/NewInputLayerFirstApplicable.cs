@@ -17,14 +17,14 @@ namespace PolytopeSolutions.Toolset.Input {
 
         #region MANAGEMENT
         public string Description => this.description;
-        public void Init() { 
+        public void Init() {
             for (int i = 0; i < this.handlers.Count; i++)
                 this.handlers[i].Value.Init();
         }
         public bool IsApplicable(InputAction.CallbackContext input) {
             this.currentHandler = null;
             for (int i = 0; i < this.handlers.Count; i++) {
-                if (this.handlers[i].Value.IsApplicable(input)) { 
+                if (this.handlers[i].Value.IsApplicable(input)) {
                     this.currentHandler = this.handlers[i].Value;
                     #if DEBUG2
                     this.Log($"Selected {this.currentHandler.Description}");

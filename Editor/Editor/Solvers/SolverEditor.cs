@@ -16,7 +16,7 @@ namespace PolytopeSolutions.Toolset.Editor.Solvers {
 
         public override void OnInspectorGUI() {
             DrawDefaultInspector();
-            if (GUILayout.Button("OneTimeSolve")) { 
+            if (GUILayout.Button("OneTimeSolve")) {
                 this.targetObject.OneTimeSolve();
             }
             if (GUILayout.Button("OneTimeClear"))

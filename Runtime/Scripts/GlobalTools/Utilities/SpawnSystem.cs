@@ -36,7 +36,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
 		protected void Initialize() {
 			if (string.IsNullOrEmpty(this.poolName))
 				this.poolName = gameObject.name;
-			if (string.IsNullOrEmpty(this.seed)) 
+			if (string.IsNullOrEmpty(this.seed))
 				this.seed = this.poolName + "_" + DateTime.Now.ToString();
 			this.prng = new System.Random(this.seed.GetHashCode());
 			if (this.tHolder == null) {
@@ -75,17 +75,17 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities {
 			int i = NextItem();
 			HandleSpawn(i);
 		}
-		private void HandleSpawn(int i) { 
+		private void HandleSpawn(int i) {
 			// If the item is already activated - Inform about it.
 			if (this[i].activeInHierarchy)
 				OnItemReused(i);
-			else { 
+			else {
 				// Activate and Inform about it, in any case.
 				this[i].SetActive(true);
 				OnItemSpawned(i);
 			}
 		}
-		public void DeactivateAll() { 
+		public void DeactivateAll() {
 			foreach (GameObject goItem in this.pool)
 				goItem.SetActive(false);
 		}

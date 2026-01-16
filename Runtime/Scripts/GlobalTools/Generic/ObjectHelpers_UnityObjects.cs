@@ -37,7 +37,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                 goFound = tFound.gameObject;
             }
             if (components != null)
-                foreach (Type component in components) 
+                foreach (Type component in components)
                     goFound.TryGetOrAddComponent(component);
             return goFound;
         }
@@ -52,8 +52,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                     goFound.TryGetOrAddComponent(component);
             return goFound;
         }
-        public static T TryGetOrAddComponent<T>(this GameObject gItem) 
-            where T : Component { 
+        public static T TryGetOrAddComponent<T>(this GameObject gItem)
+            where T : Component {
             return (T)gItem.TryGetOrAddComponent(typeof(T));
         }
         public static Component TryGetOrAddComponent(this GameObject gItem, Type componentType){
@@ -79,13 +79,13 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         public static T CopyComponent<T>(this GameObject goTarget, T source, bool copyFields=true, bool copyProperties=false) where T: Component {
             Type type = source.GetType();
             Component copy = goTarget.AddComponent(type);
-            if (copyFields) { 
+            if (copyFields) {
                 FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
                 foreach (FieldInfo field in fields) {
                     field.SetValue(copy, field.GetValue(source));
                 }
             }
-            if (copyProperties) { 
+            if (copyProperties) {
                 PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
                 foreach (PropertyInfo property in properties) {
                     if (property.CanWrite) {
@@ -118,7 +118,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             } while (!state.IsName(animationStateName));
             onStateReached?.Invoke();
         }
-        
+
         #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
         #endif
@@ -164,7 +164,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             Debug.LogError(ConditionMessage("STATIC", source.Name, methodName, messageContent, includeTimeStamp));
             #endif
         }
-        
+
         #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
         #endif
@@ -217,7 +217,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         [HideInCallstack]
         #endif
         public static void Log(this GameObject goItem, string messageContent,
-                Type type = null, 
+                Type type = null,
                 #if USE_DEBUG_TRACING && !DONT_LOG
                 [CallerMemberName] string methodName = null,
                 #else
@@ -233,7 +233,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         [HideInCallstack]
         #endif
         public static void LogWarning(this GameObject goItem, string messageContent,
-                Type type = null, 
+                Type type = null,
                 #if USE_DEBUG_TRACING && !DONT_LOG
                 [CallerMemberName] string methodName = null,
                 #else
@@ -245,12 +245,12 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             Debug.LogWarning(ConditionMessage(goItem.name, type.Name, methodName, messageContent, includeTimeStamp));
             #endif
         }
-        
+
         #if USE_DEBUG_TRACING && !DONT_LOG
         [HideInCallstack]
         #endif
         public static void LogError(this GameObject goItem, string messageContent,
-                Type type = null, 
+                Type type = null,
                 #if USE_DEBUG_TRACING && !DONT_LOG
                 [CallerMemberName] string methodName = null,
                 #else
@@ -263,7 +263,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
             #endif
         }
 
-        private static string ConditionMessage(string sourceObjectName, string typeName, string methodName, 
+        private static string ConditionMessage(string sourceObjectName, string typeName, string methodName,
                 string messageContent, bool includeTimeStamp) {
             string message = (includeTimeStamp) ? $"[{DateTime.Now.ToString("HH:mm:ss.fff")}] " : string.Empty;
             message += "[";
