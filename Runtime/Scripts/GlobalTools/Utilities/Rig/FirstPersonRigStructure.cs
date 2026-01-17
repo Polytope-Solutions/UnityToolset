@@ -3,97 +3,184 @@ using UnityEngine;
 
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using static PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig.RigUtilities;
+using static PolytopeSolutions.Toolset.GlobalTools.Types.EnumFlags;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
+    public static class FirstPersonRigJointUtility {
+        public const uint Camera                = RigJointUtility.Camera;
+        public const uint HorizontalPosition    = 1 << 1;
+        public const uint Height                = 1 << 2;
+        public const uint LocalOffset           = 1 << 3;
+        public const uint Rotation              = 1 << 4;
+    }
     [Flags]
     public enum FirstPersonRigJoint : uint {
-        HorizontalPosition = 1,
-        InRigOffset = 2,
-        Rotation = 4,
-        Camera = 8,
+        Camera              = FirstPersonRigJointUtility.Camera,
+        HorizontalPosition  = FirstPersonRigJointUtility.HorizontalPosition,
+        Height              = FirstPersonRigJointUtility.Height,
+        LocalOffset         = FirstPersonRigJointUtility.LocalOffset,
+        Rotation            = FirstPersonRigJointUtility.Rotation,
+    }
+    public interface IFirstPersonRigJointCollection<TRigJoint>
+            where TRigJoint : Enum {
+        public TRigJoint HorizontalPositionJoint { get;}
+        public TRigJoint HeightJoint { get;}
+        public TRigJoint LocalOffsetJoint { get; }
+        public TRigJoint RotationJoint { get; }
+    }
+
+    [Serializable]
+    public class DefaultFirstPersonRig 
+            : FirstPersonRig<DefaultFirstPersonRigState, FirstPersonRigJoint> {
+        public override FirstPersonRigJoint CameraJoint 
+            => FirstPersonRigJoint.Camera;
+        public override FirstPersonRigJoint HorizontalPositionJoint 
+            => FirstPersonRigJoint.HorizontalPosition;
+        public override FirstPersonRigJoint HeightJoint
+            => FirstPersonRigJoint.Height;
+        public override FirstPersonRigJoint LocalOffsetJoint 
+            => FirstPersonRigJoint.LocalOffset;
+        public override FirstPersonRigJoint RotationJoint 
+            => FirstPersonRigJoint.Rotation;
+        public override FirstPersonRigJoint AllRelevantJoints 
+            => (
+                FirstPersonRigJoint.Camera
+                | FirstPersonRigJoint.HorizontalPosition
+                | FirstPersonRigJoint.Height
+                | FirstPersonRigJoint.LocalOffset
+                | FirstPersonRigJoint.Rotation
+            );
     }
     [Serializable]
-    public class FirstPersonRig<TRigState> : Rig<TRigState, FirstPersonRigJoint>
-            where TRigState : FirstPersonRigState, new() {
+    public abstract class FirstPersonRig<TRigState, TRigJoint> 
+            : Rig<TRigState, TRigJoint>, IFirstPersonRigJointCollection<TRigJoint>
+            where TRigState : FirstPersonRigState<TRigJoint>, new()
+            where TRigJoint : Enum {
         [SerializeField] private Transform tHorizontalPositioningJoint;
-        [SerializeField] private Transform tInRigOffsetJoint;
+        [SerializeField] private Transform tHeightJoint;
+        [SerializeField] private Transform tLocalOffsetJoint;
         [SerializeField] private Transform tRotationJoint;
 
         public Transform THorizontalPositioningJoint => this.tHorizontalPositioningJoint;
-        public Transform TInRigOffsetJoint => this.tInRigOffsetJoint;
+        public Transform THeightJoint => this.tHeightJoint;
+        public Transform TLocalOffsetJoint => this.tLocalOffsetJoint;
         public Transform TRotationJoint => this.tRotationJoint;
 
-        public const uint allJoints = FirstPersonRigState.allJoints;
-        public override uint AllJoints => allJoints;
+        public abstract TRigJoint HorizontalPositionJoint { get;}
+        public abstract TRigJoint HeightJoint { get;}
+        public abstract TRigJoint LocalOffsetJoint { get; }
+        public abstract TRigJoint RotationJoint { get; }
 
-        public override void ApplyRigStateImmediate(ref TRigState state, uint updateState = allJoints) {
+        public override void ApplyRigStateImmediate(ref TRigState state, TRigJoint updateState) {
             base.ApplyRigStateImmediate(ref state, updateState);
-            FirstPersonRigJoint joints = (FirstPersonRigJoint)updateState;
-            bool horizontalPositionChanged = IsChangedAndRelevant(state, FirstPersonRigJoint.HorizontalPosition, joints),
-                inRigOffsetChanged = IsChangedAndRelevant(state, FirstPersonRigJoint.InRigOffset, joints),
-                rotationChanged = IsChangedAndRelevant(state, FirstPersonRigJoint.Rotation, joints);
+            bool horizontalPositionChanged = IsChangedAndRelevant(state, this.HorizontalPositionJoint, updateState),
+                heightChanged = IsChangedAndRelevant(state, this.HeightJoint, updateState),
+                localOffsetChanged = IsChangedAndRelevant(state, this.LocalOffsetJoint, updateState),
+                rotationChanged = IsChangedAndRelevant(state, this.RotationJoint, updateState);
             if (horizontalPositionChanged)
                 this.tHorizontalPositioningJoint.position
                     = state.HorizontalPosition.ToXZ();
-            if (inRigOffsetChanged)
-                this.tInRigOffsetJoint.localPosition
-                    = state.InRigOffset;
+            if (heightChanged)
+                this.tHeightJoint.localPosition
+                    = Vector3.up * state.Height;
+            if (localOffsetChanged)
+                this.tLocalOffsetJoint.localPosition
+                    = state.LocalOffset;
             if (rotationChanged)
                 this.tRotationJoint.localRotation
                     = state.Rotation;
         }
-        public override void ApplyRigStateSmoothed(ref TRigState state, float smoothTime, uint updateState = allJoints) {
+        public override void ApplyRigStateSmoothed(ref TRigState state, float smoothTime, TRigJoint updateState) {
             base.ApplyRigStateSmoothed(ref state, smoothTime, updateState);
-            FirstPersonRigJoint joints = (FirstPersonRigJoint)updateState;
-            if (state.IsChanged(FirstPersonRigJoint.HorizontalPosition) && joints.HasFlag(FirstPersonRigJoint.HorizontalPosition))
+            bool horizontalPositionChanged = IsChangedAndRelevant(state, this.HorizontalPositionJoint, updateState),
+                heightChanged = IsChangedAndRelevant(state, this.HeightJoint, updateState),
+                localOffsetChanged = IsChangedAndRelevant(state, this.LocalOffsetJoint, updateState),
+                rotationChanged = IsChangedAndRelevant(state, this.RotationJoint, updateState);
+            if (horizontalPositionChanged)
                 this.tHorizontalPositioningJoint.position
                     = state.HorizontalPositionSmoothed(this.tHorizontalPositioningJoint.position.XZ(), smoothTime).ToXZ();
-            if (state.IsChanged(FirstPersonRigJoint.InRigOffset) && joints.HasFlag(FirstPersonRigJoint.InRigOffset))
-                this.tInRigOffsetJoint.localPosition
-                    = state.InRigOffsetSmoothed(this.tInRigOffsetJoint.localPosition, smoothTime);
-            if (state.IsChanged(FirstPersonRigJoint.Rotation) && joints.HasFlag(FirstPersonRigJoint.Rotation))
+            if (heightChanged)
+                this.tHeightJoint.localPosition
+                    = Vector3.up * state.HeightSmoothed(this.tHeightJoint.localPosition.y, smoothTime);
+            if (localOffsetChanged)
+                this.tLocalOffsetJoint.localPosition
+                    = state.LocalOffsetSmoothed(this.tLocalOffsetJoint.localPosition, smoothTime);
+            if (rotationChanged)
                 this.tRotationJoint.localRotation
                     = state.RotationSmoothed(this.tRotationJoint.localRotation, smoothTime);
         }
         public override TRigState FromRig() {
             TRigState rigState = new();
             rigState.HorizontalPosition = this.tHorizontalPositioningJoint.position.XZ();
-            rigState.InRigOffset = this.tInRigOffsetJoint.localPosition;
+            rigState.Height = this.tHeightJoint.localPosition.y;
+            rigState.LocalOffset = this.tLocalOffsetJoint.localPosition;
             rigState.Rotation = this.tRotationJoint.localRotation;
             return rigState;
         }
-        public override uint ResolvedMask(TRigState state) {
-            uint mask = base.ResolvedMask(state);
+        public override TRigJoint ResolvedMask(TRigState state) {
+            TRigJoint mask = base.ResolvedMask(state);
             if ((this.tHorizontalPositioningJoint.position.XZ() - state.HorizontalPosition).sqrMagnitude < RigUtilities.epsilonSqr)
-                mask |= FirstPersonRigJoint.HorizontalPosition.ToUInt32();
-            if ((this.tInRigOffsetJoint.localPosition - state.InRigOffset).sqrMagnitude < RigUtilities.epsilonSqr)
-                mask |= FirstPersonRigJoint.InRigOffset.ToUInt32();
+                mask = mask.Set(this.HorizontalPositionJoint);
+            if (Mathf.Abs(this.tHeightJoint.localPosition.y - state.Height) < RigUtilities.epsilon)
+                mask = mask.Set(this.HeightJoint);
+            if ((this.tLocalOffsetJoint.localPosition - state.LocalOffset).sqrMagnitude < RigUtilities.epsilonSqr)
+                mask = mask.Set(this.LocalOffsetJoint);
             if (state.Rotation.eulerAngles != this.tRotationJoint.localRotation.eulerAngles)
-                mask |= FirstPersonRigJoint.Rotation.ToUInt32();
+                mask = mask.Set(this.RotationJoint);
             return mask;
         }
     }
     [Serializable]
-    public class FirstPersonRigState : RigState<FirstPersonRigJoint> {
-        [SerializeField] private RigStateVector2Value horizontalPosition;
-        [SerializeField] private RigStateVector3Value inRigOffset;
-        [SerializeField] private RigStateQuaternionValue rotation;
-        public new const uint allJoints = (uint)
-            (FirstPersonRigJoint.HorizontalPosition
-            | FirstPersonRigJoint.InRigOffset
-            | FirstPersonRigJoint.Rotation
-            | FirstPersonRigJoint.Camera);
+    public class DefaultFirstPersonRigState
+        : FirstPersonRigState<FirstPersonRigJoint> {
+        public override FirstPersonRigJoint CameraJoint 
+            => FirstPersonRigJoint.Camera;
+        public override FirstPersonRigJoint HorizontalPositionJoint 
+            => FirstPersonRigJoint.HorizontalPosition;
+        public override FirstPersonRigJoint HeightJoint
+            => FirstPersonRigJoint.Height;
+        public override FirstPersonRigJoint LocalOffsetJoint 
+            => FirstPersonRigJoint.LocalOffset;
+        public override FirstPersonRigJoint RotationJoint 
+            => FirstPersonRigJoint.Rotation;
+        public override FirstPersonRigJoint AllRelevantJoints 
+            => (
+                FirstPersonRigJoint.Camera
+                | FirstPersonRigJoint.HorizontalPosition
+                | FirstPersonRigJoint.Height
+                | FirstPersonRigJoint.LocalOffset
+                | FirstPersonRigJoint.Rotation
+            );
+    }
+    [Serializable]
+    public abstract class FirstPersonRigState<TRigJoint> 
+            : RigState<TRigJoint>, IFirstPersonRigJointCollection<TRigJoint>
+            where TRigJoint : Enum {
+        [SerializeField] private RigStateVector2Value<TRigJoint> horizontalPosition;
+        [SerializeField] private RigStateFloatValue<TRigJoint> height;
+        [SerializeField] private RigStateVector3Value<TRigJoint> localOffset;
+        [SerializeField] private RigStateQuaternionValue<TRigJoint> rotation;
+        
+        public abstract TRigJoint HorizontalPositionJoint { get; }
+        public abstract TRigJoint HeightJoint { get; }
+        public abstract TRigJoint LocalOffsetJoint { get; }
+        public abstract TRigJoint RotationJoint { get; }
+
         public FirstPersonRigState() {
             this.horizontalPosition = new (
-                FirstPersonRigJoint.HorizontalPosition.ToUInt32(),
+                this.HorizontalPositionJoint,
                 this.MarkChanged
             );
-            this.inRigOffset = new (
-                FirstPersonRigJoint.InRigOffset.ToUInt32(),
+            this.height = new (
+                this.HeightJoint,
+                this.MarkChanged
+            );
+            this.localOffset = new (
+                this.LocalOffsetJoint,
                 this.MarkChanged
             );
             this.rotation = new (
-                FirstPersonRigJoint.Rotation.ToUInt32(),
+                this.RotationJoint,
                 this.MarkChanged
             );
         }
@@ -104,12 +191,18 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
         }
         public Vector2 HorizontalPositionSmoothed(Vector2 current, float smoothTime)
             => this.horizontalPosition.ValueSmoothed(current, smoothTime);
-        public Vector3 InRigOffset {
-            get => this.inRigOffset.Value;
-            set => this.inRigOffset.Value = value;
+        public float Height {
+            get => this.height.Value;
+            set => this.height.Value = value;
         }
-        public Vector3 InRigOffsetSmoothed(Vector3 current, float smoothTime)
-            => this.inRigOffset.ValueSmoothed(current, smoothTime);
+        public float HeightSmoothed(float current, float smoothTime)
+            => this.height.ValueSmoothed(current, smoothTime);
+        public Vector3 LocalOffset {
+            get => this.localOffset.Value;
+            set => this.localOffset.Value = value;
+        }
+        public Vector3 LocalOffsetSmoothed(Vector3 current, float smoothTime)
+            => this.localOffset.ValueSmoothed(current, smoothTime);
         public Quaternion Rotation {
             get => this.rotation.Value;
             set => this.rotation.Value = value;

@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.77
+
+2026-01-17
+
+-	Try to generalize Rigs to handle abstractions more flexibly;
+
+---
+
 ## 0.0.76
 
 2026-01-16

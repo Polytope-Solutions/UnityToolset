@@ -2,22 +2,38 @@ using System;
 using UnityEngine;
 
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
+using static PolytopeSolutions.Toolset.GlobalTools.Types.EnumFlags;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
+
+    public static class RigJointUtility {
+        public const uint Camera    = 1 << 0;
+    }
+    [Flags]
+    public enum RigJoint : uint {
+        Camera                      = RigJointUtility.Camera,
+    }
     public static class RigUtilities {
         public const float epsilon = 0.0001f;
         public const float epsilonSqr = epsilon * epsilon;
-
-        public static uint ToUInt32(this Enum joint)
-            => Convert.ToUInt32(joint);
+    }
+    public interface IRigJointCollection<TRigJoint>
+            where TRigJoint : Enum {
+        public TRigJoint CameraJoint { get; }
+        public TRigJoint AllRelevantJoints { get; }
     }
     [Serializable]
-    public abstract class Rig<TRigState, TRigJoint>
+    public abstract class Rig<TRigState, TRigJoint> 
+            : IRigJointCollection<TRigJoint>
             where TRigState : RigState<TRigJoint>, new()
             where TRigJoint : Enum {
         [SerializeField] protected Transform tCamera;
-        protected Camera camera;
+        public abstract TRigJoint CameraJoint { get; }
+        public abstract TRigJoint AllRelevantJoints { get; }
+
         public Transform TCamera => this.tCamera;
+
+        protected Camera camera;
         public Camera Camera {
             get {
                 if (this.camera == null)
@@ -25,52 +41,61 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
                 return this.camera;
             }
         }
-        public abstract uint AllJoints { get; }
         protected bool IsChangedAndRelevant(TRigState state, TRigJoint joint, TRigJoint mask)
             => state.IsChanged(joint) && mask.HasFlag(joint);
 
-        public virtual void ApplyRigStateImmediate(ref TRigState state, uint updateState) {
+        public void ApplyRigStateImmediate(ref TRigState state)
+            => ApplyRigStateImmediate(ref state, this.AllRelevantJoints);
+        public virtual void ApplyRigStateImmediate(ref TRigState state, 
+                TRigJoint updateState) {
             state.Constrain();
         }
-        public virtual void ApplyRigStateSmoothed(ref TRigState state, float smoothTime, uint updateState) {
+        public void ApplyRigStateSmoothed(ref TRigState state, float smoothTime)
+            => ApplyRigStateSmoothed(ref state, smoothTime, this.AllRelevantJoints);
+        public virtual void ApplyRigStateSmoothed(ref TRigState state, float smoothTime,
+                TRigJoint updateState) {
             state.Constrain();
         }
         public abstract TRigState FromRig();
 
         public virtual bool IsStateApplied(TRigState state) {
-            return (ResolvedMask(state) & this.AllJoints) == this.AllJoints;
+            return ResolvedMask(state).HasAll(this.AllRelevantJoints);
         }
-        public virtual uint ResolvedMask(TRigState state)
-            => 0;
+        public virtual TRigJoint ResolvedMask(TRigState state)
+            => this.AllRelevantJoints;
     }
+    public interface IRigState{}
     [Serializable]
     public abstract class RigState<TRigJoint>
+            : IRigJointCollection<TRigJoint>, IRigState
             where TRigJoint : Enum {
-        protected uint changeMask;
-        public const uint allJoints = 0;
+        protected TRigJoint changeMask;
+        
+        public abstract TRigJoint CameraJoint { get; }
+        public abstract TRigJoint AllRelevantJoints { get; }
 
-        protected void MarkChanged(uint joint) {
-            this.changeMask |= joint;
+        protected void MarkChanged(TRigJoint joint) {
+            this.changeMask = this.changeMask.Set(joint);
         }
         public bool IsChanged(TRigJoint joint)
-            => IsChanged(joint.ToUInt32());
-        public bool IsChanged(uint testMask) => (this.changeMask & testMask) == testMask;
-        public bool IsAnyChanged => this.changeMask != 0;
-        public virtual void Constrain() {
-
-        }
-        public virtual void ClearMask(uint acknowledgedChanges = uint.MaxValue) {
-            this.changeMask &= ~acknowledgedChanges;
+            => this.changeMask.HasAll(joint);
+        public bool IsAnyChanged => this.changeMask.HasAny(this.AllRelevantJoints);
+        public virtual void Constrain() {}
+        public void ClearMask() 
+            => ClearMask(this.AllRelevantJoints);
+        public virtual void ClearMask(TRigJoint acknowledgedChanges) {
+            this.changeMask = this.changeMask.Clear(acknowledgedChanges);
         }
     }
     [Serializable]
-    public abstract class TRigStateValue<TValue> {
+    public abstract class TRigStateValue<TValue, TRigJoint> 
+            where TRigJoint : Enum {
         protected TValue value;
         protected TValue velocity;
-        private readonly uint jointValue;
-        private Action<uint> markChangedAction;
+        private readonly TRigJoint jointValue;
+        private Action<TRigJoint> markChangedAction;
 
-        public TRigStateValue(uint jointValue, Action<uint> markChangedAction) {
+        public TRigStateValue(TRigJoint jointValue, Action<TRigJoint> markChangedAction) {
             this.jointValue = jointValue;
             this.markChangedAction = markChangedAction;
         }
@@ -83,13 +108,14 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
                 this.markChangedAction?.Invoke(this.jointValue);
             }
         }
-        public uint JointValue => this.jointValue;
+        public TRigJoint JointValue => this.jointValue;
         public abstract bool TolleranceCondition(TValue newValue);
         public abstract TValue ValueSmoothed(TValue currentValue, float smoothTime);
     }
     [Serializable]
-    public class RigStateFloatValue : TRigStateValue<float> {
-        public RigStateFloatValue(uint jointValue, Action<uint> markChangedAction)
+    public class RigStateFloatValue<TRigJoint> : TRigStateValue<float, TRigJoint> 
+            where TRigJoint : Enum {
+        public RigStateFloatValue(TRigJoint jointValue, Action<TRigJoint> markChangedAction)
             : base(jointValue, markChangedAction) {
         }
         public override bool TolleranceCondition(float newValue)
@@ -98,8 +124,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
             => Mathf.SmoothDamp(currentValue, Value, ref base.velocity, smoothTime);
     }
     [Serializable]
-    public class RigStateAngleValue : TRigStateValue<float> {
-        public RigStateAngleValue(uint jointValue, Action<uint> markChangedAction)
+    public class RigStateAngleValue<TRigJoint> : TRigStateValue<float, TRigJoint>
+            where TRigJoint : Enum {
+        public RigStateAngleValue(TRigJoint jointValue, Action<TRigJoint> markChangedAction)
             : base(jointValue, markChangedAction) {
         }
         public override bool TolleranceCondition(float newValue)
@@ -108,8 +135,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
             => Mathf.SmoothDampAngle(currentValue, Value, ref base.velocity, smoothTime);
     }
     [Serializable]
-    public class RigStateVector2Value : TRigStateValue<Vector2> {
-        public RigStateVector2Value(uint jointValue, Action<uint> markChangedAction)
+    public class RigStateVector2Value<TRigJoint> : TRigStateValue<Vector2, TRigJoint> 
+            where TRigJoint : Enum {
+        public RigStateVector2Value(TRigJoint jointValue, Action<TRigJoint> markChangedAction)
             : base(jointValue, markChangedAction) {
         }
         public override bool TolleranceCondition(Vector2 newValue)
@@ -118,8 +146,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
             => Vector2.SmoothDamp(currentValue, Value, ref base.velocity, smoothTime);
     }
     [Serializable]
-    public class RigStateVector3Value : TRigStateValue<Vector3> {
-        public RigStateVector3Value(uint jointValue, Action<uint> markChangedAction)
+    public class RigStateVector3Value<TRigJoint> : TRigStateValue<Vector3, TRigJoint> 
+            where TRigJoint : Enum {
+        public RigStateVector3Value(TRigJoint jointValue, Action<TRigJoint> markChangedAction)
             : base(jointValue, markChangedAction) {
         }
         public override bool TolleranceCondition(Vector3 newValue)
@@ -128,8 +157,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
             => Vector3.SmoothDamp(currentValue, Value, ref base.velocity, smoothTime);
     }
     [Serializable]
-    public class RigStateQuaternionValue : TRigStateValue<Quaternion> {
-        public RigStateQuaternionValue(uint jointValue, Action<uint> markChangedAction)
+    public class RigStateQuaternionValue<TRigJoint> : TRigStateValue<Quaternion, TRigJoint> 
+            where TRigJoint : Enum {
+        public RigStateQuaternionValue(TRigJoint jointValue, Action<TRigJoint> markChangedAction)
             : base(jointValue, markChangedAction) {
         }
         public override bool TolleranceCondition(Quaternion newValue)

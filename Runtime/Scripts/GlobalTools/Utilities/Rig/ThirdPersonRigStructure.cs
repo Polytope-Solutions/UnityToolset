@@ -3,19 +3,59 @@ using UnityEngine;
 
 using PolytopeSolutions.Toolset.GlobalTools.Generic;
 using static PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig.RigUtilities;
+using static PolytopeSolutions.Toolset.GlobalTools.Types.EnumFlags;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
+    public static class ThirdPersonRigJointUtility  {
+        public const uint Camera                = RigJointUtility.Camera;
+        public const uint HorizontalPosition    = 1 << 1;
+        public const uint HorizontalRotation    = 1 << 2;
+        public const uint VerticalRotation      = 1 << 3;
+        public const uint Distance              = 1 << 4;
+    }
+
     [Flags]
     public enum ThirdPersonRigJoint : uint {
-        HorizontalPosition = 1,
-        HorizontalRotation = 2,
-        VerticalRotation = 4,
-        Distance = 8,
-        Camera = 16,
+        Camera              = ThirdPersonRigJointUtility.Camera,
+        HorizontalPosition  = ThirdPersonRigJointUtility.HorizontalPosition,
+        HorizontalRotation  = ThirdPersonRigJointUtility.HorizontalRotation,
+        VerticalRotation    = ThirdPersonRigJointUtility.VerticalRotation,
+        Distance            = ThirdPersonRigJointUtility.Distance,
+    }
+    public interface IThirdPersonRigJointCollection<TRigJoint>
+            where TRigJoint : Enum {
+        public TRigJoint HorizontalPositionJoint { get;}
+        public TRigJoint HorizontalRotationJoint { get; }
+        public TRigJoint VerticalRotationJoint { get; }
+        public TRigJoint DistanceJoint { get; }
     }
     [Serializable]
-    public class ThirdPersonRig<TRigState> : Rig<TRigState, ThirdPersonRigJoint>
-            where TRigState : ThirdPersonRigState, new() {
+    public class DefaultThirdPersonRig
+            : ThirdPersonRig<DefaultThirdPersonRigState, ThirdPersonRigJoint> {
+        public override ThirdPersonRigJoint CameraJoint 
+            => ThirdPersonRigJoint.Camera;
+        public override ThirdPersonRigJoint HorizontalPositionJoint 
+            => ThirdPersonRigJoint.HorizontalPosition;
+        public override ThirdPersonRigJoint HorizontalRotationJoint 
+            => ThirdPersonRigJoint.HorizontalRotation;
+        public override ThirdPersonRigJoint VerticalRotationJoint 
+            => ThirdPersonRigJoint.VerticalRotation;
+        public override ThirdPersonRigJoint DistanceJoint 
+            => ThirdPersonRigJoint.Distance;
+        public override ThirdPersonRigJoint AllRelevantJoints 
+            => (
+                ThirdPersonRigJoint.Camera
+                | ThirdPersonRigJoint.HorizontalPosition
+                | ThirdPersonRigJoint.HorizontalRotation
+                | ThirdPersonRigJoint.VerticalRotation
+                | ThirdPersonRigJoint.Distance
+            );
+    }
+    [Serializable]
+    public abstract class ThirdPersonRig<TRigState, TRigJoint> : 
+            Rig<TRigState, TRigJoint>, IThirdPersonRigJointCollection<TRigJoint> 
+            where TRigState : ThirdPersonRigState<TRigJoint>, new() 
+            where TRigJoint : Enum {
         [SerializeField] private Transform tHorizontalPositioningJoint;
         [SerializeField] private Transform tHorizontalRotationJoint;
         [SerializeField] private Transform tVerticalRotationJoint;
@@ -26,15 +66,18 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
         public Transform TVerticalRotationJoint => this.tVerticalRotationJoint;
         public Transform TDistanceControlJoint => this.tDistanceControlJoint;
 
-        protected const uint allJoints = ThirdPersonRigState.allJoints;
-        public override uint AllJoints => allJoints;
-        public override void ApplyRigStateImmediate(ref TRigState state, uint updateState = allJoints) {
+        public abstract TRigJoint HorizontalPositionJoint { get;}
+        public abstract TRigJoint HorizontalRotationJoint { get; }
+        public abstract TRigJoint VerticalRotationJoint { get; }
+        public abstract TRigJoint DistanceJoint { get; }
+
+        public override void ApplyRigStateImmediate(ref TRigState state, 
+                TRigJoint updateState) {
             base.ApplyRigStateImmediate(ref state, updateState);
-            ThirdPersonRigJoint joints = (ThirdPersonRigJoint)updateState;
-            bool horizontalPositionChanged = IsChangedAndRelevant(state, ThirdPersonRigJoint.HorizontalPosition, joints),
-                horizontalRotationChanged = IsChangedAndRelevant(state, ThirdPersonRigJoint.HorizontalRotation, joints),
-                verticalRotationChanged = IsChangedAndRelevant(state, ThirdPersonRigJoint.VerticalRotation, joints),
-                distanceChanged = IsChangedAndRelevant(state, ThirdPersonRigJoint.Distance, joints);
+            bool horizontalPositionChanged = IsChangedAndRelevant(state, this.HorizontalPositionJoint, updateState),
+                horizontalRotationChanged = IsChangedAndRelevant(state, this.HorizontalRotationJoint, updateState),
+                verticalRotationChanged = IsChangedAndRelevant(state, this.VerticalRotationJoint, updateState),
+                distanceChanged = IsChangedAndRelevant(state, this.DistanceJoint, updateState);
             if (horizontalPositionChanged)
                 this.tHorizontalPositioningJoint.position
                     = state.HorizontalPosition.ToXZ();
@@ -48,19 +91,23 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
                 this.tDistanceControlJoint.localPosition
                     = Vector3.forward * -state.Depth;
         }
-        public override void ApplyRigStateSmoothed(ref TRigState state, float smoothTime, uint updateState = allJoints) {
+        public override void ApplyRigStateSmoothed(ref TRigState state, float smoothTime, 
+                TRigJoint updateState) {
             base.ApplyRigStateSmoothed(ref state, smoothTime, updateState);
-            ThirdPersonRigJoint joints = (ThirdPersonRigJoint)updateState;
-            if (state.IsChanged(ThirdPersonRigJoint.HorizontalPosition) && joints.HasFlag(ThirdPersonRigJoint.HorizontalPosition))
+            bool horizontalPositionChanged = IsChangedAndRelevant(state, this.HorizontalPositionJoint, updateState),
+                horizontalRotationChanged = IsChangedAndRelevant(state, this.HorizontalRotationJoint, updateState),
+                verticalRotationChanged = IsChangedAndRelevant(state, this.VerticalRotationJoint, updateState),
+                distanceChanged = IsChangedAndRelevant(state, this.DistanceJoint, updateState);
+            if (horizontalPositionChanged)
                 this.tHorizontalPositioningJoint.position
                     = state.HorizontalPositionSmoothed(this.tHorizontalPositioningJoint.position.XZ(), smoothTime).ToXZ();
-            if (state.IsChanged(ThirdPersonRigJoint.HorizontalRotation) && joints.HasFlag(ThirdPersonRigJoint.HorizontalRotation))
+            if (horizontalRotationChanged)
                 this.tHorizontalRotationJoint.rotation
                     = Quaternion.Euler(Vector3.up * state.HorizontalAngleSmoothed(this.tHorizontalRotationJoint.eulerAngles.y, smoothTime));
-            if (state.IsChanged(ThirdPersonRigJoint.VerticalRotation) && joints.HasFlag(ThirdPersonRigJoint.VerticalRotation))
+            if (verticalRotationChanged)
                 this.tVerticalRotationJoint.localRotation
                     = Quaternion.Euler(Vector3.right * state.VerticalAngleSmoothed(this.tVerticalRotationJoint.eulerAngles.x, smoothTime));
-            if (state.IsChanged(ThirdPersonRigJoint.Distance) && joints.HasFlag(ThirdPersonRigJoint.Distance))
+            if (distanceChanged)
                 this.tDistanceControlJoint.localPosition
                     = Vector3.forward * -state.DepthSmoothed(Mathf.Abs(this.tDistanceControlJoint.localPosition.z), smoothTime);
         }
@@ -72,47 +119,66 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
             rigState.Depth = Mathf.Abs(this.tDistanceControlJoint.localPosition.z);
             return rigState;
         }
-        public override uint ResolvedMask(TRigState state) {
-            uint mask = base.ResolvedMask(state);
+        public override TRigJoint ResolvedMask(TRigState state) {
+            TRigJoint mask = base.ResolvedMask(state);
             if ((this.tHorizontalPositioningJoint.position.XZ() - state.HorizontalPosition).sqrMagnitude < RigUtilities.epsilonSqr)
-                mask |= ThirdPersonRigJoint.HorizontalPosition.ToUInt32();
+                mask = mask.Set(this.HorizontalPositionJoint);
             if (Mathf.Abs(Mathf.DeltaAngle(this.tHorizontalRotationJoint.eulerAngles.y, state.HorizontalAngle)) < RigUtilities.epsilon)
-                mask |= ThirdPersonRigJoint.HorizontalRotation.ToUInt32();
+                mask = mask.Set(this.HorizontalRotationJoint);
             if (Mathf.Abs(Mathf.DeltaAngle(this.tVerticalRotationJoint.eulerAngles.x, state.VerticalAngle)) < RigUtilities.epsilon)
-                mask |= ThirdPersonRigJoint.VerticalRotation.ToUInt32();
+                mask = mask.Set(this.VerticalRotationJoint);
             if (Mathf.Abs(Mathf.Abs(this.tDistanceControlJoint.localPosition.z) - state.Depth) < RigUtilities.epsilon)
-                mask |= ThirdPersonRigJoint.Distance.ToUInt32();
+                mask = mask.Set(this.DistanceJoint);
             return mask;
         }
     }
     [Serializable]
-    public class ThirdPersonRigState : RigState<ThirdPersonRigJoint> {
-        [SerializeField] private RigStateVector2Value horizontalPosition;
-        [SerializeField] private RigStateAngleValue horizontalAngle;
-        [SerializeField] private RigStateAngleValue verticalAngle;
-        [SerializeField] private RigStateFloatValue depth;
-        public new const uint allJoints = (uint)
-            (ThirdPersonRigJoint.HorizontalPosition
-            | ThirdPersonRigJoint.HorizontalRotation
-            | ThirdPersonRigJoint.VerticalRotation
-            | ThirdPersonRigJoint.Distance
-            | ThirdPersonRigJoint.Camera);
+    public class DefaultThirdPersonRigState
+            : ThirdPersonRigState<ThirdPersonRigJoint> {
+        public override ThirdPersonRigJoint CameraJoint => ThirdPersonRigJoint.Camera;
+        public override ThirdPersonRigJoint HorizontalPositionJoint => ThirdPersonRigJoint.HorizontalPosition;
+        public override ThirdPersonRigJoint HorizontalRotationJoint => ThirdPersonRigJoint.HorizontalRotation;
+        public override ThirdPersonRigJoint VerticalRotationJoint => ThirdPersonRigJoint.VerticalRotation;
+        public override ThirdPersonRigJoint DistanceJoint => ThirdPersonRigJoint.Distance;
+        public override ThirdPersonRigJoint AllRelevantJoints => 
+            (
+                ThirdPersonRigJoint.Camera
+                | ThirdPersonRigJoint.HorizontalPosition
+                | ThirdPersonRigJoint.HorizontalRotation
+                | ThirdPersonRigJoint.VerticalRotation
+                | ThirdPersonRigJoint.Distance
+            );
+    }
+    [Serializable]
+    public abstract class ThirdPersonRigState<TRigJoint> 
+            : RigState<TRigJoint>, IThirdPersonRigJointCollection<TRigJoint> 
+            where TRigJoint : Enum {
+        [SerializeField] private RigStateVector2Value<TRigJoint> horizontalPosition;
+        [SerializeField] private RigStateAngleValue<TRigJoint> horizontalAngle;
+        [SerializeField] private RigStateAngleValue<TRigJoint> verticalAngle;
+        [SerializeField] private RigStateFloatValue<TRigJoint> depth;
+
+        public abstract TRigJoint HorizontalPositionJoint { get; }
+        public abstract TRigJoint HorizontalRotationJoint { get; }
+        public abstract TRigJoint VerticalRotationJoint { get; }
+        public abstract TRigJoint DistanceJoint { get; }
+
         public ThirdPersonRigState() {
             this.horizontalPosition = new(
-                ThirdPersonRigJoint.HorizontalPosition.ToUInt32(),
+                this.HorizontalPositionJoint,
                 this.MarkChanged
             );
             this.horizontalAngle = new(
-                ThirdPersonRigJoint.HorizontalRotation.ToUInt32(),
+                this.HorizontalRotationJoint,
                 this.MarkChanged
             );
 
             this.verticalAngle = new(
-                ThirdPersonRigJoint.VerticalRotation.ToUInt32(),
+                this.VerticalRotationJoint,
                 this.MarkChanged
             );
             this.depth = new(
-                ThirdPersonRigJoint.Distance.ToUInt32(),
+                this.DistanceJoint,
                 this.MarkChanged
             );
         }
