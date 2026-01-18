@@ -71,9 +71,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
         public abstract TRigJoint VerticalRotationJoint { get; }
         public abstract TRigJoint DistanceJoint { get; }
 
-        public override void ApplyRigStateImmediate(ref TRigState state, 
+        public override void ApplyRigStateImmediateCore(ref TRigState state, 
                 TRigJoint updateState) {
-            base.ApplyRigStateImmediate(ref state, updateState);
+            base.ApplyRigStateImmediateCore(ref state, updateState);
             bool horizontalPositionChanged = IsChangedAndRelevant(state, this.HorizontalPositionJoint, updateState),
                 horizontalRotationChanged = IsChangedAndRelevant(state, this.HorizontalRotationJoint, updateState),
                 verticalRotationChanged = IsChangedAndRelevant(state, this.VerticalRotationJoint, updateState),
@@ -91,9 +91,9 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
                 this.tDistanceControlJoint.localPosition
                     = Vector3.forward * -state.Depth;
         }
-        public override void ApplyRigStateSmoothed(ref TRigState state, float smoothTime, 
+        public override void ApplyRigStateSmoothedCore(ref TRigState state, float smoothTime, 
                 TRigJoint updateState) {
-            base.ApplyRigStateSmoothed(ref state, smoothTime, updateState);
+            base.ApplyRigStateSmoothedCore(ref state, smoothTime, updateState);
             bool horizontalPositionChanged = IsChangedAndRelevant(state, this.HorizontalPositionJoint, updateState),
                 horizontalRotationChanged = IsChangedAndRelevant(state, this.HorizontalRotationJoint, updateState),
                 verticalRotationChanged = IsChangedAndRelevant(state, this.VerticalRotationJoint, updateState),

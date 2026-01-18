@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.78
+
+2026-01-18
+
+-	Fix Rig State recursion call issue;
+
+---
+
 ## 0.0.77
 
 2026-01-17

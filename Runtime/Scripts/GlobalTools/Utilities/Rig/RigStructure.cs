@@ -46,13 +46,19 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
 
         public void ApplyRigStateImmediate(ref TRigState state)
             => ApplyRigStateImmediate(ref state, this.AllRelevantJoints);
-        public virtual void ApplyRigStateImmediate(ref TRigState state, 
+        public void ApplyRigStateImmediate(ref TRigState state, 
+                TRigJoint updateState) 
+            => ApplyRigStateImmediateCore(ref state, updateState);
+        public virtual void ApplyRigStateImmediateCore(ref TRigState state, 
                 TRigJoint updateState) {
             state.Constrain();
         }
         public void ApplyRigStateSmoothed(ref TRigState state, float smoothTime)
             => ApplyRigStateSmoothed(ref state, smoothTime, this.AllRelevantJoints);
         public virtual void ApplyRigStateSmoothed(ref TRigState state, float smoothTime,
+                TRigJoint updateState)
+            => ApplyRigStateSmoothedCore(ref state, smoothTime, updateState);
+        public virtual void ApplyRigStateSmoothedCore(ref TRigState state, float smoothTime,
                 TRigJoint updateState) {
             state.Constrain();
         }

@@ -71,8 +71,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
         public abstract TRigJoint LocalOffsetJoint { get; }
         public abstract TRigJoint RotationJoint { get; }
 
-        public override void ApplyRigStateImmediate(ref TRigState state, TRigJoint updateState) {
-            base.ApplyRigStateImmediate(ref state, updateState);
+        public override void ApplyRigStateImmediateCore(ref TRigState state, TRigJoint updateState) {
+            base.ApplyRigStateImmediateCore(ref state, updateState);
             bool horizontalPositionChanged = IsChangedAndRelevant(state, this.HorizontalPositionJoint, updateState),
                 heightChanged = IsChangedAndRelevant(state, this.HeightJoint, updateState),
                 localOffsetChanged = IsChangedAndRelevant(state, this.LocalOffsetJoint, updateState),
@@ -90,8 +90,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
                 this.tRotationJoint.localRotation
                     = state.Rotation;
         }
-        public override void ApplyRigStateSmoothed(ref TRigState state, float smoothTime, TRigJoint updateState) {
-            base.ApplyRigStateSmoothed(ref state, smoothTime, updateState);
+        public override void ApplyRigStateSmoothedCore(ref TRigState state, float smoothTime, TRigJoint updateState) {
+            base.ApplyRigStateSmoothedCore(ref state, smoothTime, updateState);
             bool horizontalPositionChanged = IsChangedAndRelevant(state, this.HorizontalPositionJoint, updateState),
                 heightChanged = IsChangedAndRelevant(state, this.HeightJoint, updateState),
                 localOffsetChanged = IsChangedAndRelevant(state, this.LocalOffsetJoint, updateState),
