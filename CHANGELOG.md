@@ -2,6 +2,14 @@
 
 ---
 
+## 0.0.79
+
+2026-01-28
+
+-	Fix Rig State auto acknowledge always;
+
+---
+
 ## 0.0.78
 
 2026-01-18

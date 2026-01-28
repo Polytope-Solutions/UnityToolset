@@ -7,10 +7,12 @@ using static PolytopeSolutions.Toolset.GlobalTools.Types.EnumFlags;
 namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
 
     public static class RigJointUtility {
+        public const uint None   = 0;
         public const uint Camera    = 1 << 0;
     }
     [Flags]
     public enum RigJoint : uint {
+        None                        = RigJointUtility.None,
         Camera                      = RigJointUtility.Camera,
     }
     public static class RigUtilities {
@@ -20,6 +22,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
     public interface IRigJointCollection<TRigJoint>
             where TRigJoint : Enum {
         public TRigJoint CameraJoint { get; }
+        public TRigJoint NoJoints { get; }
         public TRigJoint AllRelevantJoints { get; }
     }
     [Serializable]
@@ -30,6 +33,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
         [SerializeField] protected Transform tCamera;
         public abstract TRigJoint CameraJoint { get; }
         public abstract TRigJoint AllRelevantJoints { get; }
+        public abstract TRigJoint NoJoints { get; }
 
         public Transform TCamera => this.tCamera;
 
@@ -68,7 +72,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
             return ResolvedMask(state).HasAll(this.AllRelevantJoints);
         }
         public virtual TRigJoint ResolvedMask(TRigState state)
-            => this.AllRelevantJoints;
+            => this.NoJoints;
     }
     public interface IRigState{}
     [Serializable]
@@ -79,6 +83,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
         
         public abstract TRigJoint CameraJoint { get; }
         public abstract TRigJoint AllRelevantJoints { get; }
+        public abstract TRigJoint NoJoints { get; }
 
         protected void MarkChanged(TRigJoint joint) {
             this.changeMask = this.changeMask.Set(joint);

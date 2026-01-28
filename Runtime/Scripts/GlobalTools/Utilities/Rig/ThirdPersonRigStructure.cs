@@ -7,6 +7,7 @@ using static PolytopeSolutions.Toolset.GlobalTools.Types.EnumFlags;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
     public static class ThirdPersonRigJointUtility  {
+        public const uint None                  = RigJointUtility.None;
         public const uint Camera                = RigJointUtility.Camera;
         public const uint HorizontalPosition    = 1 << 1;
         public const uint HorizontalRotation    = 1 << 2;
@@ -16,6 +17,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
 
     [Flags]
     public enum ThirdPersonRigJoint : uint {
+        None                = ThirdPersonRigJointUtility.None,
         Camera              = ThirdPersonRigJointUtility.Camera,
         HorizontalPosition  = ThirdPersonRigJointUtility.HorizontalPosition,
         HorizontalRotation  = ThirdPersonRigJointUtility.HorizontalRotation,
@@ -50,6 +52,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
                 | ThirdPersonRigJoint.VerticalRotation
                 | ThirdPersonRigJoint.Distance
             );
+        public override ThirdPersonRigJoint NoJoints 
+            => ThirdPersonRigJoint.None;
     }
     [Serializable]
     public abstract class ThirdPersonRig<TRigState, TRigJoint> : 
@@ -148,6 +152,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
                 | ThirdPersonRigJoint.VerticalRotation
                 | ThirdPersonRigJoint.Distance
             );
+        public override ThirdPersonRigJoint NoJoints 
+            => ThirdPersonRigJoint.None;
     }
     [Serializable]
     public abstract class ThirdPersonRigState<TRigJoint> 

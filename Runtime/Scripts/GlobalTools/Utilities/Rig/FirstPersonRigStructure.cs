@@ -7,6 +7,7 @@ using static PolytopeSolutions.Toolset.GlobalTools.Types.EnumFlags;
 
 namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
     public static class FirstPersonRigJointUtility {
+        public const uint None                  = RigJointUtility.None;
         public const uint Camera                = RigJointUtility.Camera;
         public const uint HorizontalPosition    = 1 << 1;
         public const uint Height                = 1 << 2;
@@ -15,6 +16,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
     }
     [Flags]
     public enum FirstPersonRigJoint : uint {
+        None                = FirstPersonRigJointUtility.None,
         Camera              = FirstPersonRigJointUtility.Camera,
         HorizontalPosition  = FirstPersonRigJointUtility.HorizontalPosition,
         Height              = FirstPersonRigJointUtility.Height,
@@ -50,6 +52,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
                 | FirstPersonRigJoint.LocalOffset
                 | FirstPersonRigJoint.Rotation
             );
+        public override FirstPersonRigJoint NoJoints 
+            => FirstPersonRigJoint.None;
     }
     [Serializable]
     public abstract class FirstPersonRig<TRigState, TRigJoint> 
@@ -151,6 +155,8 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Utilities.Rig {
                 | FirstPersonRigJoint.LocalOffset
                 | FirstPersonRigJoint.Rotation
             );
+        public override FirstPersonRigJoint NoJoints 
+            => FirstPersonRigJoint.None;
     }
     [Serializable]
     public abstract class FirstPersonRigState<TRigJoint> 
