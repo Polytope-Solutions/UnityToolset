@@ -2,6 +2,19 @@
 
 ---
 
+## 0.0.80
+
+2026-03-23
+
+-	Expose calllbacks for Contiunous button input layer;
+-	Add Activity-based performance layer
+	-	Add core manager;
+	-	Add base Interfaces;
+	-	Add basic implementations for singleshot, lock, and scene switching single shot usages;
+-	Add vscode formatting config;
+
+---
+
 ## 0.0.79
 
 2026-01-28
