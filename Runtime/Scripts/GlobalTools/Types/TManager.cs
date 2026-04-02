@@ -13,7 +13,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Types {
 			get {
 				if (_instance == null) {
 					// Find It
-					_instance = FindFirstObjectByType<TItem>();
+					_instance = FindAnyObjectByType<TItem>();
 				}
 				return _instance;
 			}

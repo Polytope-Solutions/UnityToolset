@@ -25,7 +25,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 // Otherwise, calculate and cache the result
                 this.frameOfPointerUpdate = Time.frameCount;
                 if (!this.isUIStatic || this.raycasters == null)
-                    this.raycasters = GameObject.FindObjectsByType<GraphicRaycaster>(FindObjectsSortMode.None);
+                    this.raycasters = GameObject.FindObjectsByType<GraphicRaycaster>();
                 this.rayCastUIResults.Clear();
                 this.pointerEventData = new PointerEventData(EventSystem.current);
                 this.pointerEventData.position = Pointer.current.position.value;

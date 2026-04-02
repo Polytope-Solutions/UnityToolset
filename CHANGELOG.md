@@ -2,6 +2,18 @@
 
 ---
 
+## 0.0.81
+
+2026-04-02
+
+-	Add Safe Invoke to Action andd Action<T>;
+-	Add Safe Action with autocleaning capability;
+-	Use Safe Invoke throughout + use Safe Action in Event System;
+-	Remove obsolete methods;
+-	Allow same scene loading in Scene Manager;
+
+---
+
 ## 0.0.80
 
 2026-03-23

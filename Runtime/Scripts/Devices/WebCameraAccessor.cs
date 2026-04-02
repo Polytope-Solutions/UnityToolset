@@ -130,9 +130,9 @@ namespace PolytopeSolutions.Toolset.Devices {
             #if DEBUG
             this.Log($"Camera is initialized: [{this.webCamTextures[cameraIndex].width}, {this.webCamTextures[cameraIndex].height}]");
             #endif
-            OnTextureReady?.Invoke();
+            OnTextureReady?.SafeInvoke();
             if (this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
-                this.webCameraStatusChangeCallbacks[cameraIndex]?.Invoke();
+                this.webCameraStatusChangeCallbacks[cameraIndex]?.SafeInvoke();
         }
         public void StopCameraTexture(int cameraIndex) {
             if (!this.HasCameras) {
@@ -145,7 +145,7 @@ namespace PolytopeSolutions.Toolset.Devices {
                 this.webCamTextures.Remove(cameraIndex);
             }
             if (this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
-                this.webCameraStatusChangeCallbacks[cameraIndex]?.Invoke();
+                this.webCameraStatusChangeCallbacks[cameraIndex]?.SafeInvoke();
         }
         public void PauseCameraTexture(int cameraIndex) {
             if (!this.HasCameras) {
@@ -155,7 +155,7 @@ namespace PolytopeSolutions.Toolset.Devices {
             if (this.webCamTextures.ContainsKey(cameraIndex))
                 this.webCamTextures[cameraIndex].Pause();
             if (this.webCameraStatusChangeCallbacks.ContainsKey(cameraIndex))
-                this.webCameraStatusChangeCallbacks[cameraIndex]?.Invoke();
+                this.webCameraStatusChangeCallbacks[cameraIndex]?.SafeInvoke();
         }
 
         [ContextMenu("DEFAULT>Start Default Camera")]

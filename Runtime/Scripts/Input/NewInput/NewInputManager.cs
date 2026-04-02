@@ -82,7 +82,7 @@ namespace PolytopeSolutions.Toolset.Input {
             this.frameOfPointerUpdate = Time.frameCount;
             this.pointerEventData = new PointerEventData(EventSystem.current);
             this.pointerEventData.position = Pointer.current.position.value;
-            this.raycasters = GameObject.FindObjectsByType<GraphicRaycaster>(FindObjectsSortMode.None);
+            this.raycasters = GameObject.FindObjectsByType<GraphicRaycaster>();
             foreach (GraphicRaycaster raycaster in this.raycasters) {
                 raycaster.Raycast(this.pointerEventData, rayCastUIResults);
                 if (rayCastUIResults.Count > 0) {

@@ -183,7 +183,7 @@ namespace PolytopeSolutions.Toolset.Input {
                 if (this.onCameraViewChanged != null
                     && ((currentPosition - lastPosition).sqrMagnitude > this.epsilon
                         || (currentRotation.ToVector4() - lastRotation.ToVector4()).sqrMagnitude > this.epsilon))
-                    this.onCameraViewChanged?.Invoke();
+                    this.onCameraViewChanged?.SafeInvoke();
                 lastPosition = currentPosition;
                 lastRotation = currentRotation;
             }

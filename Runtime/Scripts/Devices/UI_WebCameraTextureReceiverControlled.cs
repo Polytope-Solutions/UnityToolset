@@ -56,7 +56,7 @@ namespace PolytopeSolutions.Toolset.Devices {
             }
             public void Initialize(Action onRequest, Action<int> onSelectCamera, Action onStart, Action onPause, Action onStop) {
                 if (this.requestCameraAccessButton)
-                    this.requestCameraAccessButton.onClick.AddListener(() => onRequest?.Invoke());
+                    this.requestCameraAccessButton.onClick.AddListener(() => onRequest?.SafeInvoke());
 
                 if (this.cameraSelectorDropdown) {
                     this.cameraSelectorDropdown.ClearOptions();
@@ -64,11 +64,11 @@ namespace PolytopeSolutions.Toolset.Devices {
                 }
 
                 if (this.startStreamButton)
-                    this.startStreamButton.onClick.AddListener(() => onStart?.Invoke());
+                    this.startStreamButton.onClick.AddListener(() => onStart?.SafeInvoke());
                 if (this.pauseStreamButton)
-                    this.pauseStreamButton.onClick.AddListener(() => onPause?.Invoke());
+                    this.pauseStreamButton.onClick.AddListener(() => onPause?.SafeInvoke());
                 if (this.stopStreamButton)
-                    this.stopStreamButton?.onClick.AddListener(() => onStop?.Invoke());
+                    this.stopStreamButton?.onClick.AddListener(() => onStop?.SafeInvoke());
 
                 if (!this.startStreamButton && this.pauseStreamButton && this.stopStreamButton)
                     this.pauseStreamButton.gameObject.SetActive(false);

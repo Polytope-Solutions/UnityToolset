@@ -116,7 +116,7 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
                     break;
                 state = animator.GetCurrentAnimatorStateInfo(0);
             } while (!state.IsName(animationStateName));
-            onStateReached?.Invoke();
+            onStateReached?.SafeInvoke();
         }
 
         #if USE_DEBUG_TRACING && !DONT_LOG

@@ -20,5 +20,38 @@ namespace PolytopeSolutions.Toolset.GlobalTools.Generic {
         public static IEnumerable<T> Rotate<T>(this IEnumerable<T> list, int offset) {
             return list.Skip(offset).Concat(list.Take(offset)).ToList();
         }
+
+
+        private static void OnError(Delegate handler, Exception ex) {
+            LogError(typeof(ObjectHelpers),$"Error invoking event handler {handler.Method.Name}: {ex.Message}");
+        }
+		public static void SafeInvoke(this Action callback, Action<Delegate, Exception> onError = null) {
+			if (callback == null) return;
+			if (onError == null) onError = OnError;
+
+			foreach (var handler in callback.GetInvocationList()) {
+				try {
+					((Action)handler).Invoke();
+				}
+				catch (Exception ex) {
+					onError?.Invoke(handler, ex);
+					// Log, but continue to next subscriber
+				}
+			}
+		}
+		public static void SafeInvoke<T>(this Action<T> callback, T arg, Action<Delegate, Exception> onError = null) {
+			if (callback == null) return;
+			if (onError == null) onError = OnError;
+
+			foreach (var handler in callback.GetInvocationList()) {
+				try { 
+					((Action<T>)handler).Invoke(arg);
+				}
+				catch (Exception ex) { 
+					onError?.Invoke(handler, ex);
+					// Log, but continue to next subscriber
+				}
+			}
+		}
     }
 }

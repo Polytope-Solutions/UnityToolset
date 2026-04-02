@@ -11,7 +11,7 @@ namespace PolytopeSolutions.Toolset.Input {
         InputReceiver IInputHandler.InputReceiver {
             get {
                 if (!this.inputReceiver)
-                    this.inputReceiver = GameObject.FindFirstObjectByType<T>();
+                    this.inputReceiver = GameObject.FindAnyObjectByType<T>();
                 return this.inputReceiver;
             }
         }

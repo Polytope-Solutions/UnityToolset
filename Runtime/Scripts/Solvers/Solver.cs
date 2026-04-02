@@ -231,9 +231,9 @@ namespace PolytopeSolutions.Toolset.Solvers {
             this.Log($"Solution Finished: {this.solution.SolutionLog}");
             #endif
             if (this.solution.FlagSolutionSuccess)
-                this.OnSolutionSucces?.Invoke();
+                this.OnSolutionSucces?.SafeInvoke();
             else
-                this.OnSolutionFail?.Invoke();
+                this.OnSolutionFail?.SafeInvoke();
         }
         #endregion
 
@@ -258,7 +258,7 @@ namespace PolytopeSolutions.Toolset.Solvers {
         }
         private void FinishClear() {
             if (this.OnCleared != null)
-                this.OnCleared.Invoke();
+                this.OnCleared.SafeInvoke();
         }
         private void Solve() {
             if (this.flagLiveUpdate) {
