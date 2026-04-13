@@ -2,6 +2,15 @@
 
 ---
 
+## 0.0.82
+
+2026-04-13
+
+-	Add Least Recently Used capped cache structure;
+-	Add KeyValue Debouncer;
+
+---
+
 ## 0.0.81
 
 2026-04-02
